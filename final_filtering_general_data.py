@@ -5,7 +5,7 @@ df = pd.read_csv("general_filtered_balanced.csv")
 
 irrelavant = [
     'sentimental', 'proud', 'jealous', 'grateful', 'embarrassed', 'lonely', 'ashamed', 'guilty', 
-    'nostalgic', 'caring', 'disguted'
+    'nostalgic', 'caring', 'disgusted', 'terrified'
 ]
 
 # Removes irrelavant emotions

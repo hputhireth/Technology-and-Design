@@ -8,9 +8,6 @@ import seaborn as sns
 # Loads dataset
 df = pd.read_csv('general_final.csv')
 df = df.dropna()
-# Shuffle rows and reset the index
-df = df.sample(frac=1, random_state=42).reset_index(drop=True)
-df = df.head(3000)
 
 # Load model from HuggingFace
 model_name = "BAAI/bge-large-en-v1.5"

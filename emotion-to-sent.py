@@ -8,7 +8,9 @@ import seaborn as sns
 # Loads dataset
 df = pd.read_csv('general_final.csv')
 df = df.dropna()
-df = df.head(1000)
+# Shuffle rows and reset the index
+df = df.sample(frac=1, random_state=42).reset_index(drop=True)
+df = df.head(3000)
 
 # Load model from HuggingFace
 model_name = "BAAI/bge-large-en-v1.5"
@@ -74,11 +76,11 @@ emotion_embeddings = torch.nn.functional.normalize(
 # Compute cosine similarity matrix (num_emotions x 3)
 cos_sim_matrix = torch.matmul(emotion_embeddings, target_embeddings.T)
 
-# Softmax probability distribution (Temperature = 0.05)
+# Softmax probability distribution
 temperature = 0.05
 probabilities = F.softmax(cos_sim_matrix / temperature, dim=1)
 
-# Output probability results data frame
+# Creates probability results data frame
 df_results = pd.DataFrame({
     "Emotion": emotion_names,
     "Prob_Positive": probabilities[:, 0].numpy(),
@@ -103,7 +105,8 @@ sns.heatmap(
 )
 
 plt.title("Emotion-to-Sentiment Softmax Probability Distribution", fontsize=14, pad=12)
-plt.xlabel("Target Sentiment", fontsize=11)
-plt.ylabel("Emotion Category", fontsize=11)
+plt.xlabel("Target sentiment", fontsize=11)
+plt.ylabel("Emotion category", fontsize=11)
 plt.tight_layout()
+plt.savefig('softmax.png')
 plt.show()

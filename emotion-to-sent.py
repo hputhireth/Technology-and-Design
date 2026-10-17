@@ -79,13 +79,26 @@ probabilities = F.softmax(cos_sim_matrix / temperature, dim=1)
 
 # Creates probability results data frame
 df_results = pd.DataFrame({
-    "Emotion": emotion_names,
-    "Prob_Positive": probabilities[:, 0].numpy(),
-    "Prob_Negative": probabilities[:, 1].numpy(),
-    "Prob_Neutral": probabilities[:, 2].numpy(),
+    "emotion": emotion_names,
+    "positive": probabilities[:, 0].numpy(),
+    "negative": probabilities[:, 1].numpy(),
+    "neutral": probabilities[:, 2].numpy(),
 })
 
-# Set emotion as index and rename columns for cleaner axis labels
+prob_cols = ['positive', 'neutral', 'negative']
+df_results['highest_prob_column'] = df_results[prob_cols].idxmax(axis=1)
+
+df_results = df_results.drop(columns=['positive', 'neutral', 'negative'])
+
+emotion_mapping = df_results.set_index("emotion")["highest_prob_column"].to_dict()
+df['sentiment'] = df['emotion'].map(emotion_mapping)
+
+df = df.drop(columns=['emotion'])
+
+df.to_csv("general_final_hardcoded.csv", index=False)
+
+'''
+Set emotion as index and rename columns for cleaner axis labels
 heatmap_data = df_results.set_index("Emotion")
 heatmap_data.columns = ["Positive", "Negative", "Neutral"]
 
@@ -105,5 +118,6 @@ plt.title("Emotion-to-Sentiment Softmax Probability Distribution", fontsize=14, 
 plt.xlabel("Target sentiment", fontsize=11)
 plt.ylabel("Emotion category", fontsize=11)
 plt.tight_layout()
-plt.savefig('softmax.png')
+plt.savefig('softmax1.png')
 plt.show()
+'''

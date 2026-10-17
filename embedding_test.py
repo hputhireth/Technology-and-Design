@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 # Load the dataset
 df = pd.read_csv('general_final.csv')
 df = df.dropna()
+df = df.head(100)
 
 # Load the tokenizer and models
 model_name = "BAAI/bge-large-en-v1.5" # https://huggingface.co/BAAI/bge-large-en-v1.5

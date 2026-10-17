@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotion Value Trails - Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="dashboard-container">
+        
+        <!-- Top: Burger Drop Down Menu & Header -->
+        <div class="top-bar">
+            <div class="burger-menu-group">
+                <button class="burger-btn" title="Menu">≡</button>
+                <div class="title-group">
+                    <h1>Model A - General dataset</h1>
+                    <div class="subtitle">Fine-tuned from BAAI/bge-large-en-v1.5</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="main-layout">
+            
+            <!-- Left Column -->
+            <div class="column">
+                <!-- Ring Pie Chart Container -->
+                <div class="card ring-chart-container">
+                    <div class="card-title">Sentiment Distribution</div>
+                    <div class="ring-pie-chart">
+                        <div class="ring-inner"></div>
+                    </div>
+                    <div style="font-size: 11px; color: #4a5568;">Positive: 40% | Neg: 45% | Neut: 15%</div>
+                </div>
+
+                <!-- Total Test Processed Div -->
+                <div class="card">
+                    <div class="card-title">Total Text Processed</div>
+                    <div class="stat-value">65,456 rows</div>
+                </div>
+
+                <!-- Net Sentiment Div -->
+                <div class="card">
+                    <div class="card-title">Net Sentiment</div>
+                    <div class="stat-value" style="color: #2f855a;">positive (55%)</div>
+                </div>
+            </div>
+
+            <!-- Middle Column -->
+            <div class="column">
+                <!-- Word Cloud Container -->
+                <div>
+                    <div style="font-size: 12px; font-weight: 600; color: #4a5568; margin-bottom: 6px;">Word Cloud</div>
+                    <div class="word-cloud-box">Word cloud visual area</div>
+                </div>
+
+                <!-- Second Div Below It -->
+                <div class="secondary-middle-box"></div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="column">
+                <!-- First Row: Four Metric Divs -->
+                <div>
+                    <div style="font-size: 12px; font-weight: 600; color: #4a5568; margin-bottom: 6px;">Model Performance</div>
+                    <div class="four-divs-row">
+                        <div class="metric-mini-card">
+                            <div class="mini-label">macro-F1</div>
+                            <div class="mini-value">0.77</div>
+                        </div>
+                        <div class="metric-mini-card">
+                            <div class="mini-label">accuracy</div>
+                            <div class="mini-value">78%</div>
+                        </div>
+                        <div class="metric-mini-card">
+                            <div class="mini-label">precision</div>
+                            <div class="mini-value">70%</div>
+                        </div>
+                        <div class="metric-mini-card">
+                            <div class="mini-label">recall</div>
+                            <div class="mini-value">60%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Second Row: Confusion Matrix Container -->
+                <div>
+                    <div style="font-size: 12px; font-weight: 600; color: #4a5568; margin-bottom: 6px;">Confusion Matrix</div>
+                    <div class="confusion-matrix-container">Confusion Matrix Grid Area</div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+</html>

@@ -51,20 +51,23 @@
             <!-- Middle Column -->
             <div class="column">
                 <!-- Word Cloud Container -->
-                <div>
-                    <div style="font-size: 12px; font-weight: 600; color: #4a5568; margin-bottom: 6px;">Word Cloud</div>
-                    <div class="word-cloud-box">Word cloud visual area</div>
+                <div class="middle-column-div">
+                    <div class="subheader">Word Cloud</div>
+                    <div class="chart-box">Word cloud visual area</div>
                 </div>
 
                 <!-- Second Div Below It -->
-                <div class="secondary-middle-box"></div>
+                <div class="middle-column-div">
+                    <div class="subheader">Misclassification Breakdown</div>
+                    <div class="chart-box">Misclassification visual chart area</div>
+                </div>
             </div>
 
             <!-- Right Column -->
             <div class="column">
                 <!-- First Row: Four Metric Divs -->
-                <div>
-                    <div style="font-size: 12px; font-weight: 600; color: #4a5568; margin-bottom: 6px;">Model Performance</div>
+                <div id="model-performance">
+                    <div class="subheader">Model Performance</div>
                     <div class="four-divs-row">
                         <div class="metric-mini-card">
                             <div class="mini-label">macro-F1</div>
@@ -86,9 +89,11 @@
                 </div>
 
                 <!-- Second Row: Confusion Matrix Container -->
-                <div>
-                    <div style="font-size: 12px; font-weight: 600; color: #4a5568; margin-bottom: 6px;">Confusion Matrix</div>
-                    <div class="confusion-matrix-container">Confusion Matrix Grid Area</div>
+                <div id="confusion-matrix">
+                    <div class="subheader">Confusion Matrix</div>
+                    <div class="confusion-matrix-container">
+                        <div id="visual-matrix"></div>
+                    </div>
                 </div>
             </div>
 

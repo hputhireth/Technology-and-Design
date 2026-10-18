@@ -1,29 +1,22 @@
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background-color: #f7f9fc;
-    color: #1a202c;
+    background-color: #f7f9fc; color: #1a202c;
     padding: 24px;
+    display: flex; justify-content: center;
+    margin: 0 auto;
 }
 
 .dashboard-container {
-    max-width: 100%; height: 100%;
-    margin: 0 auto;
+    width: 90vw; height: 100%;
+    overflow-x: hidden;
+    margin: 0 auto; padding: 24px;
     background: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-    padding: 24px;
+    border-radius: 12px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
 }
 
 /* Top Bar & Dropdown */
 .top-bar {
-    display: flex;
-    align-items: center;
+    display: flex; align-items: center;
     justify-content: space-between;
     border-bottom: 1px solid #edf2f7;
     padding-bottom: 16px;
@@ -31,9 +24,7 @@ body {
 }
 
 .burger-menu-group {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+    display: flex; align-items: center; gap: 12px;
 }
 
 .burger-btn {
@@ -60,9 +51,8 @@ body {
 
 /* Column Common Styles */
 .column {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+    display: flex; flex-direction: column;
+    gap: 1em; align-items: stretch; 
 }
 
 .card {
@@ -73,65 +63,63 @@ body {
 }
 
 .card-title {
-    font-size: 12px;
-    font-weight: 600;
-    color: #4a5568;
-    margin-bottom: 8px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    font-size: 12px; font-weight: 600; color: #4a5568;
+    margin-bottom: 1em;
+    text-transform: uppercase; letter-spacing: 0.5px;
 }
 
 /* Left Column Specific */
 .ring-chart-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
+    display: flex; flex-direction: column;
+    align-items: center; text-align: center;
+    flex: 1;
 }
 
 .ring-pie-chart {
-    width: 110px;
-    height: 110px;
+    min-width: 10em; aspect-ratio: 1 / 1;
     border-radius: 50%;
     background: conic-gradient(#4f46e5 0% 40%, #06b6d4 40% 85%, #cbd5e1 85% 100%);
-    display: flex;
+    display: flex; flex: 1;
     align-items: center;
     justify-content: center;
     margin-bottom: 12px;
 }
 
 .ring-inner {
-    width: 75px;
-    height: 75px;
+    width: 60%; aspect-ratio: 1 / 1;
     background: #f8fafc;
     border-radius: 50%;
 }
 
 .stat-value {
-    font-size: 18px;
-    font-weight: 700;
+    font-size: 18px; font-weight: 700;
     color: #1e293b;
+    flex: 1;
 }
 
 /* Middle Column Specific */
-.word-cloud-box {
+.chart-box {
     background: #e2e8f0;
     min-height: 200px;
     border-radius: 8px;
-    display: flex;
-    align-items: center;
+    display: flex; align-items: center;
     justify-content: center;
     color: #2b6cb0;
-    font-weight: 600;
+    font-weight: 600; flex: 1;
 }
 
-.secondary-middle-box {
-    background: #e2e8f0;
-    min-height: 120px;
-    border-radius: 8px;
+.middle-column-div {
+    min-height: 120px; border-radius: 8px; flex: 1;
+    display: flex; flex-direction: column;
 }
 
 /* Right Column Specific */
+
+#model-performance {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
 .four-divs-row {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -158,14 +146,24 @@ body {
     margin-top: 4px;
 }
 
+#confusion-matrix {display: flex; flex-direction: column; height: 100%; }
+
 .confusion-matrix-container {
     background: #e2e8f0;
     border-radius: 8px;
-    flex-grow: 1;
-    min-height: 220px;
+    flex: 1;
+    min-height: 40vh;
     display: flex;
     align-items: center;
     justify-content: center;
     color: #2b6cb0;
     font-weight: 600;
 }
+
+#visual-matrix {
+    margin: auto; display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #ffc802;
+}
+.subheader {font-size: 12px; font-weight: 600; color: #4a5568; margin-bottom: 6px;}

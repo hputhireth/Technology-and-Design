@@ -1,0 +1,32 @@
+{
+  "name": "dialogue",
+  "encoder": "BAAI/bge-large-en-v1.5",
+  "max_len": 512,
+  "chunk_overlap": 32,
+  "token_budget": 16384,
+
+  "train_file": "data/raw/empathetic_training.csv",
+  "text_col": "text",
+  "predict_files": ["data/raw/predict/sentfin.csv"],
+
+  "readings": [
+    {"name": "sentiment", "col": "sentiment", "labels": ["negative", "neutral", "positive"],
+     "aliases": {"bearish": "negative", "bullish": "positive", "neg": "negative", "neu": "neutral", "pos": "positive"}},
+    {"name": "emotion", "col": "emotion",
+     "labels": ["afraid", "angry", "annoyed", "anticipating", "anxious", "apprehensive", "ashamed", "caring",
+                "confident", "content", "devastated", "disappointed", "disgusted", "embarrassed", "excited",
+                "faithful", "furious", "grateful", "guilty", "hopeful", "impressed", "jealous", "joyful", "lonely",
+                "nostalgic", "prepared", "proud", "sad", "sentimental", "surprised", "terrified", "trusting"],
+     "aliases": {}}
+  ],
+
+  "group": {"by": "column", "col": "conv_id", "fallback_runs_of": "emotion"},
+
+  "head": {"widths": [256, 128, 32], "acts": ["relu", "silu", "elu"], "dropout": 0.0, "input_dropout": 0.0,
+           "weight_decay": 0.05, "lr": 0.000241, "smoothing": 0.0, "batch": 256, "task_weights": [1.0, 1.0]},
+
+  "protocol": {"confirmation_fraction": 0.15, "folds": 5, "seeds": 3, "max_epochs": 100, "patience": 10,
+               "warmup_epochs": 1, "cosine_floor": 0.1, "ema": 0.999, "seed": 0, "stratify_on": "emotion"},
+
+  "adapt": {"beta": 0.3, "retain": 1.0, "epochs": 20, "lr": 0.0003, "batch": 256, "retain_batch": 256, "holdout": 0.5}
+}

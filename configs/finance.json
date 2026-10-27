@@ -1,0 +1,30 @@
+{
+  "name": "finance",
+  "encoder": "BAAI/bge-large-en-v1.5",
+  "max_len": 512,
+  "chunk_overlap": 32,
+  "token_budget": 16384,
+
+  "train_file": "data/raw/fs_train.csv",
+  "text_col": "text",
+  "predict_files": ["data/raw/predict/*.csv"],
+
+  "readings": [
+    {"name": "sentiment", "col": "sentiment", "labels": ["negative", "neutral", "positive"],
+     "aliases": {"strong negative": "negative", "strongly negative": "negative", "moderately negative": "negative",
+                 "moderate negative": "negative", "mildly negative": "negative", "mild negative": "negative", "bearish": "negative",
+                 "strong positive": "positive", "strongly positive": "positive", "moderately positive": "positive",
+                 "moderate positive": "positive", "mildly positive": "positive", "mild positive": "positive", "bullish": "positive",
+                 "neg": "negative", "neu": "neutral", "pos": "positive"}}
+  ],
+
+  "group": {"by": "near_duplicates"},
+
+  "head": {"widths": [256, 128], "acts": ["leaky_relu", "tanh"], "dropout": 0.3, "input_dropout": 0.2,
+           "weight_decay": 0.01, "lr": 0.000112, "smoothing": 0.05, "batch": 256, "task_weights": [1.0]},
+
+  "protocol": {"confirmation_fraction": 0.15, "folds": 5, "seeds": 3, "max_epochs": 100, "patience": 10,
+               "warmup_epochs": 1, "cosine_floor": 0.1, "ema": 0.999, "seed": 0},
+
+  "adapt": {"beta": 0.3, "retain": 1.0, "epochs": 20, "lr": 0.0003, "batch": 256, "retain_batch": 256, "holdout": 0.5}
+}

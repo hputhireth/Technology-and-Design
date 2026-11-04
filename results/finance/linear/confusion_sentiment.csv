@@ -1,0 +1,4 @@
+,pred negative,pred neutral,pred positive
+true negative,846,98,123
+true neutral,90,1114,274
+true positive,127,226,1419

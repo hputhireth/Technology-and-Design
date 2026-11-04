@@ -1,0 +1,79 @@
+{
+  "adapted": {
+    "method": "exact",
+    "rows": "wrong",
+    "group": null,
+    "beta": 0.3,
+    "retain": 1.0,
+    "epochs": 20,
+    "steps": 120,
+    "steps_per_epoch": 6,
+    "lr": 0.0003,
+    "batch": 256,
+    "retain_batch": 256,
+    "seed": 0,
+    "started_from": "results/finance/train/nn_model.json",
+    "adapt_set": "finance/sentfin",
+    "rows_trained_on": 1399,
+    "rows_held_out": 5266,
+    "held_out": "a grouped split of 50% (5266 rows), seed 0",
+    "transfer_set": null,
+    "minutes": 0.2,
+    "peak_rss_mb": 1460
+  },
+  "before": {
+    "held": {
+      "accuracy": 0.7354728446638815,
+      "macro_f1": 0.7419609625536512,
+      "recall": [
+        0.6991037131882202,
+        0.846830985915493,
+        0.669
+      ],
+      "kl_to_start": 0.0,
+      "entropy": 0.5221154093742371
+    },
+    "home": {
+      "sentiment": {
+        "accuracy": 0.798239518183924,
+        "macro_f1": 0.797823419293825,
+        "recall": [
+          0.8059981255857545,
+          0.7672530446549392,
+          0.8194130925507901
+        ],
+        "kl_to_start": 0.0,
+        "entropy": 0.4908989369869232
+      }
+    }
+  },
+  "after": {
+    "held": {
+      "accuracy": 0.8032662362324345,
+      "macro_f1": 0.7999021298870996,
+      "recall": [
+        0.8629961587708067,
+        0.6789906103286385,
+        0.8625
+      ],
+      "kl_to_start": 0.2030024230480194,
+      "entropy": 0.5061119198799133,
+      "repaired_share": 0.5577889447236181,
+      "kept_share": 0.8915569326103796
+    },
+    "home": {
+      "sentiment": {
+        "accuracy": 0.7949965253648367,
+        "macro_f1": 0.7937556793517384,
+        "recall": [
+          0.8003748828491096,
+          0.7625169147496617,
+          0.8188487584650113
+        ],
+        "kl_to_start": 0.022927777841687202,
+        "entropy": 0.4701631963253021
+      }
+    }
+  },
+  "weights_moved_share": 0.9703435897827148
+}

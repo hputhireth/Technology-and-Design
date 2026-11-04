@@ -1,0 +1,135 @@
+{
+  "readings": [
+    "sentiment"
+  ],
+  "p": 2048,
+  "arch": "2048 -> 256 (leaky_relu) -> 128 (tanh) -> [3 (softmax, sentiment)]",
+  "config": {
+    "widths": [
+      256,
+      128
+    ],
+    "acts": [
+      "leaky_relu",
+      "tanh"
+    ],
+    "dropout": 0.3,
+    "input_dropout": 0.2,
+    "weight_decay": 0.01,
+    "lr": 0.000112,
+    "smoothing": 0.05,
+    "batch": 256,
+    "task_weights": [
+      1.0
+    ]
+  },
+  "n_params": 557827,
+  "set": "train",
+  "rows": 30209,
+  "rows_development": 25892,
+  "rows_confirmation": 4317,
+  "class_counts": {
+    "sentiment": {
+      "negative": 7464,
+      "neutral": 10341,
+      "positive": 12404
+    }
+  },
+  "epochs_final": 19,
+  "cv": {
+    "folds": 5,
+    "seeds": 3,
+    "runs": 15,
+    "epochs_median": 19,
+    "score_mean": 0.8044499082496865,
+    "score_sd": 0.00583818010160174,
+    "seed_means": [
+      0.8050525568972329,
+      0.8045717801051648,
+      0.8037253877466617
+    ],
+    "sentiment": {
+      "mean": {
+        "accuracy": 0.8052679193660565,
+        "macro_f1": 0.8044499082496865,
+        "log_loss": 0.48254690708826914,
+        "auc_ovr_macro": 0.9354214602674972,
+        "ece_15": 0.020404995839539117
+      },
+      "sd": {
+        "accuracy": 0.005744789810767039,
+        "macro_f1": 0.00583818010160174,
+        "log_loss": 0.011090723677910948,
+        "auc_ovr_macro": 0.0026919963113373256,
+        "ece_15": 0.006016361436969142
+      }
+    }
+  },
+  "calibration": {
+    "sentiment": {
+      "temperature": 1.0694182651331703,
+      "ece_before": 0.018087134697550345,
+      "ece_after": 0.006876372075994329
+    }
+  },
+  "in_sample": {
+    "sentiment": {
+      "accuracy": 0.9185462691178743,
+      "macro_f1": 0.9179541994237006,
+      "log_loss": 0.2772352147933547,
+      "auc_ovr_macro": 0.9845771681606337,
+      "ece_15": 0.08956879845490559
+    }
+  },
+  "confirmation": {
+    "rows": 4317,
+    "sentiment": {
+      "metrics": {
+        "accuracy": 0.798239518183924,
+        "macro_f1": 0.797823419293825,
+        "log_loss": 0.4975858105028858,
+        "auc_ovr_macro": 0.9308996383773227,
+        "ece_15": 0.008699268342672735
+      },
+      "macro_f1_ci": [
+        0.7862751405942732,
+        0.8092856402761234
+      ],
+      "confusion": [
+        [
+          860,
+          80,
+          127
+        ],
+        [
+          89,
+          1134,
+          255
+        ],
+        [
+          133,
+          187,
+          1452
+        ]
+      ],
+      "recall": [
+        0.8059981255857545,
+        0.7672530446549392,
+        0.8194130925507901
+      ],
+      "cv_interval_covers": true
+    }
+  },
+  "optimiser": {
+    "warmup_epochs": 1,
+    "cosine_floor": 0.1,
+    "ema": 0.999,
+    "batch": 256,
+    "max_epochs": 100,
+    "patience": 10
+  },
+  "protocol": "25892 development rows and 4317 confirmation rows held out first by group. Grouped 5-fold cross-validation with 3 seeds on the fixed configuration, every fold standardised with its own training rows; AdamW, warm-up 1 epoch, cosine decay to 0.1 of the rate, EMA 0.999, early stopping on validation cross-entropy (patience 10, at most 100 epochs), label smoothing 0.05. Final fit of 19 epochs (the median best epoch) on the development rows. One temperature per reading fitted on the out-of-fold logits.",
+  "feature_key": "341f64e12105c97e",
+  "minutes": 8.3,
+  "peak_rss_mb": 2006
+}

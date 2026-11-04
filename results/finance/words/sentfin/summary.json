@@ -1,0 +1,75 @@
+{
+  "config": "finance",
+  "set": "sentfin",
+  "reading": "sentiment",
+  "classes": [
+    "negative",
+    "neutral",
+    "positive"
+  ],
+  "C": 1.0,
+  "split": "an own grouped split of 15% and 5-fold x 3 seeds",
+  "rows": 10532,
+  "rows_development": 9027,
+  "rows_confirmation": 1505,
+  "n_words": 8119,
+  "n_trigger_words": 4648,
+  "n_params": 24360,
+  "cv": {
+    "runs": 15,
+    "C": 1.0,
+    "mean": {
+      "accuracy": 0.8010421606852709,
+      "macro_f1": 0.7998590616186505
+    },
+    "sd": {
+      "accuracy": 0.011199052935624251,
+      "macro_f1": 0.011181332538496553
+    }
+  },
+  "confirmation": {
+    "rows": 1505,
+    "metrics": {
+      "accuracy": 0.7980066445182724,
+      "macro_f1": 0.7978560850504238,
+      "rows": 1505,
+      "covered": 1505,
+      "na": 0,
+      "log_loss": 0.5304008784644753,
+      "auc_ovr_macro": 0.9264681385004604,
+      "ece_15": 0.03224394364862851
+    },
+    "macro_f1_ci": [
+      0.7772928603824463,
+      0.8170029316301199
+    ],
+    "recall": [
+      0.7780269058295964,
+      0.8008213552361396,
+      0.8111888111888111
+    ],
+    "confusion": [
+      [
+        347,
+        59,
+        40,
+        0
+      ],
+      [
+        31,
+        390,
+        66,
+        0
+      ],
+      [
+        35,
+        73,
+        464,
+        0
+      ]
+    ]
+  },
+  "predictions": {},
+  "minutes": 0.4,
+  "peak_rss_mb": 169
+}

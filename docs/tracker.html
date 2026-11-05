@@ -1,0 +1,962 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sentiment Heads Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one working page, summary first, then the table, the pipeline chart, the kanban and the hours; a drawer on the right for one program. */
+:root {
+  --bg: #f4f6f8; --surface: #ffffff; --surface-2: #eceff3; --fg: #1a1f28; --muted: #5d6878; --line: #d7dde6; --line-2: #e7ebf1;
+  --accent: #0e6b72; --accent-fg: #ffffff; --accent-soft: #d9eef0; --focus: #2b8f97;
+  --ns: #7c8797; --ns-soft: #e9ecf1; --ip: #1f5fd1; --ip-soft: #dde7fb; --ur: #a86a0b; --ur-soft: #f7ebd2;
+  --co: #1d7a47; --co-soft: #d9efe2; --ca: #a83a2e; --ca-soft: #f5dfdb; --over: #c0392b;
+  --shadow: 0 10px 30px rgba(20, 30, 45, .14);
+  --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1318; --surface: #171c23; --surface-2: #1f2630; --fg: #e5e9ef; --muted: #99a3b2; --line: #2b3441; --line-2: #222a35;
+    --accent: #5cc0c6; --accent-fg: #0b1a1c; --accent-soft: #163a3d; --focus: #7fd3d8;
+    --ns: #8b96a6; --ns-soft: #262d38; --ip: #7aa7ff; --ip-soft: #1b2b4d; --ur: #e0a741; --ur-soft: #3d2f12;
+    --co: #5fc98a; --co-soft: #15372a; --ca: #ef8b7d; --ca-soft: #42211d; --over: #ff6b5b;
+    --shadow: 0 10px 30px rgba(0, 0, 0, .5);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1318; --surface: #171c23; --surface-2: #1f2630; --fg: #e5e9ef; --muted: #99a3b2; --line: #2b3441; --line-2: #222a35;
+  --accent: #5cc0c6; --accent-fg: #0b1a1c; --accent-soft: #163a3d; --focus: #7fd3d8;
+  --ns: #8b96a6; --ns-soft: #262d38; --ip: #7aa7ff; --ip-soft: #1b2b4d; --ur: #e0a741; --ur-soft: #3d2f12;
+  --co: #5fc98a; --co-soft: #15372a; --ca: #ef8b7d; --ca-soft: #42211d; --over: #ff6b5b;
+  --shadow: 0 10px 30px rgba(0, 0, 0, .5);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--fg); font: 14px/1.45 var(--sans); }
+.wrap { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 56px; max-width: 1560px; margin: 0 auto; }
+h1, h2, h3 { margin: 0; text-wrap: balance; }
+h1 { font-size: 22px; font-weight: 600; letter-spacing: -.01em; }
+h2 { font-size: 17px; font-weight: 600; }
+h3 { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+p { margin: 0; }
+a { color: var(--accent); }
+button, select, input, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.mono { font-family: var(--mono); }
+.num { font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); }
+.small { font-size: 12px; }
+
+.top { display: flex; flex-wrap: wrap; gap: 16px 28px; align-items: flex-start; padding-block: 22px 14px; border-bottom: 1px solid var(--line); }
+.top .brand { flex: 1 1 320px; min-width: 0; }
+.top .brand p { color: var(--muted); margin-top: 4px; max-width: 64ch; }
+.counts { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px; border-radius: 999px; font-size: 12px; font-weight: 500; background: var(--surface-2); border: 1px solid transparent; white-space: nowrap; }
+.chip .dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.chip.st-ns { color: var(--ns); background: var(--ns-soft); }
+.chip.st-ip { color: var(--ip); background: var(--ip-soft); }
+.chip.st-ur { color: var(--ur); background: var(--ur-soft); }
+.chip.st-co { color: var(--co); background: var(--co-soft); }
+.chip.st-ca { color: var(--ca); background: var(--ca-soft); }
+.tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.btn { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 6px 11px; font-size: 13px; font-weight: 500; line-height: 1.2; }
+.btn:hover { border-color: var(--muted); }
+.btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+.btn.small { padding: 3px 8px; font-size: 12px; }
+.btn.danger { color: var(--ca); }
+.saved { font-size: 12px; color: var(--muted); min-width: 10ch; }
+
+nav.tabs { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); display: flex; gap: 4px; padding-block: 8px; border-bottom: 1px solid var(--line-2); overflow-x: auto; }
+nav.tabs a { text-decoration: none; color: var(--muted); font-weight: 500; padding: 6px 10px; border-radius: 8px; white-space: nowrap; }
+nav.tabs a:hover, nav.tabs a.on { color: var(--fg); background: var(--surface-2); }
+
+section { padding-block: 26px 10px; }
+.sec-head { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.sec-head .lead { color: var(--muted); max-width: 70ch; margin-top: 2px; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.controls label { display: inline-flex; gap: 6px; align-items: center; font-size: 12px; color: var(--muted); }
+.controls select, .controls input[type="search"], .field select, .field input, .field textarea { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 5px 8px; font-size: 13px; }
+.controls input[type="search"] { min-width: 180px; max-width: 100%; }
+.controls select { max-width: min(300px, calc(100vw - 120px)); min-width: 0; }
+.controls label { max-width: 100%; min-width: 0; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--surface); }
+.seg button { border: 0; background: transparent; padding: 5px 10px; font-size: 12px; font-weight: 500; color: var(--muted); }
+.seg button.on { background: var(--accent-soft); color: var(--accent); }
+
+/* the table */
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+table.programs { width: 100%; border-collapse: collapse; min-width: 980px; }
+table.programs th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 600; padding: 10px 12px; border-bottom: 1px solid var(--line); background: var(--surface); position: sticky; top: 0; }
+table.programs td { padding: 10px 12px; border-bottom: 1px solid var(--line-2); vertical-align: top; }
+table.programs tr:last-child td { border-bottom: 0; }
+table.programs tr.group td { background: var(--surface-2); font-weight: 600; padding-block: 7px; }
+table.programs tr.group td span { color: var(--muted); font-weight: 400; margin-left: 8px; }
+.col-status { width: 150px; } .col-date { width: 160px; } .col-pri { width: 70px; } .col-owner { width: 90px; } .col-hours { width: 86px; } .col-todos { width: 170px; } .col-meet { width: 230px; }
+select.status { appearance: none; -webkit-appearance: none; width: 100%; border: 1px solid transparent; border-radius: 8px; padding: 5px 24px 5px 10px; font-size: 12.5px; font-weight: 600; background: var(--ns-soft) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' fill='none' stroke='%23888' stroke-width='1.5'/></svg>") no-repeat right 9px center; color: var(--ns); }
+select.status.st-ns { background-color: var(--ns-soft); color: var(--ns); }
+select.status.st-ip { background-color: var(--ip-soft); color: var(--ip); }
+select.status.st-ur { background-color: var(--ur-soft); color: var(--ur); }
+select.status.st-co { background-color: var(--co-soft); color: var(--co); }
+select.status.st-ca { background-color: var(--ca-soft); color: var(--ca); }
+.auto-tag { display: block; font-size: 10.5px; color: var(--muted); margin-top: 3px; padding-left: 2px; }
+input.date { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 4px 6px; font-size: 12.5px; width: 100%; font-family: var(--mono); }
+.overdue { display: block; font-size: 11px; color: var(--over); margin-top: 3px; font-weight: 500; }
+select.pri { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 4px 6px; font-size: 12.5px; font-family: var(--mono); }
+.prog-name { background: none; border: 0; padding: 0; font-family: var(--mono); font-size: 13px; color: var(--accent); text-align: left; text-decoration: underline; text-decoration-color: transparent; text-underline-offset: 3px; }
+.prog-name:hover { text-decoration-color: currentColor; }
+.prog-sum { color: var(--muted); font-size: 12.5px; margin-top: 3px; max-width: 70ch; }
+.prog-sum.cancelled { text-decoration: line-through; text-decoration-color: var(--line); }
+.tag { display: inline-block; font-size: 10.5px; padding: 1px 7px; border-radius: 999px; background: var(--surface-2); color: var(--muted); margin-top: 6px; margin-right: 4px; letter-spacing: .02em; }
+.tag.phase { border: 1px solid var(--line); }
+.owner { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; }
+.ava { width: 22px; height: 22px; border-radius: 50%; display: inline-grid; place-items: center; font-size: 11px; font-weight: 600; color: var(--accent-fg); background: var(--accent); flex: none; }
+.ava.J { background: #6a4bbd; } .ava.H { background: #b1572b; }
+:root[data-theme="dark"] .ava.J, :root:not([data-theme="light"]) .ava.J { color: #fff; }
+.bar { height: 6px; border-radius: 3px; background: var(--surface-2); overflow: hidden; margin-top: 6px; }
+.bar i { display: block; height: 100%; background: var(--co); }
+.bar i.ip { background: var(--ip); }
+.link { background: none; border: 0; padding: 0; color: var(--accent); font-size: 12px; text-decoration: underline; text-underline-offset: 3px; }
+ul.meet { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+ul.meet li { display: flex; align-items: center; gap: 8px; font-size: 12.5px; }
+ul.meet .d { font-family: var(--mono); color: var(--muted); font-size: 12px; min-width: 6ch; }
+.stars { letter-spacing: 1px; color: var(--ur); font-size: 12px; }
+.stars .off { color: var(--line); }
+.stars.pending { color: var(--muted); font-style: italic; letter-spacing: 0; }
+.x { background: none; border: 0; color: var(--muted); padding: 0 3px; font-size: 14px; line-height: 1; opacity: 0; }
+ul.meet li:hover .x, ul.meet li:focus-within .x { opacity: 1; }
+.add-meet { display: grid; grid-template-columns: 1fr auto; gap: 6px; margin-top: 6px; }
+.add-meet.open { grid-template-columns: 1fr; }
+.add-meet .row { display: flex; gap: 6px; flex-wrap: wrap; }
+.add-meet input, .add-meet select { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 4px 6px; font-size: 12px; }
+.add-meet input[type="date"] { font-family: var(--mono); }
+.add-meet input.note { flex: 1 1 120px; min-width: 0; }
+
+/* the flowchart */
+.flow-wrap { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); overflow: auto; position: relative; }
+.flow-wrap svg { display: block; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; font-size: 12px; color: var(--muted); margin-top: 8px; }
+.legend .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+svg .node { cursor: pointer; }
+svg .node rect.box { fill: var(--surface); stroke: var(--line); stroke-width: 1; }
+svg .node:hover rect.box, svg .node:focus rect.box, svg .node.on rect.box { stroke: var(--accent); stroke-width: 1.5; }
+svg .node.ca rect.box { stroke-dasharray: 4 3; }
+svg .node text { font-family: var(--mono); font-size: 11.5px; fill: var(--fg); }
+svg .node.ca text.label { fill: var(--muted); text-decoration: line-through; }
+svg .node text.sub { font-family: var(--sans); font-size: 10px; fill: var(--muted); }
+svg .stripe.st-ns { fill: var(--ns); } svg .stripe.st-ip { fill: var(--ip); } svg .stripe.st-ur { fill: var(--ur); } svg .stripe.st-co { fill: var(--co); } svg .stripe.st-ca { fill: var(--ca); }
+svg .edge { fill: none; stroke: var(--line); stroke-width: 1.3; }
+svg .edge.back { stroke-dasharray: 5 4; }
+svg .edge.lit { stroke: var(--accent); stroke-width: 2; }
+svg .edge.dim { opacity: .25; }
+svg .band { fill: var(--surface-2); opacity: .55; }
+svg .band-label { font-family: var(--sans); font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; fill: var(--muted); }
+svg .col-label { font-family: var(--mono); font-size: 10.5px; fill: var(--muted); }
+svg .ava-c { fill: var(--accent); } svg .ava-c.J { fill: #6a4bbd; } svg .ava-c.H { fill: #b1572b; }
+svg .ava-t { font-family: var(--sans); font-size: 9px; font-weight: 600; fill: #fff; }
+svg marker path { fill: var(--line); }
+svg marker.lit path { fill: var(--accent); }
+
+/* the kanban */
+.kanban { display: grid; grid-template-columns: repeat(5, minmax(200px, 1fr)); gap: 10px; overflow-x: auto; padding-bottom: 6px; }
+.kcol { background: var(--surface-2); border-radius: 12px; padding: 8px; min-height: 160px; display: flex; flex-direction: column; gap: 8px; border: 1px solid transparent; }
+.kcol.over { border-color: var(--accent); background: var(--accent-soft); }
+.kcol h4 { margin: 2px 4px 4px; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); display: flex; justify-content: space-between; }
+.kcol h4 .n { font-family: var(--mono); font-weight: 500; }
+.klabel { font-family: var(--mono); font-size: 11px; color: var(--muted); padding: 6px 4px 0; border-top: 1px dashed var(--line); margin-top: 2px; }
+.klabel:first-of-type { border-top: 0; margin-top: 0; padding-top: 2px; }
+.card { background: var(--surface); border: 1px solid var(--line-2); border-radius: 10px; padding: 9px 10px 8px; display: grid; gap: 6px; cursor: grab; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+.card:active { cursor: grabbing; }
+.card.dragging { opacity: .5; }
+.card .t { font-size: 13px; line-height: 1.35; }
+.card.canc .t { text-decoration: line-through; color: var(--muted); }
+.card .m { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; font-size: 11.5px; color: var(--muted); }
+.card .m .mono { font-size: 11px; }
+.card .m .ava { width: 18px; height: 18px; font-size: 9.5px; }
+.pbadge { font-family: var(--mono); font-size: 10.5px; padding: 0 5px; border-radius: 5px; border: 1px solid var(--line); color: var(--muted); }
+.pbadge.p1 { color: var(--ca); border-color: var(--ca); } .pbadge.p2 { color: var(--ur); border-color: var(--ur); }
+.card select.ts { border: 1px solid var(--line-2); background: var(--surface-2); border-radius: 6px; padding: 2px 6px; font-size: 11.5px; width: 100%; }
+.card .del { margin-left: auto; }
+.add-todo { display: none; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px; margin-bottom: 12px; }
+.add-todo.open { display: block; }
+.fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; }
+.field { display: grid; gap: 4px; font-size: 12px; color: var(--muted); }
+.field.wide { grid-column: 1 / -1; }
+.field input, .field select, .field textarea { width: 100%; }
+.form-actions { display: flex; gap: 8px; margin-top: 10px; align-items: center; }
+.hint { font-size: 12px; color: var(--muted); }
+.err { font-size: 12px; color: var(--ca); }
+
+/* the hours */
+.hours-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+table.hours { border-collapse: collapse; width: 100%; min-width: 760px; }
+table.hours th, table.hours td { padding: 10px 12px; border-bottom: 1px solid var(--line-2); text-align: left; vertical-align: top; }
+table.hours th { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+table.hours th small { display: block; text-transform: none; letter-spacing: 0; font-weight: 400; font-family: var(--mono); font-size: 10.5px; margin-top: 2px; }
+table.hours td.h { font-family: var(--mono); font-size: 13px; }
+table.hours td.h .b { height: 5px; background: var(--surface-2); border-radius: 3px; margin-top: 5px; overflow: hidden; }
+table.hours td.h .b i { display: block; height: 100%; background: var(--accent); }
+table.hours td.h.over { color: var(--over); } table.hours td.h.over .b i { background: var(--over); }
+table.hours td.h .o { font-size: 10.5px; color: var(--muted); display: block; }
+table.hours tr.total td { font-weight: 600; border-top: 1px solid var(--line); }
+.note { color: var(--muted); font-size: 12.5px; margin-top: 10px; max-width: 80ch; }
+
+/* the drawer */
+.backdrop { position: fixed; inset: 0; background: rgba(10, 14, 20, .35); z-index: 20; }
+.drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(600px, 100vw); background: var(--surface); box-shadow: var(--shadow); z-index: 21; overflow-y: auto; padding-left: 22px; padding-right: max(22px, env(safe-area-inset-right, 0px)); padding-block: calc(16px + env(safe-area-inset-top, 0px)) 32px; border-left: 1px solid var(--line); }
+.drawer .head-row { display: flex; gap: 12px; align-items: flex-start; justify-content: space-between; }
+.drawer .close { flex: none; }
+.drawer header .file { font-family: var(--mono); font-size: 16px; font-weight: 500; word-break: break-word; }
+.drawer header .meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.drawer .block { margin-top: 22px; }
+.drawer .block h3 { margin-bottom: 8px; }
+.drawer p.what { max-width: 68ch; }
+.drawer .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chips button.chip { cursor: pointer; border-color: var(--line); background: var(--surface); }
+.chips button.chip:hover { border-color: var(--accent); color: var(--accent); }
+.chips .chip.plain { color: var(--muted); }
+.io { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.io ul { margin: 0; padding-left: 0; list-style: none; font-family: var(--mono); font-size: 12px; display: grid; gap: 3px; }
+.io ul li { word-break: break-all; }
+.arch { border: 1px solid var(--line-2); border-radius: 10px; padding: 8px; background: var(--bg); overflow-x: auto; }
+.arch svg { display: block; width: 100%; height: auto; }
+.arch svg rect { fill: var(--surface); stroke: var(--line); }
+.arch svg text.n { font-family: var(--mono); font-size: 11.5px; fill: var(--fg); font-weight: 500; }
+.arch svg text.d { font-family: var(--sans); font-size: 10.5px; fill: var(--muted); }
+.arch svg path { stroke: var(--muted); fill: none; stroke-width: 1.2; }
+.arch svg marker path { fill: var(--muted); stroke: none; }
+ul.tlist { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+ul.tlist li { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; align-items: center; padding: 8px 10px; border: 1px solid var(--line-2); border-radius: 10px; }
+ul.tlist li .t { font-size: 13px; }
+ul.tlist li.canc .t { text-decoration: line-through; color: var(--muted); }
+ul.tlist li .m { grid-column: 1 / -1; display: flex; gap: 10px; flex-wrap: wrap; font-size: 11.5px; color: var(--muted); align-items: center; }
+ul.tlist select.ts { border: 1px solid var(--line-2); background: var(--surface-2); border-radius: 6px; padding: 2px 6px; font-size: 11.5px; }
+.ctrl-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; }
+.empty { color: var(--muted); font-size: 12.5px; padding: 8px 2px; }
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 8px 14px; border-radius: 10px; font-size: 13px; z-index: 30; box-shadow: var(--shadow); }
+.confirm { display: inline-flex; gap: 6px; align-items: center; font-size: 12.5px; }
+
+@media (max-width: 760px) {
+  .kanban { grid-template-columns: 1fr; }
+  table.programs { min-width: 0; }
+  table.programs thead { display: none; }
+  table.programs tr { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; padding: 12px 10px; border-bottom: 1px solid var(--line); }
+  table.programs tr.group { display: block; }
+  table.programs td { display: block; padding: 0; border: 0; }
+  table.programs td.c-prog { grid-column: 1 / -1; order: -1; }
+  table.programs td.c-meet { grid-column: 1 / -1; }
+  table.programs td::before { content: attr(data-l); display: block; font-size: 10.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 3px; }
+  table.programs td.c-prog::before { display: none; }
+  .io { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .drawer { animation: slide .18s ease-out; }
+  @keyframes slide { from { transform: translateX(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <div class="brand">
+    <h1>Sentiment Heads Tracker</h1>
+    <p>COS60011 MG-04. Every program of the pipeline from the encoding research to the front end, with its deadline, its todos on the kanban, its meetings and the hours against the 18 a week of the working pattern.</p>
+    <p class="small" style="margin-top:6px"><a href="https://github.com/hputhireth/Technology-and-Design">Repository</a> · <a href="https://github.com/hputhireth/Technology-and-Design/issues?q=label%3Aprogram">Program issues</a> · <a href="https://github.com/users/hputhireth/projects">Board</a> · <a href="https://github.com/hputhireth/Technology-and-Design/blob/main/docs/README.md">Backlog pages</a></p>
+  </div>
+  <div class="counts" id="counts"></div>
+  <div class="tools">
+    <button class="btn" id="exportBtn" type="button">Export JSON</button>
+    <label class="btn" for="importFile">Import JSON</label>
+    <input type="file" id="importFile" accept="application/json,.json" hidden>
+    <button class="btn danger" id="resetBtn" type="button">Reset to the record</button>
+    <span class="confirm" id="resetConfirm" hidden>Replace your changes with the record? <button class="btn small danger" id="resetYes" type="button">Yes, reset</button> <button class="btn small" id="resetNo" type="button">Keep</button></span>
+    <span class="saved" id="saved"></span>
+  </div>
+</header>
+
+<nav class="tabs" aria-label="Sections">
+  <a href="#programs">Programs</a>
+  <a href="#pipeline">Pipeline</a>
+  <a href="#kanban">Kanban</a>
+  <a href="#hours">Hours</a>
+</nav>
+
+<section id="programs">
+  <div class="sec-head">
+    <div>
+      <h2>Programs</h2>
+      <p class="lead">Highest priority first. Click a program name for its architecture, what it depends on and what it affects. When every todo of a program is done on the kanban, its progress becomes Complete on its own.</p>
+    </div>
+    <div class="controls">
+      <input type="search" id="search" placeholder="Search programs" aria-label="Search programs">
+      <label>Sort
+        <span class="seg" id="sortSeg">
+          <button type="button" data-v="priority" class="on">Priority</button>
+          <button type="button" data-v="deadline">Deadline</button>
+          <button type="button" data-v="phase">Phase</button>
+        </span>
+      </label>
+      <label>Status <select id="fStatus"><option value="">all</option></select></label>
+      <label>Owner <select id="fOwner"><option value="">all</option></select></label>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table class="programs" id="programTable">
+      <thead>
+        <tr>
+          <th class="col-status">Progress</th>
+          <th class="col-date">Deadline</th>
+          <th class="col-pri">Priority</th>
+          <th>Program</th>
+          <th class="col-owner">Owner</th>
+          <th class="col-hours">Hours</th>
+          <th class="col-todos">Todos</th>
+          <th class="col-meet">Meetings</th>
+        </tr>
+      </thead>
+      <tbody id="programBody"></tbody>
+    </table>
+  </div>
+</section>
+
+<section id="pipeline">
+  <div class="sec-head">
+    <div>
+      <h2>Pipeline</h2>
+      <p class="lead">The software from the encoding research to the front end, one box per program file. Click a box to open its internal architecture; the arrows are what feeds what.</p>
+    </div>
+    <div class="controls">
+      <span class="seg" id="zoomSeg">
+        <button type="button" data-z="-">Smaller</button>
+        <button type="button" data-z="1">100%</button>
+        <button type="button" data-z="+">Larger</button>
+      </span>
+    </div>
+  </div>
+  <div class="flow-wrap" id="flowWrap"></div>
+  <div class="legend" id="legend"></div>
+</section>
+
+<section id="kanban">
+  <div class="sec-head">
+    <div>
+      <h2>Kanban</h2>
+      <p class="lead">Every todo lives under a program. Drag a card between columns, or use its status menu. Sort by priority or by program.</p>
+    </div>
+    <div class="controls">
+      <label>Program <select id="kProgram"><option value="">all programs</option></select></label>
+      <label>Owner <select id="kOwner"><option value="">all</option></select></label>
+      <label>Sort
+        <span class="seg" id="kSortSeg">
+          <button type="button" data-v="priority" class="on">Priority</button>
+          <button type="button" data-v="program">Program</button>
+        </span>
+      </label>
+      <button class="btn primary" id="addTodoBtn" type="button">Add todo</button>
+    </div>
+  </div>
+  <form class="add-todo" id="addTodo">
+    <div class="fields">
+      <label class="field wide">Todo<input id="nTitle" required maxlength="160" placeholder="What has to be done"></label>
+      <label class="field">Program<select id="nProgram" required></select></label>
+      <label class="field">Owner<select id="nOwner"></select></label>
+      <label class="field">Priority<select id="nPri"><option value="1">P1 highest</option><option value="2">P2</option><option value="3" selected>P3</option><option value="4">P4</option><option value="5">P5 lowest</option></select></label>
+      <label class="field">Hours<input id="nHours" type="number" min="0" step="0.25" value="1"></label>
+      <label class="field">Date<input id="nDate" type="date"></label>
+    </div>
+    <div class="form-actions">
+      <button class="btn primary" type="submit">Add to Todo</button>
+      <button class="btn" type="button" id="cancelTodo">Cancel</button>
+      <span class="err" id="nErr"></span>
+    </div>
+  </form>
+  <div class="kanban" id="kanbanBoard"></div>
+</section>
+
+<section id="hours">
+  <div class="sec-head">
+    <div>
+      <h2>Hours</h2>
+      <p class="lead">Task hours per person and week against the 18 hours a week of the working pattern (Monday 2, Tuesday 4, Wednesday 4, Friday 4, Saturday 2, Sunday 2). A week over 18 turns red.</p>
+    </div>
+  </div>
+  <div class="hours-wrap"><table class="hours" id="hoursTable"></table></div>
+  <p class="note" id="hoursNote"></p>
+</section>
+</div>
+
+<div id="drawerHost"></div>
+<script id="seed" type="application/json">{"version": 1, "title": "Sentiment Heads Tracker", "today": "2026-11-05", "cap": 18.0, "team": [{"id": "R", "name": "Ricky", "full": "Puthireth Horng", "role": "Technical Lead"}, {"id": "J", "name": "Johnny", "full": "Tran Hoang Nam Nguyen", "role": "Group Lead"}, {"id": "H", "name": "Hara", "full": "Sok Eang Meng", "role": "Front-End and Deployment Lead"}], "weeks": [{"id": "W0", "label": "Before the sprints", "start": "2026-10-05", "end": "2026-10-09"}, {"id": "S1", "label": "Sprint 1", "start": "2026-10-10", "end": "2026-10-16"}, {"id": "S2", "label": "Sprint 2", "start": "2026-10-17", "end": "2026-10-23"}, {"id": "S3", "label": "Sprint 3", "start": "2026-10-24", "end": "2026-10-30"}, {"id": "S4", "label": "Sprint 4", "start": "2026-10-31", "end": "2026-11-06"}, {"id": "S5", "label": "Final week", "start": "2026-11-07", "end": "2026-11-11"}], "phases": [{"id": "A", "name": "Encoding research", "span": "1 to 10 Oct", "about": "First access to the SuperComputer, the first encoding pass, the first linear model and the data investigation."}, {"id": "B", "name": "Model research", "span": "Sprints 1 to 3", "about": "The research pipeline fs_detailed: the head search under the protocol, the audit, the inspection, the Dialogue Network and the reinforcement suite."}, {"id": "C", "name": "Final pipeline", "span": "27 Oct to 3 Nov", "about": "The final repository sentiment_heads: one configuration per corpus, nine common modules, seven scripts and the Slurm chain that ran end to end on 3 November."}, {"id": "D", "name": "Test layers", "span": "29 Oct to 3 Nov", "about": "Unit, smoke, integration and mutation, written before the step each one checks, plus the security scan."}, {"id": "E", "name": "Front end", "span": "12 Oct to 9 Nov", "about": "The Streamlit application, its model store, the encoder service, its 213 tests, CI and the deployment."}, {"id": "F", "name": "Cloud system", "span": "after 6 Nov", "about": "Containers for the application and the encoder service, the model store from the release asset, hosting notes."}, {"id": "G", "name": "Documents and process", "span": "whole project", "about": "The design document, the test plan, the presentation, the security write-up, the minutes and the repository protocol."}], "status": {"ns": "Not started", "ip": "In progress", "ur": "Under review", "co": "Complete", "ca": "Cancelled"}, "tstatus": {"todo": "Todo", "prog": "In progress", "rev": "In review", "done": "Done", "canc": "Cancelled"}, "columns": [{"x": 0, "label": "Encoding research"}, {"x": 1, "label": "Model research"}, {"x": 2, "label": "common/"}, {"x": 3, "label": "scripts/ and configs/"}, {"x": 4, "label": "env/ and slurm/"}, {"x": 5, "label": "tests/"}, {"x": 6, "label": "Front end"}, {"x": 7, "label": "Cloud system"}, {"x": 8, "label": "Documents and process"}], "programs": [{"id": "fd01", "file": "fs_detailed/fd_01_prepare.py", "phase": "A", "owner": "R", "priority": 3, "status": "co", "deadline": "2026-10-06", "summary": "The research pipeline's preparation of FinGPT: cleaning, the nine shades to three classes, duplicates folded, a group key.", "what": "Reads data/raw/fs_train.csv, repairs the Windows-1252 mojibake, applies NFC, strips zero-width characters and normalises whitespace while keeping punctuation. Maps the nine sentiment shades to negative, neutral and positive and keeps the shade in its own column. Folds exact duplicates into one row with a count and gives every row a near-duplicate group so that no split ever separates two versions of the same sentence. Writes one table per set with a content hash.", "depends": ["data/raw/fs_train.csv", "scripts in the research pipeline share one config file"], "affects": ["fdgpu", "fdlin", "fd07", "c10"], "arch": [{"n": "read csv", "d": "fs_train.csv, 76,772 rows"}, {"n": "fix_mojibake, NFC, whitespace", "d": "374 repairs, 2 label conflicts"}, {"n": "map shades to three classes", "d": "shade kept in its own column"}, {"n": "fold duplicates", "d": "30,209 distinct texts"}, {"n": "near-duplicate group key", "d": "groups never cross a split"}, {"n": "write table + hash", "d": "data/cache/<config>/train.csv"}], "reads": ["data/raw/fs_train.csv"], "writes": ["data/cache/fd_<hash>/train.csv", "manifest.json", "label_counts.json"], "meetings": [{"date": "2026-10-06", "rating": 3, "note": "Prepared tables walked through on the call: 374 mojibake repairs and 2 label conflicts shown."}], "col": 0, "row": 0, "note": null}, {"id": "fdgpu", "file": "fs_detailed/fd_gpu_encode.py", "phase": "A", "owner": "R", "priority": 3, "status": "co", "deadline": "2026-10-06", "summary": "The first encoding pass: bge-large-en-v1.5 frozen, fp16 on one P100, 2,048 values per text, cached under a content hash.", "what": "Loads the encoder offline from the Hugging Face cache, reads every prepared text in windows of 510 tokens with a 32-token overlap, pools the [CLS] vector joined with the masked mean over the tokens, averages the windows of a long text and stores the result as float16 under the SHA-256 of the weights, the tokenizer, the text column, the pooling and the length settings. A second run with the same inputs finds the cache and does nothing. 30,209 texts took 1.8 minutes.", "depends": ["fd01", "hf_cache/ with the encoder weights"], "affects": ["fdlin", "fd07", "c11"], "arch": [{"n": "load encoder offline", "d": "BAAI/bge-large-en-v1.5, 24 layers"}, {"n": "window the text", "d": "510 tokens, 32 overlap"}, {"n": "forward pass fp16", "d": "one P100, token budget per batch"}, {"n": "pool", "d": "[CLS] joined with the masked mean, 2,048"}, {"n": "average the windows", "d": "one vector per text"}, {"n": "save under the content hash", "d": "features/<key>/pooled.npy"}], "reads": ["data/cache/<config>/*.csv", "hf_cache/"], "writes": ["features/<key>/pooled.npy", "ids.csv", "manifest.json"], "meetings": [{"date": "2026-10-06", "rating": 4, "note": "Encoding time far under the A2 estimate: 1.8 minutes for the whole corpus."}], "col": 0, "row": 1, "note": null}, {"id": "fdlin", "file": "fs_detailed/fd_linear.py", "phase": "A", "owner": "R", "priority": 4, "status": "co", "deadline": "2026-10-06", "summary": "The first model on the SuperComputer: a multinomial logit on the frozen features. 57 percent on our own training set.", "what": "Fits a multinomial logistic regression on the cached 2,048 features and scores it on the training set and on SEntFiN. The 57 percent on our own training rows, and worse on the test, is the result that started the four-day investigation and the paper study. The script stayed in the research pipeline as the ancestor of the linear control.", "depends": ["fdgpu"], "affects": ["fdinv", "c15"], "arch": [{"n": "load features and labels", "d": "from the cache"}, {"n": "fit multinomial logit", "d": "L-BFGS, L2 penalty"}, {"n": "score training set", "d": "57 percent"}, {"n": "score SEntFiN", "d": "worse than the training set"}], "reads": ["features/<key>/pooled.npy", "data/cache/<config>/train.csv"], "writes": ["results/fd/linear_first/summary.json"], "meetings": [{"date": "2026-10-06", "rating": 2, "note": "57 percent on our own training set, worse on the test; the investigation agreed on the spot."}], "col": 0, "row": 2, "note": null}, {"id": "fdinv", "file": "fs_detailed/fd_investigate.py", "phase": "A", "owner": "R", "priority": 4, "status": "co", "deadline": "2026-10-10", "summary": "The data investigation of 7 to 10 October: how the encoder's position moves when a sentence changes polarity.", "what": "Takes pairs of sentences that differ in polarity and measures how far the pooled vector moves, on the training set and on the SEntFiN headlines, and compares the training labels with the encoder's nearest neighbours. It showed that the information is there but a single linear boundary does not read it, and that the training labels themselves were part of the problem. Its write-up opened Sprint 1.", "depends": ["fdlin", "fdgpu"], "affects": ["fd07", "fd08"], "arch": [{"n": "polarity pairs", "d": "grew against fell, and the like"}, {"n": "movement of the pooled vector", "d": "training set"}, {"n": "the same on SEntFiN", "d": "headlines"}, {"n": "labels against neighbours", "d": "the labels are part of the problem"}, {"n": "write-up", "d": "read at the Sprint 1 planning"}], "reads": ["features/<key>/pooled.npy", "data/cache/<config>/*.csv"], "writes": ["shared notes: the investigation read-out"], "meetings": [{"date": "2026-10-09", "rating": 3, "note": "The information is there; a single linear boundary does not read it."}, {"date": "2026-10-10", "rating": 4, "note": "Sprint 1 planned on the strength of the read-out: a deep learning pipeline."}], "col": 0, "row": 3, "note": null}, {"id": "jexp", "file": "data/explore_general.py", "phase": "A", "owner": "J", "priority": 4, "status": "co", "deadline": "2026-10-05", "summary": "Johnny's cleaning and exploratory analysis of the general dataset (emotion-emotion_69k.csv): skew, anomalies, quality charts.", "what": "Loads the general emotion dataset, cleans it, renames the files to say what they hold, and draws the class skew and the anomaly charts the team used for its quality check. The exploration fed the data-quality follow-up of the label audit; the general-domain models built on it were exploratory only.", "depends": ["data/raw/ of the public repository"], "affects": ["jtfidf", "jsim", "fd08"], "arch": [{"n": "load csv", "d": "emotion-emotion_69k.csv"}, {"n": "clean and rename", "d": "the general dataset"}, {"n": "class skew", "d": "charts"}, {"n": "anomalies", "d": "charts for the quality check"}], "reads": ["emotion-emotion_69k.csv"], "writes": ["figures of the quality check"], "meetings": [{"date": "2026-10-05", "rating": 4, "note": "Quality charts reviewed on the first call of the week."}], "col": 0, "row": 5, "note": null}, {"id": "jtfidf", "file": "models/general_tfidf_logreg.py", "phase": "A", "owner": "J", "priority": 5, "status": "ca", "deadline": "2026-10-05", "summary": "A logistic regression on TF-IDF features for the general domain. Explored, then walked back.", "what": "Johnny's experimental general-domain model: TF-IDF features and a logistic regression on the general dataset. It was built to explore, not to deliver, and was dropped once the frozen-encoder route was chosen. Its role as a bag-of-words control passed to the word logit of the final repository, on the finance corpora.", "depends": ["jexp"], "affects": ["c16"], "arch": [{"n": "TF-IDF features", "d": "on the general dataset"}, {"n": "logistic regression", "d": "one model"}, {"n": "score", "d": "exploratory"}], "reads": ["emotion-emotion_69k.csv"], "writes": ["none kept"], "meetings": [{"date": "2026-10-06", "rating": 3, "note": "Explored only; not for the delivery."}], "col": 0, "row": 6, "note": "Walked back on 10 October: the word logit of the final repository is the bag-of-words control."}, {"id": "jsim", "file": "models/emotion_label_similarity.py", "phase": "A", "owner": "J", "priority": 5, "status": "ca", "deadline": "2026-10-08", "summary": "Pairwise similarity of the 32 encoded emotion labels, drawn as a heatmap. Dropped: the intensity pairs sit on top of each other.", "what": "Encodes the 32 emotion label names with the encoder, computes their pairwise cosine similarity and draws it with seaborn, with a batch size limit added to the encoding. The heatmap showed that afraid and terrified, angry and furious, sad and devastated are indistinguishable to the encoder, which is one reason the valence route was dropped.", "depends": ["jexp", "fdgpu"], "affects": ["jsoft"], "arch": [{"n": "encode the 32 labels", "d": "batch size limited"}, {"n": "pairwise cosine similarity", "d": "32 x 32"}, {"n": "heatmap", "d": "seaborn"}], "reads": ["the 32 emotion names"], "writes": ["similarity heatmap"], "meetings": [{"date": "2026-10-09", "rating": 2, "note": "The intensity pairs sit on top of each other; the route was dropped."}], "col": 0, "row": 7, "note": "Dropped on 9 October."}, {"id": "jsoft", "file": "models/softmax_emotion_to_sentiment.py", "phase": "A", "owner": "J", "priority": 5, "status": "ca", "deadline": "2026-10-08", "summary": "A softmax over the encoded emotion labels to derive a sentiment: the A2 valence idea. Replaced by distillation.", "what": "The Assignment 2 plan read sentiment off an emotion head through Warriner's valence groups. This script tried the first step on the general dataset: a softmax over the similarities of a text to the encoded emotion labels, mapped to a sentiment. It was replaced by distillation: the FinGPT Network reads every dialogue window once and its readings become the sentiment column the Dialogue Network learns.", "depends": ["jsim"], "affects": ["ed01"], "arch": [{"n": "similarity to the 32 labels", "d": "per text"}, {"n": "softmax", "d": "a distribution over emotions"}, {"n": "valence groups", "d": "to a sentiment"}, {"n": "score on the general dataset", "d": "exploratory"}], "reads": ["emotion-emotion_69k.csv", "the encoded labels"], "writes": ["none kept"], "meetings": [{"date": "2026-10-18", "rating": 2, "note": "Walked back; the dialogue head gets a learned sentiment output instead."}], "col": 0, "row": 8, "note": "Replaced on 18 October by the distilled sentiment column of the dialogue windows."}, {"id": "bened", "file": "data/benedetti_check.py", "phase": "A", "owner": "J", "priority": 4, "status": "co", "deadline": "2026-10-09", "summary": "The check that dismissed the Kaggle Finance News Sentiments file as a test set: undocumented labels, 93 against 46 percent agreement.", "what": "Johnny flagged the Benedetti file: undocumented labels and an overlap with FinGPT. Ricky's label analysis confirmed it: the same head agrees with 93 percent of its rows that are also in FinGPT and 46 percent of the rest, so the labels are not learnable in the way SEntFiN's are. SEntFiN 1.0 stayed the external test.", "depends": ["fd07"], "affects": ["the dataset table of the design document"], "arch": [{"n": "overlap with FinGPT", "d": "by normalised text"}, {"n": "agreement on the overlap", "d": "93 percent"}, {"n": "agreement on the rest", "d": "46 percent"}, {"n": "decision", "d": "dismissed as a test set"}], "reads": ["Finance News Sentiments (Kaggle), 32,569 rows", "results/fd/train/nn/nn_model.json"], "writes": ["section II.F of the design document"], "meetings": [{"date": "2026-10-09", "rating": 4, "note": "Dismissed as a test set; SEntFiN 1.0 stays the external test."}], "col": 0, "row": 4, "note": null}, {"id": "fine", "file": "research/finetune_encoder.py", "phase": "A", "owner": "R", "priority": 5, "status": "ca", "deadline": "2026-10-05", "summary": "The Assignment 2 plan: full fine-tuning of the 335M encoder for M1 to M3 and a DoRA adapter for M4. Never written.", "what": "Assignment 2 proposed letting the sentiment gradient reach the attention and feed-forward matrices, with micro-batches of 16, gradient checkpointing and fp16 loss scaling on the P100, about 35 GPU-hours. The cost check of 29 and 30 September and the frozen-feature literature (Kumar et al. 2022) decided against it, Dr Vo agreed the scope cut by email, and the encoder stayed frozen.", "depends": ["the P100: 12 GB, fp16 only, no tensor cores"], "affects": ["fdgpu", "repr"], "arch": [{"n": "micro-batches of 16", "d": "planned"}, {"n": "gradient checkpointing", "d": "planned"}, {"n": "fp16 loss scaling", "d": "planned"}, {"n": "DoRA adapter for M4", "d": "planned"}, {"n": "cost check", "d": "about 35 GPU-hours: cancelled"}], "reads": [], "writes": [], "meetings": [{"date": "2026-10-05", "rating": 4, "note": "Scope cut confirmed with Dr Vo by email; access under his project."}], "col": 0, "row": 9, "note": "Cancelled before the sprints: the encoder is frozen throughout."}, {"id": "repr", "file": "research/representation_analysis.py", "phase": "A", "owner": "R", "priority": 5, "status": "ca", "deadline": "2026-10-10", "summary": "UMAP, GMM and CKA on the fine-tuned spaces, as planned in A2. With the encoder frozen the space is fixed, so the head is inspected instead.", "what": "The Assignment 2 representation analysis compared the pooled space before and after fine-tuning. With a frozen encoder there is no second space to compare, so the analysis moved to the head: the random-label control, the label audit, the Hessian, seed connectivity and probes of fd_10.", "depends": ["fine"], "affects": ["fd10"], "arch": [{"n": "UMAP of the pooled space", "d": "tried briefly"}, {"n": "GMM", "d": "cancelled"}, {"n": "CKA before and after", "d": "no second space: cancelled"}], "reads": [], "writes": [], "meetings": [{"date": "2026-10-10", "rating": 3, "note": "With the encoder frozen the space is fixed; the head is what we inspect."}], "col": 0, "row": 10, "note": "Replaced by the head inspection of fd_10_nn_inspect.py."}, {"id": "fd07", "file": "fs_detailed/fd_07_nn.py", "phase": "B", "owner": "R", "priority": 2, "status": "co", "deadline": "2026-10-19", "summary": "The head search on FinGPT under the protocol: 34 configurations, successive halving, 15 runs each. The first network memorised; c12 came out.", "what": "Stage one of the research pipeline for the network heads. The first feed-forward head on the cached features memorised its training set: training accuracy kept climbing while held-out accuracy fell. The paper study that followed set the protocol: a confirmation split held out by group before anything is fitted, StratifiedGroupKFold five by three seeds, label smoothing, an exponential moving average of the weights, early stopping on the validation cross-entropy, a temperature fitted on the out-of-fold logits. The search ran as the job of Monday 19 October (59 minutes) and chose c12: 2,048 to 256 leaky ReLU to 128 tanh to 3, 557,827 weights, 0.8044 macro-F1 cross-validated, 0.798 on the confirmation split.", "depends": ["fd01", "fdgpu", "fdinv"], "affects": ["fd08", "fd10", "fdtr", "ed01", "c6", "c12", "bened"], "arch": [{"n": "confirmation split first", "d": "15 percent by group"}, {"n": "StratifiedGroupKFold 5 x 3", "d": "on the development rows"}, {"n": "candidate heads", "d": "34 configurations"}, {"n": "fit", "d": "AdamW, warm-up, cosine, EMA, early stop"}, {"n": "successive halving", "d": "15 runs for the survivors"}, {"n": "temperature on OOF logits", "d": "one per reading"}, {"n": "choose c12", "d": "highest mean macro-F1"}, {"n": "export", "d": "nn_selected.json, nn_folds.csv, nn_confirmation.json"}], "reads": ["features/<key>/pooled.npy", "data/cache/fd_<hash>/train.csv"], "writes": ["results/fd/train/nn/nn_selected.json", "nn_folds.csv", "nn_confirmation.json", "inside_summary.json"], "meetings": [{"date": "2026-10-13", "rating": 2, "note": "The first network memorises its training set."}, {"date": "2026-10-16", "rating": 3, "note": "Sprint 1 review: the protocol taken from the papers, page by page."}, {"date": "2026-10-20", "rating": 5, "note": "c12 at 0.8044 cross-validated and 0.798 on the confirmation split."}], "col": 1, "row": 0, "note": null}, {"id": "fd08", "file": "fs_detailed/fd_08_label_audit.py", "phase": "B", "owner": "R", "priority": 3, "status": "co", "deadline": "2026-10-22", "summary": "The label audit and the random-label control: every validation row's predicted class recorded, the head on shuffled labels.", "what": "Records the predicted class of every validation row across the 15 runs so the rows the head never learns can be read, and trains the same head on shuffled labels to show how much of the training accuracy is memorisation. Johnny's data-quality follow-up on the audited rows named the convention gap between the annotators.", "depends": ["fd07", "jexp"], "affects": ["fdtr", "the data section of the design document"], "arch": [{"n": "validation predictions", "d": "every row, 15 runs"}, {"n": "never-learned rows", "d": "listed"}, {"n": "random-label control", "d": "the head on shuffled labels"}, {"n": "audit table", "d": "for the data-quality follow-up"}], "reads": ["results/fd/train/nn/nn_folds.csv"], "writes": ["results/fd/audit/*.csv"], "meetings": [{"date": "2026-10-21", "rating": 4, "note": "Audit reviewed; the convention gap named."}], "col": 1, "row": 1, "note": null}, {"id": "fd10", "file": "fs_detailed/fd_10_nn_inspect.py", "phase": "B", "owner": "R", "priority": 3, "status": "co", "deadline": "2026-10-23", "summary": "The inspection of the chosen head: Hessian trace, seed connectivity, linear probes. Eleven minutes.", "what": "What replaced the representation analysis of Assignment 2. With the encoder frozen the space does not change, so the head is examined: the trace of the Hessian at the solution, whether the solutions of different seeds connect along a low-loss path, and what linear probes read from each hidden layer.", "depends": ["fd07", "repr"], "affects": ["the analysis section of the design document"], "arch": [{"n": "Hessian trace", "d": "at the solution"}, {"n": "seed connectivity", "d": "low-loss path between seeds"}, {"n": "linear probes", "d": "on the hidden layers"}, {"n": "report", "d": "11 minutes"}], "reads": ["results/fd/train/nn/nn_selected.json", "features"], "writes": ["results/fd/inspect/*.json"], "meetings": [{"date": "2026-10-23", "rating": 4, "note": "Sprint 2 review: the full model research demonstrated."}], "col": 1, "row": 2, "note": null}, {"id": "fdtr", "file": "fs_detailed/fd_transfer_prior.py", "phase": "B", "owner": "R", "priority": 3, "status": "co", "deadline": "2026-10-23", "summary": "Zero-shot transfer to SEntFiN and the prior corrections: EM, BBSE and balanced all lost to the uncorrected probabilities.", "what": "Scores the FinGPT Network on the 10,532 labelled SEntFiN headlines without any adaptation (73.5 percent) and applies the three prior corrections proposed in Assignment 2. They reach 0.643, 0.669 and 0.734 against 0.735 uncorrected: the SEntFiN errors are a convention shift, not a change of class mix, so no prior correction repairs them and none ships.", "depends": ["fd07"], "affects": ["c13", "ed12"], "arch": [{"n": "zero-shot on SEntFiN", "d": "73.5 percent"}, {"n": "EM correction", "d": "0.643"}, {"n": "BBSE", "d": "0.669"}, {"n": "balanced", "d": "0.734"}, {"n": "decision", "d": "uncorrected probabilities ship"}], "reads": ["results/fd/train/nn/nn_selected.json", "features of SEntFiN"], "writes": ["results/fd/sentfin/*.json"], "meetings": [{"date": "2026-10-23", "rating": 3, "note": "Uncorrected probabilities kept; the errors are a convention shift."}], "col": 1, "row": 3, "note": null}, {"id": "ed01", "file": "fs_detailed/ed_01_prepare.py, ed_gpu_encode.py", "phase": "B", "owner": "R", "priority": 3, "status": "co", "deadline": "2026-10-24", "summary": "The dialogue windows: two turns in conversation order, the FinGPT Network's reading as the sentiment column, 64,566 windows encoded.", "what": "Builds two-turn windows of EmpatheticDialogues in conversation order, keeps the speaker's emotion (32 classes) and adds the sentiment column by distillation: the FinGPT Network reads every window once (negative 3.9 percent, neutral 85.6, positive 10.5). Groups are conversations, so no split separates two windows of one conversation. The windows are encoded on the P100 in 3.9 minutes.", "depends": ["fd07", "jsoft"], "affects": ["ed07", "c10", "c11"], "arch": [{"n": "two-turn windows", "d": "64,591, in conversation order"}, {"n": "fold duplicates", "d": "64,566"}, {"n": "FinGPT Network reads every window", "d": "the distilled sentiment column"}, {"n": "group by conversation", "d": "55,341 development, 9,225 confirmation"}, {"n": "encode on the P100", "d": "3.9 minutes"}], "reads": ["data/raw/empathetic_training.csv", "results/fd/train/nn/nn_selected.json"], "writes": ["data/cache/ed_<hash>/train.csv", "features/<key>/pooled.npy"], "meetings": [{"date": "2026-10-24", "rating": 4, "note": "Sprint 3 planning: the Dialogue Network and the reinforcement suite."}], "col": 1, "row": 4, "note": null}, {"id": "ed07", "file": "fs_detailed/ed_07_nn.py", "phase": "B", "owner": "R", "priority": 2, "status": "co", "deadline": "2026-10-25", "summary": "The Dialogue Network search: one trunk, two outputs (sentiment and 32 emotions). Job of Sunday 25 October, 141 minutes; c31 chosen.", "what": "The same protocol as fd_07 with two readings from one trunk: the loss is the sum of the two readings' cross-entropies with the emotion term weighted, the folds are grouped by conversation, and one temperature is fitted per reading. c31 came out: 2,048 to 256 ReLU to 128 SiLU to 32 ELU to [3 | 32], 562,723 weights, 0.8555 sentiment and 0.3723 emotion macro-F1 cross-validated, 74.5 percent on SEntFiN without ever seeing a finance label.", "depends": ["ed01", "fd07"], "affects": ["ed12", "c6", "c12"], "arch": [{"n": "conversation-grouped folds", "d": "5 x 3"}, {"n": "one trunk, two outputs", "d": "[3 | 32]"}, {"n": "summed loss", "d": "emotion term weighted"}, {"n": "halving search", "d": "141 minutes"}, {"n": "temperatures", "d": "1.037 and 1.098"}, {"n": "predict SEntFiN", "d": "74.5 percent zero-shot"}], "reads": ["features/<key>/pooled.npy", "data/cache/ed_<hash>/train.csv"], "writes": ["results/ed/train/nn/nn_selected.json", "nn_folds.csv", "nn_confirmation.json"], "meetings": [{"date": "2026-10-25", "rating": 4, "note": "The Dialogue Network reviewed on the Sunday call."}, {"date": "2026-10-26", "rating": 4, "note": "Live-testing check: the two readings from one trunk."}], "col": 1, "row": 5, "note": null}, {"id": "ed12", "file": "fs_detailed/ed_12_rl.py", "phase": "B", "owner": "R", "priority": 2, "status": "co", "deadline": "2026-10-26", "summary": "The reinforcement suite: the closed form, leashed SFT, REINFORCE, GRPO, PPO and a Q layer, full-information and bandit feedback, 36 runs.", "what": "Formulates adaptation as a contextual bandit under a KL leash with a retention term, then runs every method on every corpus, before and after: the closed form of the leashed objective, leashed supervised fine-tuning, REINFORCE, GRPO, PPO with the ratio clipped to [0.8, 1.2], a Q layer, and the bandit variants with the off-policy estimators on the log. The job of 25 October 15:47 ran 22 adaptation runs in 9 minutes 19 seconds. REINFORCE, PPO and the Q layer tied with GRPO or fell behind it when every label is known, so only the closed form and GRPO went into the final repository.", "depends": ["ed07", "fd07", "fdtr"], "affects": ["edmis", "c14"], "arch": [{"n": "problem formulation", "d": "contextual bandit, KL leash, retention"}, {"n": "closed form", "d": "softmax(log pi_ref + onehot / beta)"}, {"n": "leashed SFT", "d": "a method"}, {"n": "REINFORCE / GRPO / PPO", "d": "sampled methods"}, {"n": "Q layer", "d": "forgot most"}, {"n": "bandit feedback", "d": "off-policy estimators"}, {"n": "both stages, every corpus", "d": "before and after"}, {"n": "RL reports", "d": "one page per model"}], "reads": ["results/fd/train/nn/*.json", "results/ed/train/nn/*.json", "features"], "writes": ["results/ed/rl/<method>/summary.json", "adapt_log.csv"], "meetings": [{"date": "2026-10-26", "rating": 4, "note": "Gains and retention reviewed method by method."}, {"date": "2026-10-30", "rating": 4, "note": "Sprint 3 review: only the closed form and GRPO ship."}], "col": 1, "row": 6, "note": null}, {"id": "edmis", "file": "fs_detailed/ed_rl_mistakes.py", "phase": "B", "owner": "R", "priority": 4, "status": "co", "deadline": "2026-10-27", "summary": "The misread rows only: the selection-bias experiment. The closed form gains 6.8 points for 0.3 lost; every sampled method learned never neutral.", "what": "Trains only on the rows of the training half that the starting head misreads. The closed form reaches 80.3 percent on the held-out half for 0.3 FinGPT points lost. The sampled methods on the same rows all learned to avoid neutral and ended below where they started: a biased sample, so the setting ships for the closed form only, as --rows wrong of adapt.py.", "depends": ["ed12"], "affects": ["c14"], "arch": [{"n": "misread rows of the training half", "d": "1,399 headlines"}, {"n": "closed form", "d": "80.3 percent for 0.3 lost"}, {"n": "sampled methods", "d": "never neutral: below the start"}, {"n": "decision", "d": "--rows wrong, closed form only"}], "reads": ["results/fd/train/nn/*.json", "features of SEntFiN"], "writes": ["results/ed/rl_mistakes/summary.json"], "meetings": [{"date": "2026-10-27", "rating": 3, "note": "A biased sample for the sampled methods; kept for the closed form only."}], "col": 1, "row": 7, "note": null}, {"id": "c0", "file": "configs/finance.json, configs/dialogue.json", "phase": "C", "owner": "R", "priority": 2, "status": "co", "deadline": "2026-10-30", "summary": "One configuration per corpus: the files, the labels, the head, the protocol and the adaptation settings.", "what": "Everything a script needs to know about a corpus: the raw files and the prediction sets, the readings with their label maps, the head (widths, activations, dropout, weight decay), the protocol (confirmation fraction 0.15, 5 folds, 3 seeds, 100 epochs, patience 10, warm-up 1, cosine floor 0.1, EMA 0.999) and the adaptation block (beta 0.3, beta_grpo 0.1, group 4, retain 1, 20 epochs, lr 3e-4, batch 256, holdout 0.5). The dialogue config adds the emotion reading and grouping by conversation.", "depends": ["fd07", "ed07", "ed12"], "affects": ["c2", "c10", "c11", "c12", "c13", "c14", "c15", "c16", "d3"], "arch": [{"n": "files", "d": "raw tables and prediction sets"}, {"n": "readings", "d": "label maps per reading"}, {"n": "head", "d": "widths, activations, dropout"}, {"n": "protocol", "d": "folds, seeds, epochs, patience, EMA"}, {"n": "adapt", "d": "beta, beta_grpo, group, retain, holdout"}], "reads": [], "writes": ["configs/finance.json", "configs/dialogue.json"], "meetings": [{"date": "2026-10-27", "rating": 4, "note": "Lean repository agreed: one config file per corpus."}], "col": 3, "row": 0, "note": null}, {"id": "c1", "file": "env/paths.sh, env/setup.sh", "phase": "C", "owner": "R", "priority": 2, "status": "co", "deadline": "2026-11-02", "summary": "The environment: the project root and offline flags every shell and job source, and the venv built once on the cluster's Python module.", "what": "paths.sh exports the project root, the Hugging Face cache, the offline flags and the venv; setup.sh builds the venv on the loaded Python module, installs torch from the CUDA 12.6 wheels (the last that run on the P100), the packages and the encoder, and records the module name in venv/PYMOD so every job loads the same one. The first chain submission of 2 November had built the venv on the node's own Python 3.9 with CUDA 12.8 wheels, which dropped the P100; the rebuild on python/3.11.5 fixed it.", "depends": ["module load gcccore/13.2.0 python/3.11.5", "requirements.txt"], "affects": ["c17", "c18", "d1", "d2"], "arch": [{"n": "source paths.sh", "d": "root, caches, offline flags"}, {"n": "module load", "d": "python/3.11.5"}, {"n": "python -m venv", "d": "under the root"}, {"n": "torch from cu126 wheels", "d": "sm_60 listed"}, {"n": "pip install -r requirements.txt", "d": "packages"}, {"n": "record venv/PYMOD", "d": "every job loads it"}], "reads": ["requirements.txt"], "writes": ["venv/", "venv/PYMOD", "hf_cache/"], "meetings": [{"date": "2026-11-02", "rating": 2, "note": "First chain submission on Python 3.9 with the CUDA 12.8 wheels: jobs cancelled, environment rebuilt."}], "col": 4, "row": 0, "note": null}, {"id": "c2", "file": "common/paths.py", "phase": "C", "owner": "R", "priority": 3, "status": "co", "deadline": "2026-11-01", "summary": "The folder layout under the project root: root(), load_config(), cache_dir(), results_dir().", "what": "Every path a script touches goes through this module, so no absolute path appears in any tracked file. load_config finds a config as a path, as a name under configs/, or as a name under the project root, which is where the smoke chain writes its tiny configs.", "depends": ["c0", "env/paths.sh"], "affects": ["c3", "c4", "c5", "c8", "c10", "c11", "c12", "c13", "c14", "c15", "c16"], "arch": [{"n": "root()", "d": "$COS_ROOT"}, {"n": "code_root()", "d": "the repository"}, {"n": "load_config()", "d": "path, configs/, or root"}, {"n": "cache_dir()", "d": "data/cache/<config>"}, {"n": "results_dir()", "d": "results/<config>/..."}], "reads": ["configs/*.json"], "writes": [], "meetings": [{"date": "2026-10-28", "rating": 4, "note": "Walkthrough of the lean repository at the live-testing check."}], "col": 2, "row": 0, "note": null}, {"id": "c3", "file": "common/text.py", "phase": "C", "owner": "R", "priority": 2, "status": "co", "deadline": "2026-10-28", "summary": "Cleaning, label normalisation, duplicate keys, groups and the grouped splits.", "what": "fix_mojibake and clean_text repair and normalise a text; normalise_labels maps a column onto a reading's classes; near_duplicate_keys and run_keys build the group keys; grouped_folds and confirmation_split hold groups together across every split. UT-D and UT-N test every branch against closed-form answers.", "depends": ["c2"], "affects": ["c10", "c12", "c14", "c15", "c16", "d1"], "arch": [{"n": "fix_mojibake", "d": "Windows-1252 repairs"}, {"n": "clean_text", "d": "NFC, zero-width, whitespace"}, {"n": "normalise_labels", "d": "onto the reading's classes"}, {"n": "near_duplicate_keys", "d": "group key"}, {"n": "grouped_folds", "d": "StratifiedGroupKFold"}, {"n": "confirmation_split", "d": "15 percent by group"}], "reads": [], "writes": [], "meetings": [{"date": "2026-10-28", "rating": 4, "note": "Walkthrough of the lean repository."}], "col": 2, "row": 1, "note": null}, {"id": "c4", "file": "common/cache.py", "phase": "C", "owner": "R", "priority": 3, "status": "co", "deadline": "2026-10-28", "summary": "The content-hash feature cache: the key, the manifest, save and load.", "what": "sha256_file and sha256_column digest the weights, the tokenizer and the text column; feature_key joins them with the pooling and the length settings; save_features writes pooled.npy in float16 with ids.csv and a manifest; load_features returns the cache or None. No hostname, working directory or job id goes into the manifest.", "depends": ["c2"], "affects": ["c5", "c8", "c11", "d1"], "arch": [{"n": "sha256_file / sha256_column", "d": "weights, tokenizer, texts"}, {"n": "feature_key()", "d": "the content hash"}, {"n": "save_features()", "d": "pooled.npy fp16, ids.csv, manifest.json"}, {"n": "load_features()", "d": "the cache or None"}], "reads": [], "writes": ["features/<key>/pooled.npy", "ids.csv", "manifest.json"], "meetings": [{"date": "2026-10-28", "rating": 4, "note": "Walkthrough of the lean repository."}], "col": 2, "row": 2, "note": null}, {"id": "c5", "file": "common/encoder.py", "phase": "C", "owner": "R", "priority": 2, "status": "co", "deadline": "2026-10-28", "summary": "Offline loading of the encoder, pooling, and the windowed forward pass.", "what": "model_dir and weights_file find the encoder in the offline cache; digests hash the weights and the tokenizer for the cache key; load puts the model on the device in eval mode; pool joins the [CLS] vector with the masked mean; encode reads long texts in windows of 510 tokens with a 32-token overlap under a token budget and averages the windows. UT-E tests the window count at 1, 509, 510, 511, 988 and 989 tokens.", "depends": ["c4", "c2", "hf_cache/"], "affects": ["c11", "d1", "e3"], "arch": [{"n": "model_dir / weights_file", "d": "offline cache"}, {"n": "digests()", "d": "for the cache key"}, {"n": "load()", "d": "eval, device"}, {"n": "pool()", "d": "[CLS] + masked mean"}, {"n": "encode()", "d": "windows 510/32, token budget, average"}], "reads": ["hf_cache/"], "writes": [], "meetings": [{"date": "2026-10-28", "rating": 4, "note": "Walkthrough of the lean repository."}], "col": 2, "row": 3, "note": null}, {"id": "c6", "file": "common/head.py", "phase": "C", "owner": "R", "priority": 1, "status": "co", "deadline": "2026-10-29", "summary": "The head, standardisation, the training loop, inference and the JSON form the application reads.", "what": "MultiHead is a trunk of linear layers with one output layer per reading. standardise fits mean and sd on the training rows; fit runs AdamW with a one-epoch warm-up and a cosine floor, an EMA of the weights, smoothed cross-entropy and early stopping on the validation cross-entropy; predict_logits and predict_proba run inference with the temperatures; to_json and from_json are the export, float16 weights with the activations and temperatures, that the numpy pass, the integration checker and the application all read.", "depends": ["c7", "fd07", "ed07"], "affects": ["c12", "c13", "c14", "c15", "d1", "d3", "e2"], "arch": [{"n": "MultiHead", "d": "trunk + one output per reading"}, {"n": "standardise()", "d": "mean and sd on the training rows"}, {"n": "fit()", "d": "AdamW, warm-up, cosine floor, EMA, early stop"}, {"n": "predict_proba()", "d": "with the temperatures"}, {"n": "to_json()", "d": "the export"}, {"n": "from_json()", "d": "reload"}], "reads": [], "writes": ["nn_model.json (through the scripts)"], "meetings": [{"date": "2026-10-29", "rating": 4, "note": "Export format agreed with Hara: mean, sd, trunk, outputs, temperatures."}], "col": 2, "row": 4, "note": null}, {"id": "c7", "file": "common/metrics.py", "phase": "C", "owner": "R", "priority": 2, "status": "co", "deadline": "2026-11-01", "summary": "Accuracy, macro-F1, log-loss, AUC, confusion, the bootstrap, the corrected resampled t-test and the temperature.", "what": "evaluate returns every metric of a prediction table; bootstrap_macro_f1 gives the interval of the confirmation score; corrected_resampled_t is Nadeau and Bengio's test on paired fold-by-seed differences with the variance corrected for the overlap of training sets; fit_temperature finds the scalar that divides the logits; ece the calibration error over 15 bins.", "depends": [], "affects": ["c6", "c12", "c13", "c14", "c15", "c16", "d1"], "arch": [{"n": "softmax / evaluate", "d": "accuracy, macro-F1, log-loss, AUC"}, {"n": "confusion()", "d": "K x K"}, {"n": "bootstrap_macro_f1()", "d": "1,000 draws"}, {"n": "corrected_resampled_t()", "d": "Nadeau and Bengio"}, {"n": "fit_temperature()", "d": "on OOF logits"}, {"n": "ece()", "d": "15 bins"}], "reads": [], "writes": [], "meetings": [{"date": "2026-10-31", "rating": 4, "note": "The corrected t-test on known values at the live-testing check."}], "col": 2, "row": 5, "note": null}, {"id": "c8", "file": "common/sets.py", "phase": "C", "owner": "R", "priority": 3, "status": "co", "deadline": "2026-10-28", "summary": "A prepared table with its cached features and its labels, in one call.", "what": "load_set reads the prepared table of a set, finds its features under the content hash and returns the frame, the feature matrix and the label arrays per reading; labels maps the columns onto the readings' classes.", "depends": ["c4", "c5", "c2"], "affects": ["c12", "c13", "c14", "c15"], "arch": [{"n": "feature_key()", "d": "from the config and the texts"}, {"n": "load_set()", "d": "frame, features, labels"}, {"n": "labels()", "d": "per reading"}], "reads": ["data/cache/<config>/<set>.csv", "features/<key>/pooled.npy"], "writes": [], "meetings": [{"date": "2026-10-28", "rating": 4, "note": "Walkthrough of the lean repository."}], "col": 2, "row": 6, "note": null}, {"id": "c9", "file": "common/runlog.py", "phase": "C", "owner": "R", "priority": 2, "status": "co", "deadline": "2026-11-01", "summary": "The dated PASS/FAIL log every test layer and the chain write: one line per check, a .json mirror, no host or path.", "what": "RunLog opens <stage>_<date>.log and its .json mirror under logs/, writes a header with the reference of the design document, one dated line per check with its id, message and seconds, counts the verdicts and closes with the PASS or FAIL summary line and the exit code. The forbidden-pattern scan keeps hosts, logins and paths out of it.", "depends": [], "affects": ["d1", "d2", "d3", "d4", "c17"], "arch": [{"n": "RunLog(stage, folder, reference)", "d": "opens .log and .json"}, {"n": "header()", "d": "the reference line"}, {"n": "check(ident, ok, message, seconds)", "d": "one dated line"}, {"n": "counts()", "d": "passed, failed, skipped"}, {"n": "close(exit_code)", "d": "the summary line"}], "reads": [], "writes": ["logs/<stage>_<date>.log", "logs/<stage>_<date>.json"], "meetings": [{"date": "2026-11-01", "rating": 4, "note": "Log format shown at the live-testing check; the same line in every layer."}], "col": 2, "row": 7, "note": null}, {"id": "c10", "file": "scripts/prepare.py", "phase": "C", "owner": "R", "priority": 1, "status": "co", "deadline": "2026-10-28", "summary": "Step 1: clean, normalise the labels, fold duplicates, group, and write one table per set with a content hash. Seconds, on the login node.", "what": "For one config: reads the raw training file and every prediction file, cleans the text, puts the labels on their configured names, folds exact duplicates of the training set with a count, assigns groups (near-duplicate key for finance, conversation for dialogue) and writes the prepared tables with a manifest, label counts and a length audit (how_short). CH-01 of the chain: 6 seconds for both corpora.", "depends": ["c0", "c2", "c3", "data/raw/"], "affects": ["c11", "c12", "c13", "d3"], "arch": [{"n": "load_config", "d": "finance or dialogue"}, {"n": "prepare(train)", "d": "clean, labels, fold, group"}, {"n": "prepare(prediction sets)", "d": "sentfin"}, {"n": "length audit", "d": "how_short"}, {"n": "write tables", "d": "data/cache/<config>/ with the hash"}], "reads": ["data/raw/fs_train.csv", "data/raw/empathetic_training.csv", "data/raw/predict/sentfin.csv"], "writes": ["data/cache/<config>/train.csv", "sentfin.csv", "manifest.json", "label_counts.json", "length_audit.json"], "meetings": [{"date": "2026-10-28", "rating": 4, "note": "Walkthrough of the lean repository."}], "col": 3, "row": 1, "note": null}, {"id": "c11", "file": "scripts/encode.py", "phase": "C", "owner": "R", "priority": 1, "status": "co", "deadline": "2026-10-28", "summary": "Step 2: the frozen encoder over every prepared set, fp16 on one GPU; skips a set whose key is in the cache. CH-02: 33 seconds.", "what": "For each prepared set of a config it computes the feature key from the encoder digests, the text column, the pooling and the length settings, loads the cache if the key exists and otherwise runs the windowed forward pass and saves the features. On 3 November the three caches were found under their hashes, so the job took 33 seconds (7.8 GPU-minutes when they were first written).", "depends": ["c10", "c4", "c5", "c2"], "affects": ["c12", "c13", "c14", "c15", "d3"], "arch": [{"n": "load_config", "d": "finance or dialogue"}, {"n": "feature_key_of()", "d": "digests + text + pooling + length"}, {"n": "cache hit?", "d": "load_features"}, {"n": "encode()", "d": "windows, fp16, GPU"}, {"n": "save_features()", "d": "pooled.npy, ids.csv, manifest"}], "reads": ["data/cache/<config>/*.csv", "hf_cache/"], "writes": ["features/<key>/pooled.npy", "ids.csv", "manifest.json"], "meetings": [{"date": "2026-10-28", "rating": 4, "note": "Walkthrough of the lean repository."}], "col": 3, "row": 2, "note": null}, {"id": "c12", "file": "scripts/train.py", "phase": "C", "owner": "R", "priority": 1, "status": "co", "deadline": "2026-10-29", "summary": "Steps 3 to 7: confirmation split, StratifiedGroupKFold 5 x 3 on the chosen configuration, temperature, final fit, confirmation scored once, export.", "what": "Holds the confirmation split out first, runs the grouped folds by seed on the fixed configuration and records every validation fold in folds.csv (read by the controls and the integration test), fits one temperature per reading on the out-of-fold logits, refits on all development rows for the median best epoch, scores the confirmation split once with a bootstrap interval and exports the head. CH-03 and CH-04 of the chain: 9 min 10 s for finance, 6 min 25 s for dialogue; both networks came back to the fourth decimal of the research pipeline's numbers.", "depends": ["c11", "c10", "c0", "c6", "c7", "c8", "c3"], "affects": ["c13", "c14", "c15", "c16", "d3", "e2"], "arch": [{"n": "load_set(train)", "d": "features and labels"}, {"n": "confirmation_split", "d": "15 percent by group, held out first"}, {"n": "StratifiedGroupKFold 5 x 3", "d": "fit per fold, record folds.csv"}, {"n": "fit_temperature", "d": "on the OOF logits"}, {"n": "final fit", "d": "median best epoch, all development rows"}, {"n": "confirmation scored once", "d": "bootstrap interval"}, {"n": "export", "d": "nn_model.json, summary.json, cv_runs.csv"}], "reads": ["data/cache/<config>/train.csv", "features/<key>/pooled.npy", "configs/<config>.json"], "writes": ["results/<config>/train/nn_model.json", "summary.json", "cv_runs.csv", "folds.csv", "confirmation_ids.csv", "confusion_<reading>.csv"], "meetings": [{"date": "2026-10-29", "rating": 4, "note": "train.py walked through against Appendix B."}, {"date": "2026-11-03", "rating": 5, "note": "The two networks reproduce to the fourth decimal."}], "col": 3, "row": 3, "note": null}, {"id": "c13", "file": "scripts/predict.py", "phase": "C", "owner": "R", "priority": 2, "status": "co", "deadline": "2026-10-29", "summary": "A trained head on every prediction set: pieces averaged per original row, metrics where labels exist. Seconds, inside the train job.", "what": "Loads the exported head, runs it on the cached features of each prediction set, averages the pieces of a long text per original row, writes predictions.csv with the probabilities of every reading and metrics.json with a confusion matrix where the set has labels. sbatch slurm/predict.sh <config> prepares and encodes a new file under data/raw/predict/ first.", "depends": ["c12", "c11", "c6", "c7", "c8"], "affects": ["c14", "d3", "e2"], "arch": [{"n": "from_json", "d": "the exported head"}, {"n": "load_set(prediction set)", "d": "features"}, {"n": "predict_proba", "d": "temperatures applied"}, {"n": "average pieces", "d": "per original row"}, {"n": "write", "d": "predictions.csv, metrics.json, confusion"}], "reads": ["results/<config>/train/nn_model.json", "features of the prediction sets"], "writes": ["results/<config>/<set>/predictions.csv", "metrics.json"], "meetings": [{"date": "2026-10-29", "rating": 4, "note": "predict.py walked through."}], "col": 3, "row": 4, "note": null}, {"id": "c14", "file": "scripts/adapt.py", "phase": "C", "owner": "R", "priority": 1, "status": "co", "deadline": "2026-11-02", "summary": "Step 8: the leashed objective in two forms, the closed form and GRPO, all rows or the misread rows, with the retention term. Eight runs in 3 min 19 s.", "what": "Moves a trained head to a new corpus without losing what it knows. exact_loss fits the head to softmax(log pi_ref + onehot(y) / beta) at beta 0.3; grpo_advantage and grpo_loss sample four classes per row, centre and scale the rewards within the group and take the policy gradient with beta 0.1 on the KL to the starting head. Under both a retention term, the forward KL on the head's own development rows, holds the old readings. Half of the new corpus is held out by group; --rows wrong trains only on the misread rows of the training half. CH-05 of the chain: the eight runs; the two shipped GRPO stages repeated on three seeds.", "depends": ["c12", "c13", "c0", "c6", "c7", "c8", "c3", "ed12", "edmis"], "affects": ["d3", "e2", "g3"], "arch": [{"n": "load start head and corpora", "d": "home rows and the new corpus"}, {"n": "held_mask", "d": "half by group, or the misread rows"}, {"n": "exact_loss", "d": "closed form, beta 0.3"}, {"n": "grpo_loss", "d": "G 4, group-normalised advantage, beta 0.1"}, {"n": "retention term", "d": "forward KL on home development rows"}, {"n": "AdamW, clipped at 1", "d": "20 epochs"}, {"n": "evaluate per epoch", "d": "new, transfer and home corpora"}, {"n": "export", "d": "nn_model.json, summary.json, adapt_log.csv, weight_changes.csv"}], "reads": ["results/<config>/train/nn_model.json", "features of both corpora", "configs/*.json"], "writes": ["results/<config>/adapt/<run>/nn_model.json", "summary.json", "adapt_log.csv", "predictions_<set>.csv", "weight_changes.csv"], "meetings": [{"date": "2026-10-30", "rating": 4, "note": "The closed form and GRPO side by side at the Sprint 3 review."}, {"date": "2026-11-03", "rating": 5, "note": "84.4 (sd 0.2) for 78.8 kept; the dialogue head at 78.6 with its emotion reading intact."}], "col": 3, "row": 5, "note": null}, {"id": "c15", "file": "scripts/linear.py", "phase": "C", "owner": "R", "priority": 2, "status": "co", "deadline": "2026-10-31", "summary": "The linear control: ridge logistic regression on the same 2,048 features, the network's folds and confirmation rows, paired by the corrected t-test.", "what": "Reads the network's folds.csv and confirmation ids so that the control sees exactly the same rows, chooses C on two folds, fits the multinomial logit with L-BFGS on every fold and seed, scores the confirmation split and SEntFiN, and pairs the fold-by-seed macro-F1 against the network with the corrected resampled t-test and a paired bootstrap. CH-06: 66 min 42 s, the longest job of the chain (L-BFGS makes several hundred passes over a 360 MB matrix per fit).", "depends": ["c12", "c7", "c6", "c8", "fdlin"], "affects": ["d3", "g1"], "arch": [{"n": "read_folds", "d": "the network's folds.csv and confirmation ids"}, {"n": "C on two folds", "d": "grouped"}, {"n": "fit_logit per fold and seed", "d": "L-BFGS, L2"}, {"n": "confirmation and SEntFiN", "d": "scored once"}, {"n": "paired_difference", "d": "bootstrap"}, {"n": "corrected_resampled_t", "d": "against the network"}, {"n": "export", "d": "linear_model.json, summary.json"}], "reads": ["results/<config>/train/folds.csv", "confirmation_ids.csv", "features"], "writes": ["results/<config>/linear/linear_model.json", "summary.json", "cv_runs.csv", "<set>/predictions.csv"], "meetings": [{"date": "2026-10-31", "rating": 4, "note": "+0.018 macro-F1 for the hidden layers on FinGPT, p 5e-8; a tie on the dialogue data."}], "col": 3, "row": 6, "note": null}, {"id": "c16", "file": "scripts/words.py", "phase": "C", "owner": "R", "priority": 2, "status": "co", "deadline": "2026-10-31", "summary": "The word logit: a multinomial logit on word indicators, identified by its ridge penalty, one model per corpus, with its trigger words. The control for the encoder.", "what": "words_of reads the distinct words of a text; indicators builds the sparse matrix; fit_logit fits the multinomial logit with L2 by L-BFGS with C chosen by grouped cross-validation; read and predict score a text word by word with N/A for a text with no known word; trigger_words lists the words whose top class probability exceeds 0.5 (4,648 on SEntFiN). CH-07: 7 min 31 s for the three models. The trigger table is written with six decimals after a word at 0.50004 recomputed on the other side of 0.5.", "depends": ["c10", "c3", "c7", "jtfidf"], "affects": ["d3", "e1", "g1"], "arch": [{"n": "words_of", "d": "[a-z]+(?:'[a-z]+)?"}, {"n": "indicators", "d": "sparse matrix"}, {"n": "own_split / network_split", "d": "same rows as the network"}, {"n": "fit_logit", "d": "C by grouped CV, L-BFGS"}, {"n": "read / predict", "d": "P(class | word), N/A"}, {"n": "trigger_words", "d": "top probability above 0.5"}, {"n": "export", "d": "words_model.json, trigger_words.csv"}], "reads": ["data/cache/<config>/<set>.csv", "results/<config>/train/folds.csv"], "writes": ["results/<config>/words/<set>/words_model.json", "summary.json", "trigger_words.csv", "cv_runs.csv"], "meetings": [{"date": "2026-10-31", "rating": 4, "note": "FinGPT at 71.0, SEntFiN at 58.9 zero-shot and 79.8 in domain."}, {"date": "2026-11-03", "rating": 3, "note": "A word at 0.50004 recomputed on the other side of 0.5; six decimals now."}], "col": 3, "row": 7, "note": null}, {"id": "c17", "file": "slurm/_header.sh, encode.sh, train.sh, predict.sh, adapt.sh, linear.sh, words.sh", "phase": "C", "owner": "R", "priority": 1, "status": "co", "deadline": "2026-11-02", "summary": "The job scripts with their allocations; the shared header writes one dated PASS or FAIL line with the wall time to the chain log.", "what": "Each job script sets its stage id and reference, sources env/paths.sh and _header.sh, and runs its script. _header.sh records the node, the allocation and the Python in the job's own log, traps the exit and appends one dated line with the duration to logs/chain_<date>.log. The configuration travels as a positional argument, because sbatch does not pass environment variables into a job: the second fault of 3 November, when both training jobs trained the finance head.", "depends": ["c1", "c9"], "affects": ["c18", "d3"], "arch": [{"n": "STAGE, STAGE_ID, REFERENCE", "d": "per job"}, {"n": "source env/paths.sh", "d": "root and venv"}, {"n": "source _header.sh", "d": "start line, trap"}, {"n": "run the script", "d": "with the positional config"}, {"n": "stage_finish", "d": "PASS or FAIL line with the wall time"}], "reads": [], "writes": ["logs/<stage>_<jobid>.txt", "logs/chain_<date>.log"], "meetings": [{"date": "2026-11-02", "rating": 2, "note": "Two CH-03 lines in the chain log: sbatch does not pass environment variables into a job."}], "col": 4, "row": 1, "note": null}, {"id": "c18", "file": "slurm/chain.sh", "phase": "C", "owner": "R", "priority": 1, "status": "co", "deadline": "2026-11-03", "summary": "The whole chain as one submission: prepare on the login node, then seven jobs with afterok dependencies, the integration test last.", "what": "Runs prepare for both configs, then submits encode, the two training jobs, adapt, linear and words with afterok dependencies, and the integration test depending on all of them, so the test never runs on a partial tree. Submitted four times on 2 and 3 November: the environment fault, the positional config, three checker fixes against the real tree, the mutation count; the fourth submission ended with CH-08 PASS, 154 checks, and the archive was packed and its checksum verified.", "depends": ["c17", "c1", "d2"], "affects": ["d3", "d4", "g1"], "arch": [{"n": "prepare x2", "d": "login node, CH-01"}, {"n": "sbatch encode", "d": "CH-02"}, {"n": "train finance, train dialogue", "d": "afterok encode"}, {"n": "adapt, linear, words", "d": "afterok both trainings"}, {"n": "integration_test", "d": "afterok all: CH-08"}, {"n": "archive", "d": "sha256 and manifest"}], "reads": [], "writes": ["logs/chain_<date>.log", "the archive of the project folder"], "meetings": [{"date": "2026-11-02", "rating": 2, "note": "Submissions one and two failed on the environment and the configuration."}, {"date": "2026-11-03", "rating": 5, "note": "Submission four: 154 PASS, 8 FAIL on the broken copy, exit 0 on the clean tree."}], "col": 4, "row": 2, "note": null}, {"id": "d1", "file": "tests/unit/ (111 tests), conftest.py, numpy_head.py, make_tiny.py", "phase": "D", "owner": "R", "priority": 1, "status": "co", "deadline": "2026-11-01", "summary": "Every function of common/* against closed-form answers, and the torch head against an independent numpy pass: the parity oracle.", "what": "UT-D covers the cleaning branches, UT-B the word reader, UT-N the grouping, the confirmation split and the corrected t-test on known values, UT-E the window count at 1, 509, 510, 511, 988 and 989 tokens with a tiny random encoder from make_tiny.py, UT-R the closed-form tilt and the GRPO advantage, UT-G the dated log. numpy_head.py reruns an exported head without torch and is the oracle the integration test and the application's parity tests rest on. conftest.py writes logs/unit_<date>.log, .json and a junit xml. 111 passed in 15.4 seconds on 3 November.", "depends": ["c3", "c4", "c5", "c6", "c7", "c9", "c14", "c15", "c16"], "affects": ["d2", "d3", "e4", "g2"], "arch": [{"n": "conftest.py", "d": "the dated log and the junit xml"}, {"n": "make_tiny.py", "d": "a tiny random encoder"}, {"n": "numpy_head.py", "d": "the independent pass"}, {"n": "UT-D / UT-B / UT-N", "d": "cleaning, words, splits, the t-test"}, {"n": "UT-E", "d": "window boundaries"}, {"n": "UT-R", "d": "tilt and advantage"}, {"n": "UT-G", "d": "the log itself"}], "reads": ["the modules under common/"], "writes": ["logs/unit_<date>.log", ".json", ".xml"], "meetings": [{"date": "2026-11-01", "rating": 4, "note": "111 passed in 15 seconds at the live-testing check."}], "col": 5, "row": 0, "note": null}, {"id": "d2", "file": "tests/smoke.sh, tests/run_local.sh", "phase": "D", "owner": "R", "priority": 1, "status": "co", "deadline": "2026-11-01", "summary": "The whole chain on synthetic data with a tiny random encoder, 25 steps in under three minutes, run on the login node before anything is submitted.", "what": "Builds synthetic corpora and the tiny encoder, runs prepare, encode, train and predict for both configs, the eight adaptations, the two linear controls, the three word logits, then the integration checker on the result tree (154 checks, no bounds) and on a copy broken five ways (8 FAIL lines, exit 1). run_local.sh runs the unit suite then the smoke chain. It is the layer that exposed the mutation-count fault before the fourth submission.", "depends": ["d1", "c10", "c11", "c12", "c13", "c14", "c15", "c16", "d3", "d4"], "affects": ["c18", "g2"], "arch": [{"n": "SM-01 synthetic corpora", "d": "and the tiny encoder"}, {"n": "prepare, encode", "d": "both configs"}, {"n": "train, predict", "d": "both configs"}, {"n": "eight adaptations", "d": "closed form, GRPO, rows wrong"}, {"n": "linear x2, words x3", "d": "the controls"}, {"n": "SM-23 checker on the clean tree", "d": "154 checks"}, {"n": "SM-24, SM-25 five faults, 8 FAIL", "d": "exit 1"}], "reads": [], "writes": ["logs/smoke_<date>.log", "a temporary synthetic root"], "meetings": [{"date": "2026-11-01", "rating": 4, "note": "25 steps in 140 seconds on the login node."}, {"date": "2026-11-03", "rating": 4, "note": "SM-25 confirmed the mutation-count fix before the resubmission."}], "col": 5, "row": 1, "note": null}, {"id": "d3", "file": "tests/integration/check_results.py, bounds.json, slurm/integration_test.sh", "phase": "D", "owner": "R", "priority": 1, "status": "co", "deadline": "2026-11-03", "summary": "154 checks over every model's files: schema, parity to 1e-6, split hygiene, the bounds of the design document. The last job of the chain.", "what": "Opens each of the fourteen model directories (ten checks each) and runs fourteen checks across models: the export reloads, the numpy pass equals the torch pass and the stored number to 1e-6, confirmation ids are disjoint from every training fold and shared with the controls, the learning log has steps = epochs x ceil(rows / batch), the GRPO trunk differs from its start while mean, sd and temperatures do not, the confirmation score lies inside the cross-validation band, and every headline number of the document holds to its bound in bounds.json. Writes results/integration_report.txt and exits 0 or 1; integration_test.sh runs it as CH-08.", "depends": ["d1", "c12", "c13", "c14", "c15", "c16", "c9"], "affects": ["d4", "c18", "g1", "g2"], "arch": [{"n": "open 14 model directories", "d": "ten checks each"}, {"n": "reload export", "d": "from_json and numpy_head"}, {"n": "parity", "d": "torch, numpy, stored: 1e-6"}, {"n": "split hygiene", "d": "ids disjoint, shared with the controls"}, {"n": "learning log and weights", "d": "steps, moved trunk, fixed mean and sd"}, {"n": "bounds.json", "d": "every headline number"}, {"n": "14 checks across models", "d": "ladders, splits, manifests, tables"}, {"n": "report and exit", "d": "integration_report.txt, 0 or 1"}], "reads": ["results/**", "features/<key>/manifest.json", "data/cache/*/manifest.json", "tests/integration/bounds.json"], "writes": ["results/integration_report.txt", "logs/integration_<date>.log"], "meetings": [{"date": "2026-11-02", "rating": 3, "note": "149 of 154 on the first complete run: manifests, decimals and a copied band."}, {"date": "2026-11-03", "rating": 5, "note": "154 PASS in 12.8 seconds as the last job of the chain."}], "col": 5, "row": 2, "note": null}, {"id": "d4", "file": "tests/integration/mutate.py", "phase": "D", "owner": "R", "priority": 2, "status": "co", "deadline": "2026-11-03", "summary": "Five faults seeded into a copy of the results; the checker must fail with exactly 8 FAIL lines and exit 1.", "what": "M1 appends a confirmation id to a training fold, M2 lowers a stored accuracy by 0.01, M3 replaces a GRPO trunk by its start, M4 truncates a bias vector, M5 removes the trigger word copra. Each fault maps to a different check, so the run shows the checker's coverage. The first version raised the accuracy, which also crossed the upper bound and gave 9 FAIL lines, and a doubled submission made the day's log count 16; both fixed on 3 November.", "depends": ["d3"], "affects": ["c18", "d2", "g2"], "arch": [{"n": "copy the results tree", "d": "mutants/"}, {"n": "M1 split hygiene", "d": "id into a fold"}, {"n": "M2 stored accuracy", "d": "lowered by 0.01"}, {"n": "M3 GRPO trunk", "d": "replaced by its start"}, {"n": "M4 bias vector", "d": "truncated"}, {"n": "M5 trigger word", "d": "copra removed"}, {"n": "checker on the copy", "d": "exactly 8 FAIL, exit 1"}], "reads": ["results/**"], "writes": ["mutants/**", "logs/mutation_<date>.log"], "meetings": [{"date": "2026-11-03", "rating": 4, "note": "8 FAIL, exit 1 on the broken copy; the clean tree 154 PASS."}], "col": 5, "row": 3, "note": null}, {"id": "d5", "file": "tests/forbidden_patterns.py (the security scan)", "phase": "D", "owner": "R", "priority": 2, "status": "co", "deadline": "2026-11-01", "summary": "Nothing leaves the SuperComputer carrying a login, a host name or a project path: the forbidden-pattern tests and the static scan of every deliverable.", "what": "A test over every export, summary and log that refuses a file carrying a home path, a login or an address (NF-07 and ST-F-07 on the application side), and a static scan run over every document, slide and figure before it leaves. The public repository carries the login redacted; the result files carry paths relative to the project root only.", "depends": ["c9", "c6"], "affects": ["e2", "e4", "g4"], "arch": [{"n": "patterns", "d": "home paths, logins, hosts, addresses"}, {"n": "scan exports and summaries", "d": "refuse the file"}, {"n": "scan logs", "d": "the dated logs"}, {"n": "static scan of deliverables", "d": "documents, slides, figures"}, {"n": "redact", "d": "the public repository"}], "reads": ["results/**", "logs/**", "the deliverables"], "writes": ["the scan report"], "meetings": [{"date": "2026-10-30", "rating": 4, "note": "Security write-up reviewed; the scan run over the public copy."}], "col": 5, "row": 4, "note": null}, {"id": "e1", "file": "sentiment-app/app.py", "phase": "E", "owner": "H", "priority": 1, "status": "co", "deadline": "2026-11-01", "summary": "The Streamlit application: a sentence through any of the fourteen models, the network drawn with its live activations, the word logit word by word.", "what": "Hara's application, built from the first experiments of 12 October to the first deployment of 25 October and the redeployment of all fourteen models on 1 November. It reads the model store, calls the encoder service for a new sentence, runs the heads on a CPU with the same numpy pass the unit tests use, draws the network a sentence passes through with the calculation steps, and reads a sentence word by word for the word logit with N/A for unknown words. 368 statements, 99 percent covered.", "depends": ["e2", "e3", "c16"], "affects": ["e4", "e6", "f1", "g3"], "arch": [{"n": "page and catalog", "d": "fourteen models"}, {"n": "sentence input", "d": "text area"}, {"n": "encoder service call", "d": "2,048 values"}, {"n": "run_head (numpy pass)", "d": "mean, sd, trunk, output, temperature"}, {"n": "network drawn", "d": "live activations"}, {"n": "word logit page", "d": "word by word, N/A"}, {"n": "result and the 2,048 values", "d": "metric, bars, table"}], "reads": ["the model store built by build_models.py"], "writes": [], "meetings": [{"date": "2026-10-16", "rating": 3, "note": "First Streamlit experiments shown at the Sprint 1 review."}, {"date": "2026-10-23", "rating": 4, "note": "The FinGPT Network export read into the page."}, {"date": "2026-10-30", "rating": 4, "note": "The Dialogue Network page and the adapted heads."}, {"date": "2026-11-01", "rating": 5, "note": "All fourteen models live."}], "col": 6, "row": 0, "note": null}, {"id": "e2", "file": "sentiment-app/build_models.py", "phase": "E", "owner": "H", "priority": 1, "status": "ip", "deadline": "2026-11-09", "summary": "The model store: reads the exported float16 weights and JSON summaries, refuses any file carrying a path or a login. To be rebuilt from the 3 November exports.", "what": "Builds the store app.py reads from the exports of the pipeline: the trained networks, the adapted heads, the two controls and the word tables, with the golden readings for the parity tests. Every export and summary is scanned for home paths, logins and addresses and refused if one is found. The store still holds the October exports; it is to be rebuilt from the chain of 3 November, with the dialogue model shipped as two heads on the same features, emotion from dialogue/train and sentiment from dialogue/adapt/finance_train_grpo.", "depends": ["c12", "c13", "c14", "c15", "c16", "c6", "d5"], "affects": ["e1", "e4", "f1"], "arch": [{"n": "read exports", "d": "nn_model.json, summary.json, words_model.json"}, {"n": "scan", "d": "paths, logins, addresses: refuse"}, {"n": "catalog", "d": "fourteen models and their names"}, {"n": "golden readings", "d": "for the parity tests"}, {"n": "dialogue as two heads", "d": "emotion from train, sentiment from GRPO"}, {"n": "write the store", "d": "one folder app.py reads"}], "reads": ["results/**/nn_model.json", "summary.json", "words_model.json", "trigger_words.csv"], "writes": ["the model store", "golden_readings.json"], "meetings": [{"date": "2026-10-30", "rating": 4, "note": "The store and its scan reviewed."}, {"date": "2026-11-05", "rating": 3, "note": "The store still holds the October exports; the rebuild is planned for the weekend."}], "col": 6, "row": 1, "note": null}, {"id": "e3", "file": "fd_encode_server.py", "phase": "E", "owner": "R", "priority": 2, "status": "co", "deadline": "2026-10-28", "summary": "The encoder service: a local HTTP server that turns a sentence into the 2,048 values the heads were trained on.", "what": "Loads bge-large-en-v1.5 once and serves GET /health and GET /encode?text=..., returning the [CLS] vector joined with the mean over the tokens, unnormalised, with the token count and the seconds. The application calls it for a new sentence; in the app the encoder is held in a cached resource so it loads once per process.", "depends": ["c5"], "affects": ["e1", "f1"], "arch": [{"n": "load encoder once", "d": "tokenizer and model, eval"}, {"n": "GET /health", "d": "ok"}, {"n": "GET /encode?text", "d": "2,048 values, tokens, seconds"}, {"n": "CORS header", "d": "the model pages call it from the browser"}], "reads": ["hf_cache/ or the hub"], "writes": [], "meetings": [{"date": "2026-10-27", "rating": 4, "note": "The encoder service and the lean repository shown together."}], "col": 6, "row": 2, "note": null}, {"id": "e4", "file": "sentiment-app/tests/ (213 tests)", "phase": "E", "owner": "H", "priority": 1, "status": "co", "deadline": "2026-11-01", "summary": "137 component tests, 46 AppTest scenarios, 15 non-functional checks, the parity tests to 1e-5 and a load test under a Playwright browser.", "what": "The application's own suite. The component tests cover the store, the catalog and the numpy pass; the AppTest scenarios drive the pages; the non-functional checks include NF-07, no path, login or address in any export; ST-P-01 holds every shipped head to the pipeline's stored probabilities to 1e-5 on the golden rows; the load test runs under a Playwright browser. 213 passed, 1 skipped, 98 percent coverage.", "depends": ["e1", "e2", "d1", "d5"], "affects": ["e5", "g2"], "arch": [{"n": "component tests", "d": "137"}, {"n": "AppTest scenarios", "d": "46"}, {"n": "non-functional", "d": "15, NF-07"}, {"n": "parity ST-P-01", "d": "1e-5 on the golden rows"}, {"n": "load test", "d": "Playwright browser"}, {"n": "coverage", "d": "98 percent"}], "reads": ["the model store", "golden_readings.json"], "writes": ["the test report"], "meetings": [{"date": "2026-10-30", "rating": 4, "note": "Component tests and the first AppTest scenarios."}, {"date": "2026-11-01", "rating": 5, "note": "213 passed, 1 skipped, 98 percent coverage."}], "col": 6, "row": 3, "note": null}, {"id": "e5", "file": ".github/workflows/ci.yml (application)", "phase": "E", "owner": "H", "priority": 2, "status": "co", "deadline": "2026-11-01", "summary": "The application's CI: the quick job on every push on Python 3.10 and 3.12, the full job on main.", "what": "The quick job installs the application and runs the component tests on two Python versions on every push; the full job on main adds the AppTest scenarios, the non-functional checks, the parity tests and the load test.", "depends": ["e4"], "affects": ["e6"], "arch": [{"n": "on push", "d": "quick job, Python 3.10 and 3.12"}, {"n": "on main", "d": "the full job"}, {"n": "artefacts", "d": "the test report"}], "reads": [], "writes": [], "meetings": [{"date": "2026-11-01", "rating": 4, "note": "CI green on the redeployment commit."}], "col": 6, "row": 4, "note": null}, {"id": "e6", "file": "sentiment-app/README.md and the deployment", "phase": "E", "owner": "H", "priority": 2, "status": "co", "deadline": "2026-11-02", "summary": "The hosted Streamlit page the live-testing sessions tested against: first deployment 25 October, all fourteen models by 1 November.", "what": "The deployment pipeline (secrets, requirements, the hosting build), the first deployment with the first few models, the redeployment of all fourteen, and the README with the deployment notes and the findings in plain language.", "depends": ["e1", "e5"], "affects": ["f1", "g3"], "arch": [{"n": "hosting account", "d": "and a first page"}, {"n": "deployment pipeline", "d": "secrets, requirements, build"}, {"n": "first deployment", "d": "25 Oct"}, {"n": "redeploy all fourteen", "d": "1 Nov"}, {"n": "README", "d": "deployment notes, findings in plain language"}], "reads": [], "writes": ["the deployed page"], "meetings": [{"date": "2026-10-25", "rating": 4, "note": "First deployment demonstrated on the Sunday call."}, {"date": "2026-11-01", "rating": 5, "note": "All fourteen models redeployed."}], "col": 6, "row": 5, "note": null}, {"id": "e7", "file": "streamlit-a3/train_model.py (model.pkl from the model pages)", "phase": "E", "owner": "H", "priority": 5, "status": "ca", "deadline": "2026-10-27", "summary": "The first store: the heads unpacked from the model pages into one model.pkl. Replaced by build_models.py reading the exports.", "what": "The first deployment read each head's weights out of its model page (model_a.html and the like) and pickled them together so the app loaded one file. Once the pipeline exported nn_model.json directly, the store was rebuilt from the exports and the pickle route was dropped.", "depends": ["the model pages of the research pipeline"], "affects": ["e2"], "arch": [{"n": "read the model page", "d": "const D = ... JSON"}, {"n": "decode base64 weights", "d": "float32"}, {"n": "pickle the heads", "d": "model.pkl"}, {"n": "app loads one file", "d": "replaced"}], "reads": ["model_a.html", "model_a_sentfin.html", "dialogue_head_fingpt_sentfin.html"], "writes": ["model.pkl"], "meetings": [{"date": "2026-10-27", "rating": 3, "note": "Dropped in favour of the exports."}], "col": 6, "row": 6, "note": "Replaced on 27 October by build_models.py, which reads the exports directly."}, {"id": "e8", "file": "dashboard/index.html (BI dashboard layout)", "phase": "E", "owner": "J", "priority": 5, "status": "ca", "deadline": "2026-10-18", "summary": "Johnny's BI dashboard layout with flexbox, 18 October. Dropped at the Sprint 2 review: the Streamlit app is the front end.", "what": "A static dashboard layout in HTML and CSS for the results, started while the Streamlit experiments were running. The two front ends would have duplicated each other, so the dashboard was dropped and Johnny's front-end work became supervision of the Streamlit pages.", "depends": [], "affects": ["e1"], "arch": [{"n": "layout", "d": "BI dashboard"}, {"n": "flexbox CSS", "d": "adjusted UI"}, {"n": "wire to the exports", "d": "cancelled"}], "reads": [], "writes": [], "meetings": [{"date": "2026-10-23", "rating": 2, "note": "Dropped at the Sprint 2 review: one front end."}], "col": 6, "row": 7, "note": "Dropped on 23 October."}, {"id": "f1", "file": "deploy/Dockerfile, deploy/compose.yml", "phase": "F", "owner": "H", "priority": 3, "status": "ns", "deadline": "2026-11-11", "summary": "Two containers, the application and the encoder service, CPU only, with the model store from the release asset and HTTPS behind a reverse proxy.", "what": "The cloud system of the roadmap: the application and the encoder service as two containers that run on a CPU, the model store built from the results folder and the release asset features.zip, health checks, and HTTPS behind a reverse proxy. To be scoped after the review with Dr Vo.", "depends": ["e1", "e3", "e2"], "affects": ["f2"], "arch": [{"n": "Dockerfile: app", "d": "Streamlit, the store"}, {"n": "Dockerfile: encoder service", "d": "bge-large, CPU"}, {"n": "compose.yml", "d": "two services, a network"}, {"n": "model store from the release", "d": "features.zip, results/"}, {"n": "reverse proxy", "d": "HTTPS, health checks"}], "reads": ["the release asset features.zip", "results/"], "writes": ["images and compose.yml"], "meetings": [{"date": "2026-11-06", "rating": null, "note": "To be scoped after the review with Dr Vo."}], "col": 7, "row": 0, "note": null}, {"id": "f2", "file": "deploy/cloud_notes.md", "phase": "F", "owner": "H", "priority": 4, "status": "ns", "deadline": "2026-11-11", "summary": "Hosting options and cost, secrets and the model store out of the image.", "what": "The notes that decide where the containers run: a small virtual machine against the Streamlit hosting, the monthly cost, how the secrets and the model store stay out of the image, and who holds the keys.", "depends": ["f1"], "affects": [], "arch": [{"n": "options", "d": "a small VM against the Streamlit hosting"}, {"n": "cost", "d": "per month"}, {"n": "secrets", "d": "out of the image"}, {"n": "keys", "d": "who holds them"}], "reads": [], "writes": ["deploy/cloud_notes.md"], "meetings": [{"date": "2026-11-06", "rating": null, "note": "To be scoped after the review with Dr Vo."}], "col": 7, "row": 1, "note": null}, {"id": "g1", "file": "docs/A3_Design_Document.docx", "phase": "G", "owner": "R", "priority": 1, "status": "ur", "deadline": "2026-11-06", "summary": "The design document: technical sections by Ricky, management sections by Johnny, the application by Hara; revised 3 November; team review to 5 November.", "what": "Every number in it is read from the chain of 3 November or marked as the research pipeline's. The 1 November version carried the test plan references; the 3 November revision added the chain's four fixes and the three seeds. The team reviewed it from 2 to 5 November; the review with Dr Vo is on Friday 6 November at 2:30 pm.", "depends": ["c18", "d3", "e4", "g2"], "affects": ["g3"], "arch": [{"n": "technical sections", "d": "architecture, protocol, RL, tests"}, {"n": "management sections", "d": "timeline, sprints, duties"}, {"n": "application section", "d": "and the findings in plain language"}, {"n": "3 Nov revision", "d": "four fixes, three seeds"}, {"n": "team review", "d": "2 to 5 Nov"}, {"n": "review with Dr Vo", "d": "Fri 6 Nov"}], "reads": ["results/**", "logs/*_20261103.log"], "writes": ["A3_Design_Document_3Nov.docx"], "meetings": [{"date": "2026-11-01", "rating": 4, "note": "The 1 November version read through at the Sunday session."}, {"date": "2026-11-04", "rating": 4, "note": "Team review: changes highlighted."}, {"date": "2026-11-06", "rating": null, "note": "Review with Dr Vo, 2:30 to 3:00 pm."}], "col": 8, "row": 0, "note": null}, {"id": "g2", "file": "docs/test_plan.md", "phase": "G", "owner": "R", "priority": 2, "status": "co", "deadline": "2026-11-03", "summary": "The test plan: four layers, cheapest first, every check id, the mutation table and what the layers caught on 3 November.", "what": "Names the layers (unit, smoke, integration, mutation, and the application's 213 tests), the id scheme of every check, the log format, the five seeded faults and the checks that catch them, and the four faults the layers caught before the chain passed.", "depends": ["d1", "d2", "d3", "d4", "e4"], "affects": ["g1"], "arch": [{"n": "four layers", "d": "cheapest first"}, {"n": "check ids", "d": "UT, SM, CH, IT, ST, NF"}, {"n": "log format", "d": "one dated line per check"}, {"n": "mutation table", "d": "M1 to M5"}, {"n": "what the layers caught", "d": "3 Nov"}], "reads": ["logs/*_20261103.log"], "writes": ["docs/test_plan.md"], "meetings": [{"date": "2026-11-01", "rating": 4, "note": "Test plan read against the logs."}], "col": 8, "row": 1, "note": null}, {"id": "g3", "file": "docs/presentation/ (the deck and the three scripts)", "phase": "G", "owner": "J", "priority": 1, "status": "ip", "deadline": "2026-11-11", "summary": "The 50-slide deck and the three scripts: group lead (team, process, data), technical lead (findings, papers, policy, pipeline), front end.", "what": "Johnny's script covers the team, the process and the data; Ricky's the findings, the papers, the policy and the pipeline, with the deck; Hara's the application and the findings in plain language. First rehearsal on 4 November; the GRPO slide is to be updated from the 3 November run; the final rehearsal is on 10 November.", "depends": ["g1", "c14", "e6"], "affects": [], "arch": [{"n": "group lead script", "d": "team, process, data"}, {"n": "technical lead script", "d": "findings, papers, policy, pipeline"}, {"n": "front-end script", "d": "the application"}, {"n": "the deck", "d": "50 slides"}, {"n": "rehearsals", "d": "4 and 10 Nov"}], "reads": ["A3_Design_Document_3Nov.docx", "results/**"], "writes": ["the deck", "three scripts"], "meetings": [{"date": "2026-11-04", "rating": 4, "note": "First rehearsal of the three scripts."}, {"date": "2026-11-10", "rating": null, "note": "Final rehearsal."}], "col": 8, "row": 2, "note": null}, {"id": "g4", "file": "docs/security_writeup.md", "phase": "G", "owner": "R", "priority": 2, "status": "co", "deadline": "2026-10-30", "summary": "What crosses out of the SuperComputer and what never does: float16 weights, word lists and JSON summaries out; logins, hosts and paths never.", "what": "Why the code is on a private repository, why the research ran on the SuperComputer, what leaves it, how the application's tests and the static scan enforce the rule, and how the public repository carries the login redacted.", "depends": ["d5"], "affects": ["g1", "e6"], "arch": [{"n": "what leaves", "d": "weights, word lists, summaries"}, {"n": "what never leaves", "d": "logins, hosts, paths"}, {"n": "enforcement", "d": "NF-07, ST-F-07, the scan"}, {"n": "the public repository", "d": "redacted"}], "reads": [], "writes": ["docs/security_writeup.md"], "meetings": [{"date": "2026-10-30", "rating": 4, "note": "Reviewed at the Sprint 3 review."}], "col": 8, "row": 3, "note": null}, {"id": "g5", "file": "docs/minutes/ (minutes, the defect log, the backlog)", "phase": "G", "owner": "J", "priority": 2, "status": "ip", "deadline": "2026-11-06", "summary": "Johnny's record of every session: minutes, the defect list raised at the live-testing checks, the sprint backlogs and the retrospectives.", "what": "Each session starts with a live-testing check and ends in the minutes and the defect list; each sprint has its planning record, its review and its Keep, Stop, Try. Sprint 4's review and retrospective are on Friday 6 November.", "depends": [], "affects": ["g1", "g6"], "arch": [{"n": "live-testing minutes", "d": "every session"}, {"n": "defect list", "d": "raised on the spot"}, {"n": "sprint backlog", "d": "planning"}, {"n": "review and retrospective", "d": "last Friday"}, {"n": "Keep, Stop, Try", "d": "at most three actions"}], "reads": [], "writes": ["docs/minutes/sprint<n>.md"], "meetings": [{"date": "2026-10-16", "rating": 4, "note": "Sprint 1 review and retrospective."}, {"date": "2026-10-23", "rating": 4, "note": "Sprint 2 review and retrospective."}, {"date": "2026-10-30", "rating": 4, "note": "Sprint 3 review and retrospective."}, {"date": "2026-11-06", "rating": null, "note": "Sprint 4 review and retrospective."}], "col": 8, "row": 4, "note": null}, {"id": "g6", "file": ".github/ (templates, the checks workflow, branch protection, the board)", "phase": "G", "owner": "R", "priority": 2, "status": "ip", "deadline": "2026-11-11", "summary": "The repository protocol: agile commit guidelines, the pull-request gate, the GitHub Projects board sentiment_heads, branch protection on main.", "what": "Johnny's commit guidelines and the pull-request gate from Sprint 1; the public repository's final update pushed to main on 4 November; the GitHub Projects board with the four columns; the full cycle (issues, branches, pull requests with the checks workflow, review, squash merge) and branch protection still to run, with the release v1.0.0 carrying features.zip.", "depends": ["g5"], "affects": ["g1"], "arch": [{"n": "commit guidelines", "d": "Conventional Commits"}, {"n": "pull-request gate", "d": "review before merge"}, {"n": "board", "d": "Todo, In Progress, In review, Done"}, {"n": "checks workflow", "d": "syntax and the unit suite"}, {"n": "branch protection", "d": "main"}, {"n": "release v1.0.0", "d": "features.zip"}], "reads": [], "writes": [".github/", "the board", "the release"], "meetings": [{"date": "2026-11-04", "rating": 3, "note": "Board created; the final update went to main directly instead of through the cycle."}], "col": 8, "row": 5, "note": null}], "todos": [{"id": "fd01-1", "program": "fd01", "title": "Clean FinGPT: mojibake repair, NFC, whitespace; the nine shades to three classes", "owner": "R", "priority": 2, "status": "done", "hours": 1.5, "date": "2026-10-05", "week": "W0"}, {"id": "fd01-2", "program": "fd01", "title": "Fold exact duplicates and build the near-duplicate group key", "owner": "R", "priority": 2, "status": "done", "hours": 1.0, "date": "2026-10-06", "week": "W0"}, {"id": "fdgpu-1", "program": "fdgpu", "title": "First encoding job on one P100 in fp16: 30,209 texts in 1.8 min", "owner": "R", "priority": 2, "status": "done", "hours": 1.5, "date": "2026-10-05", "week": "W0"}, {"id": "fdgpu-2", "program": "fdgpu", "title": "Cache under the content hash of weights, tokenizer, text, pooling and length", "owner": "R", "priority": 2, "status": "done", "hours": 1.5, "date": "2026-10-06", "week": "W0"}, {"id": "fdlin-1", "program": "fdlin", "title": "Fit the multinomial logit on the cached features", "owner": "R", "priority": 3, "status": "done", "hours": 1.5, "date": "2026-10-06", "week": "W0"}, {"id": "fdlin-2", "program": "fdlin", "title": "Score on the training set and on SEntFiN", "owner": "R", "priority": 3, "status": "done", "hours": 1.0, "date": "2026-10-06", "week": "W0"}, {"id": "fdinv-1", "program": "fdinv", "title": "Polarity flips: how the pooled vector moves when a sentence changes polarity", "owner": "R", "priority": 3, "status": "done", "hours": 2.5, "date": "2026-10-07", "week": "W0"}, {"id": "fdinv-2", "program": "fdinv", "title": "The same on the SEntFiN headlines", "owner": "R", "priority": 3, "status": "done", "hours": 1.5, "date": "2026-10-08", "week": "W0"}, {"id": "fdinv-3", "program": "fdinv", "title": "Training labels against the encoder's neighbours", "owner": "R", "priority": 3, "status": "done", "hours": 2.0, "date": "2026-10-09", "week": "W0"}, {"id": "fdinv-4", "program": "fdinv", "title": "Write-up for the Sprint 1 planning", "owner": "R", "priority": 3, "status": "done", "hours": 1.0, "date": "2026-10-10", "week": "S1"}, {"id": "jexp-1", "program": "jexp", "title": "Load and clean emotion-emotion_69k.csv; rename the files to the general dataset", "owner": "J", "priority": 3, "status": "done", "hours": 2.5, "date": "2026-10-05", "week": "W0"}, {"id": "jexp-2", "program": "jexp", "title": "Class skew and anomaly charts for the quality check", "owner": "J", "priority": 3, "status": "done", "hours": 1.5, "date": "2026-10-05", "week": "W0"}, {"id": "jexp-3", "program": "jexp", "title": "Remove the test files and the irrelevant files from the repository", "owner": "J", "priority": 4, "status": "done", "hours": 0.5, "date": "2026-10-07", "week": "W0"}, {"id": "jtfidf-1", "program": "jtfidf", "title": "TF-IDF features and a logistic regression on the general dataset", "owner": "J", "priority": 4, "status": "done", "hours": 2.0, "date": "2026-10-05", "week": "W0"}, {"id": "jtfidf-2", "program": "jtfidf", "title": "Compare against the frozen-encoder route", "owner": "J", "priority": 4, "status": "canc", "hours": 0.5, "date": "2026-10-08", "week": "W0"}, {"id": "jsim-1", "program": "jsim", "title": "Encode the 32 emotion labels and compute the pairwise similarity", "owner": "J", "priority": 4, "status": "done", "hours": 1.5, "date": "2026-10-08", "week": "W0"}, {"id": "jsim-2", "program": "jsim", "title": "Heatmap with seaborn; a batch size limit during encoding", "owner": "J", "priority": 4, "status": "done", "hours": 0.5, "date": "2026-10-08", "week": "W0"}, {"id": "jsoft-1", "program": "jsoft", "title": "Softmax over the label similarities to derive a sentiment", "owner": "J", "priority": 4, "status": "done", "hours": 1.5, "date": "2026-10-08", "week": "W0"}, {"id": "jsoft-2", "program": "jsoft", "title": "Try it on the general dataset", "owner": "J", "priority": 4, "status": "done", "hours": 1.0, "date": "2026-10-08", "week": "W0"}, {"id": "jsoft-3", "program": "jsoft", "title": "Carry the valence decoding into the dialogue head", "owner": "J", "priority": 4, "status": "canc", "hours": 0.5, "date": "2026-10-18", "week": "S2"}, {"id": "bened-1", "program": "bened", "title": "Flag the Benedetti file: undocumented labels, overlap with FinGPT", "owner": "J", "priority": 3, "status": "done", "hours": 1.5, "date": "2026-10-07", "week": "W0"}, {"id": "bened-2", "program": "bened", "title": "Prepare Benedetti as the external test set", "owner": "J", "priority": 3, "status": "canc", "hours": 0.5, "date": "2026-10-09", "week": "W0"}, {"id": "bened-3", "program": "bened", "title": "Label analysis with the head: 93 percent on the overlap, 46 percent on the rest", "owner": "R", "priority": 3, "status": "done", "hours": 1.0, "date": "2026-10-21", "week": "S2"}, {"id": "bened-4", "program": "bened", "title": "The Benedetti decision written into section II.F", "owner": "J", "priority": 4, "status": "done", "hours": 1.0, "date": "2026-10-27", "week": "S3"}, {"id": "fine-1", "program": "fine", "title": "Record the scope cut in the shared notes and the A2 revision", "owner": "R", "priority": 4, "status": "done", "hours": 0.5, "date": "2026-10-05", "week": "W0"}, {"id": "fine-2", "program": "fine", "title": "Micro-batches of 16 with gradient checkpointing and fp16 loss scaling", "owner": "R", "priority": 5, "status": "canc", "hours": 0.0, "date": "2026-10-05", "week": "W0"}, {"id": "fine-3", "program": "fine", "title": "DoRA adapter for M4", "owner": "R", "priority": 5, "status": "canc", "hours": 0.0, "date": "2026-10-05", "week": "W0"}, {"id": "repr-1", "program": "repr", "title": "UMAP and GMM of the pooled space", "owner": "J", "priority": 5, "status": "canc", "hours": 0.5, "date": "2026-10-09", "week": "W0"}, {"id": "repr-2", "program": "repr", "title": "CKA between the fine-tuned and the frozen space", "owner": "R", "priority": 5, "status": "canc", "hours": 0.0, "date": "2026-10-10", "week": "S1"}, {"id": "fd07-1", "program": "fd07", "title": "First feed-forward head on the cached features", "owner": "R", "priority": 2, "status": "done", "hours": 4.0, "date": "2026-10-11", "week": "S1"}, {"id": "fd07-2", "program": "fd07", "title": "Memorisation found: training accuracy climbs while held-out falls", "owner": "R", "priority": 1, "status": "done", "hours": 2.0, "date": "2026-10-13", "week": "S1"}, {"id": "fd07-3", "program": "fd07", "title": "Grouped folds by the near-duplicate key", "owner": "R", "priority": 2, "status": "done", "hours": 2.0, "date": "2026-10-14", "week": "S1"}, {"id": "fd07-4", "program": "fd07", "title": "Paper study on noisy labels and memorisation; the protocol written down", "owner": "R", "priority": 1, "status": "done", "hours": 5.0, "date": "2026-10-15", "week": "S1"}, {"id": "fd07-5", "program": "fd07", "title": "Training loop with the confirmation split held out first", "owner": "R", "priority": 2, "status": "done", "hours": 2.0, "date": "2026-10-16", "week": "S1"}, {"id": "fd07-6", "program": "fd07", "title": "StratifiedGroupKFold 5 x 3, label smoothing, EMA, early stopping", "owner": "R", "priority": 1, "status": "done", "hours": 3.0, "date": "2026-10-17", "week": "S2"}, {"id": "fd07-7", "program": "fd07", "title": "Successive halving over 34 configurations; the job of Mon 19 Oct", "owner": "R", "priority": 1, "status": "done", "hours": 2.5, "date": "2026-10-19", "week": "S2"}, {"id": "fd07-8", "program": "fd07", "title": "Temperature on the out-of-fold logits; c12 chosen at 0.8044", "owner": "R", "priority": 2, "status": "done", "hours": 1.5, "date": "2026-10-20", "week": "S2"}, {"id": "fd07-9", "program": "fd07", "title": "Reviewer at the live-testing checks of Sprint 1: the first network run in front of the team", "owner": "J", "priority": 3, "status": "done", "hours": 3.0, "date": "2026-10-14", "week": "S1"}, {"id": "fd08-1", "program": "fd08", "title": "Every validation row's predicted class recorded for the audit", "owner": "R", "priority": 3, "status": "done", "hours": 1.0, "date": "2026-10-20", "week": "S2"}, {"id": "fd08-2", "program": "fd08", "title": "Random-label control: the head on shuffled labels", "owner": "R", "priority": 3, "status": "done", "hours": 1.5, "date": "2026-10-21", "week": "S2"}, {"id": "fd08-3", "program": "fd08", "title": "Data-quality follow-up on the audited rows", "owner": "J", "priority": 3, "status": "done", "hours": 2.5, "date": "2026-10-21", "week": "S2"}, {"id": "fd10-1", "program": "fd10", "title": "Hessian trace and seed connectivity of c12", "owner": "R", "priority": 3, "status": "done", "hours": 1.5, "date": "2026-10-22", "week": "S2"}, {"id": "fd10-2", "program": "fd10", "title": "Linear probes on the hidden layers", "owner": "R", "priority": 3, "status": "done", "hours": 1.0, "date": "2026-10-22", "week": "S2"}, {"id": "fdtr-1", "program": "fdtr", "title": "Zero-shot on SEntFiN: 73.5 percent", "owner": "R", "priority": 3, "status": "done", "hours": 1.0, "date": "2026-10-20", "week": "S2"}, {"id": "fdtr-2", "program": "fdtr", "title": "EM, BBSE and balanced corrections against the uncorrected reading", "owner": "R", "priority": 3, "status": "done", "hours": 1.5, "date": "2026-10-22", "week": "S2"}, {"id": "fdtr-3", "program": "fdtr", "title": "Ship a prior correction in the application", "owner": "R", "priority": 4, "status": "canc", "hours": 0.0, "date": "2026-10-23", "week": "S2"}, {"id": "ed01-1", "program": "ed01", "title": "Two-turn windows in conversation order, encoded on the P100", "owner": "R", "priority": 3, "status": "done", "hours": 0.5, "date": "2026-10-24", "week": "S3"}, {"id": "ed01-2", "program": "ed01", "title": "The FinGPT Network reads every window: the distilled sentiment column", "owner": "R", "priority": 2, "status": "done", "hours": 0.5, "date": "2026-10-24", "week": "S3"}, {"id": "ed07-1", "program": "ed07", "title": "Two-output head from one trunk; conversation-grouped splits", "owner": "R", "priority": 2, "status": "done", "hours": 1.0, "date": "2026-10-23", "week": "S2"}, {"id": "ed07-2", "program": "ed07", "title": "The search job of Sun 25 Oct; c31 chosen", "owner": "R", "priority": 1, "status": "done", "hours": 0.5, "date": "2026-10-25", "week": "S3"}, {"id": "ed07-3", "program": "ed07", "title": "Prediction on SEntFiN: 74.5 percent without a finance label", "owner": "R", "priority": 2, "status": "done", "hours": 0.5, "date": "2026-10-25", "week": "S3"}, {"id": "ed07-4", "program": "ed07", "title": "Review at the live-testing session of Sprint 3", "owner": "J", "priority": 3, "status": "done", "hours": 2.0, "date": "2026-10-26", "week": "S3"}, {"id": "ed12-1", "program": "ed12", "title": "Problem formulation: contextual bandit, KL leash, retention term", "owner": "R", "priority": 1, "status": "done", "hours": 1.0, "date": "2026-10-22", "week": "S2"}, {"id": "ed12-2", "program": "ed12", "title": "The closed form of the leashed objective", "owner": "R", "priority": 1, "status": "done", "hours": 0.5, "date": "2026-10-25", "week": "S3"}, {"id": "ed12-3", "program": "ed12", "title": "REINFORCE, GRPO and PPO with the clipped ratio", "owner": "R", "priority": 2, "status": "done", "hours": 1.0, "date": "2026-10-25", "week": "S3"}, {"id": "ed12-4", "program": "ed12", "title": "The Q layer and the bandit variants with the off-policy estimators", "owner": "R", "priority": 3, "status": "done", "hours": 0.5, "date": "2026-10-26", "week": "S3"}, {"id": "ed12-5", "program": "ed12", "title": "Both stages on every corpus, before and after; the RL reports", "owner": "R", "priority": 2, "status": "done", "hours": 0.5, "date": "2026-10-26", "week": "S3"}, {"id": "ed12-6", "program": "ed12", "title": "Review of gains and retention at the sprint review", "owner": "J", "priority": 3, "status": "done", "hours": 1.0, "date": "2026-10-26", "week": "S3"}, {"id": "ed12-7", "program": "ed12", "title": "Ship REINFORCE, PPO and the Q layer in the final repository", "owner": "R", "priority": 4, "status": "canc", "hours": 0.0, "date": "2026-10-28", "week": "S3"}, {"id": "ed12-8", "program": "ed12", "title": "Advantage scaled by the whole batch's standard deviation", "owner": "R", "priority": 4, "status": "canc", "hours": 0.0, "date": "2026-10-29", "week": "S3"}, {"id": "edmis-1", "program": "edmis", "title": "The closed form on the 1,399 misread headlines", "owner": "R", "priority": 3, "status": "done", "hours": 0.5, "date": "2026-10-26", "week": "S3"}, {"id": "edmis-2", "program": "edmis", "title": "Sampled methods on the misread rows", "owner": "R", "priority": 4, "status": "canc", "hours": 0.5, "date": "2026-10-27", "week": "S3"}, {"id": "c0-1", "program": "c0", "title": "One configuration file per corpus: files, labels, head, protocol, the adaptation settings", "owner": "R", "priority": 2, "status": "done", "hours": 0.5, "date": "2026-10-27", "week": "S3"}, {"id": "c1-1", "program": "c1", "title": "Data in place and the Hugging Face cache on the login node", "owner": "R", "priority": 2, "status": "done", "hours": 1.5, "date": "2026-10-05", "week": "W0"}, {"id": "c1-2", "program": "c1", "title": "Accounts and project membership for the team", "owner": "H", "priority": 3, "status": "done", "hours": 1.5, "date": "2026-10-05", "week": "W0"}, {"id": "c1-3", "program": "c1", "title": "paths.sh: the project root, the offline flags, the venv", "owner": "R", "priority": 3, "status": "done", "hours": 0.5, "date": "2026-10-27", "week": "S3"}, {"id": "c1-4", "program": "c1", "title": "Rebuild on python/3.11.5 with the CUDA 12.6 wheels; the module pair in venv/PYMOD", "owner": "R", "priority": 1, "status": "done", "hours": 0.5, "date": "2026-11-02", "week": "S4"}, {"id": "c2-1", "program": "c2", "title": "root(), load_config(), cache_dir(), results_dir()", "owner": "R", "priority": 3, "status": "done", "hours": 0.25, "date": "2026-10-27", "week": "S3"}, {"id": "c2-2", "program": "c2", "title": "A config is also found under the project root, for the smoke chain", "owner": "R", "priority": 3, "status": "done", "hours": 0.25, "date": "2026-11-01", "week": "S4"}, {"id": "c3-1", "program": "c3", "title": "Cleaning, labels, duplicate keys and the grouped splits, lifted from the research pipeline and trimmed", "owner": "R", "priority": 2, "status": "done", "hours": 0.5, "date": "2026-10-27", "week": "S3"}, {"id": "c4-1", "program": "c4", "title": "sha256 of weights, tokenizer and text column; save_features and load_features", "owner": "R", "priority": 3, "status": "done", "hours": 0.25, "date": "2026-10-27", "week": "S3"}, {"id": "c5-1", "program": "c5", "title": "Offline loading, pooling and the windowed forward pass: 510 tokens, 32 overlap", "owner": "R", "priority": 2, "status": "done", "hours": 0.5, "date": "2026-10-27", "week": "S3"}, {"id": "c6-1", "program": "c6", "title": "MultiHead and fit(): AdamW, warm-up, cosine floor, EMA, smoothed cross-entropy, early stopping", "owner": "R", "priority": 1, "status": "done", "hours": 0.5, "date": "2026-10-28", "week": "S3"}, {"id": "c6-2", "program": "c6", "title": "to_json / from_json: the export the application and the numpy pass read", "owner": "R", "priority": 1, "status": "done", "hours": 0.5, "date": "2026-10-29", "week": "S3"}, {"id": "c7-1", "program": "c7", "title": "evaluate, macro_f1, ece, bootstrap_macro_f1, fit_temperature", "owner": "R", "priority": 2, "status": "done", "hours": 0.5, "date": "2026-10-28", "week": "S3"}, {"id": "c7-2", "program": "c7", "title": "corrected_resampled_t, Nadeau and Bengio's overlap correction", "owner": "R", "priority": 2, "status": "done", "hours": 0.5, "date": "2026-10-31", "week": "S4"}, {"id": "c8-1", "program": "c8", "title": "load_set: the prepared table with its cached features and labels", "owner": "R", "priority": 3, "status": "done", "hours": 0.25, "date": "2026-10-28", "week": "S3"}, {"id": "c9-1", "program": "c9", "title": "RunLog: one dated PASS or FAIL line per check, a .json mirror, no host or path", "owner": "R", "priority": 2, "status": "done", "hours": 0.5, "date": "2026-11-01", "week": "S4"}, {"id": "c10-1", "program": "c10", "title": "Step 1 for both configs; the content hash on every table; the length audit", "owner": "R", "priority": 1, "status": "done", "hours": 0.5, "date": "2026-10-28", "week": "S3"}, {"id": "c11-1", "program": "c11", "title": "The encoder over every prepared set; skip when the cache has the key", "owner": "R", "priority": 1, "status": "done", "hours": 0.5, "date": "2026-10-28", "week": "S3"}, {"id": "c12-1", "program": "c12", "title": "Steps 3 to 7 on the chosen configuration", "owner": "R", "priority": 1, "status": "done", "hours": 0.5, "date": "2026-10-29", "week": "S3"}, {"id": "c12-2", "program": "c12", "title": "folds.csv per seed and the confirmation recall in summary.json", "owner": "R", "priority": 2, "status": "done", "hours": 0.5, "date": "2026-11-01", "week": "S4"}, {"id": "c13-1", "program": "c13", "title": "A trained head on every prediction set; pieces averaged per original row", "owner": "R", "priority": 2, "status": "done", "hours": 0.5, "date": "2026-10-29", "week": "S3"}, {"id": "c14-1", "program": "c14", "title": "The closed form (exact) with the retention term", "owner": "R", "priority": 1, "status": "done", "hours": 0.5, "date": "2026-10-29", "week": "S3"}, {"id": "c14-2", "program": "c14", "title": "GRPO with the group-normalised advantage", "owner": "R", "priority": 1, "status": "done", "hours": 0.5, "date": "2026-10-30", "week": "S3"}, {"id": "c14-3", "program": "c14", "title": "--rows wrong, the eight runs, three seeds for the two shipped stages", "owner": "R", "priority": 2, "status": "done", "hours": 0.5, "date": "2026-11-02", "week": "S4"}, {"id": "c15-1", "program": "c15", "title": "Ridge logistic regression on the network's folds and confirmation rows", "owner": "R", "priority": 2, "status": "done", "hours": 0.5, "date": "2026-10-30", "week": "S3"}, {"id": "c15-2", "program": "c15", "title": "C on two folds; the paired bootstrap and the corrected t-test; the job of Sat 31 Oct 21:13", "owner": "R", "priority": 2, "status": "done", "hours": 0.5, "date": "2026-10-31", "week": "S4"}, {"id": "c16-1", "program": "c16", "title": "Word indicators and the multinomial logit identified by its penalty", "owner": "R", "priority": 2, "status": "done", "hours": 0.5, "date": "2026-10-30", "week": "S3"}, {"id": "c16-2", "program": "c16", "title": "Trigger words, the N/A reading, one model per corpus", "owner": "R", "priority": 2, "status": "done", "hours": 0.5, "date": "2026-10-31", "week": "S4"}, {"id": "c16-3", "program": "c16", "title": "Six decimals in trigger_words.csv after the 0.50004 catch", "owner": "R", "priority": 3, "status": "done", "hours": 0.5, "date": "2026-11-03", "week": "S4"}, {"id": "c17-1", "program": "c17", "title": "One job script per stage with its allocation", "owner": "R", "priority": 1, "status": "done", "hours": 0.5, "date": "2026-10-28", "week": "S3"}, {"id": "c17-2", "program": "c17", "title": "_header.sh: a dated PASS or FAIL line with the wall time in the chain log", "owner": "R", "priority": 1, "status": "done", "hours": 0.5, "date": "2026-11-01", "week": "S4"}, {"id": "c17-3", "program": "c17", "title": "The config as a positional argument after both jobs trained the finance head", "owner": "R", "priority": 1, "status": "done", "hours": 0.5, "date": "2026-11-02", "week": "S4"}, {"id": "c18-1", "program": "c18", "title": "afterok dependencies: encode, train x2, adapt, linear, words, the integration test last", "owner": "R", "priority": 1, "status": "done", "hours": 0.5, "date": "2026-11-01", "week": "S4"}, {"id": "c18-2", "program": "c18", "title": "Submission 1: the environment fault (Python 3.9, CUDA 12.8 wheels)", "owner": "R", "priority": 1, "status": "done", "hours": 0.5, "date": "2026-11-02", "week": "S4"}, {"id": "c18-3", "program": "c18", "title": "Submission 2: both training jobs on the finance head", "owner": "R", "priority": 1, "status": "done", "hours": 0.5, "date": "2026-11-02", "week": "S4"}, {"id": "c18-4", "program": "c18", "title": "Submission 3: 149 of 154; the manifests, six decimals, the KL band", "owner": "R", "priority": 1, "status": "done", "hours": 0.5, "date": "2026-11-03", "week": "S4"}, {"id": "c18-5", "program": "c18", "title": "Submission 4: CH-08 PASS; the archive packed and its checksum verified", "owner": "R", "priority": 1, "status": "done", "hours": 0.5, "date": "2026-11-03", "week": "S4"}, {"id": "c18-6", "program": "c18", "title": "Regression suite green before the review; the defect log closed", "owner": "J", "priority": 2, "status": "done", "hours": 1.5, "date": "2026-11-03", "week": "S4"}, {"id": "d1-1", "program": "d1", "title": "numpy_head.py: the independent pass from the export, the parity oracle", "owner": "R", "priority": 1, "status": "done", "hours": 0.5, "date": "2026-10-29", "week": "S3"}, {"id": "d1-2", "program": "d1", "title": "UT-D, UT-B, UT-N: cleaning, the word reader, splits and the corrected t-test", "owner": "R", "priority": 1, "status": "done", "hours": 0.5, "date": "2026-10-31", "week": "S4"}, {"id": "d1-3", "program": "d1", "title": "UT-R: the tilt and the GRPO advantage; UT-E at 1, 509, 510, 511, 988, 989 tokens; conftest writes the dated log", "owner": "R", "priority": 1, "status": "done", "hours": 0.5, "date": "2026-11-01", "week": "S4"}, {"id": "d2-1", "program": "d2", "title": "Synthetic corpora, the tiny random encoder, the 25 steps with the checker on the clean tree and the broken copy", "owner": "R", "priority": 1, "status": "done", "hours": 0.5, "date": "2026-11-01", "week": "S4"}, {"id": "d2-2", "program": "d2", "title": "SM-25 confirms the mutation count fix before the fourth submission", "owner": "R", "priority": 2, "status": "done", "hours": 0.5, "date": "2026-11-03", "week": "S4"}, {"id": "d3-1", "program": "d3", "title": "Ten checks per model directory: files, reload, parity to 1e-6, split hygiene", "owner": "R", "priority": 1, "status": "done", "hours": 0.5, "date": "2026-10-31", "week": "S4"}, {"id": "d3-2", "program": "d3", "title": "Fourteen checks across models: the two ladders, shared splits, manifests, tables", "owner": "R", "priority": 1, "status": "done", "hours": 0.5, "date": "2026-11-01", "week": "S4"}, {"id": "d3-3", "program": "d3", "title": "integration_test.sh as the last job; the exit status is the test's", "owner": "R", "priority": 2, "status": "done", "hours": 0.5, "date": "2026-11-01", "week": "S4"}, {"id": "d3-4", "program": "d3", "title": "bounds.json from the document's numbers; the KL band from the derivation [0.3, 1.8]", "owner": "R", "priority": 1, "status": "done", "hours": 0.5, "date": "2026-11-03", "week": "S4"}, {"id": "d4-1", "program": "d4", "title": "Five faults into a copy: M1 to M5", "owner": "R", "priority": 2, "status": "done", "hours": 0.5, "date": "2026-11-01", "week": "S4"}, {"id": "d4-2", "program": "d4", "title": "Exactly 8 FAIL lines and exit 1; count only the last run in the day's log", "owner": "R", "priority": 1, "status": "done", "hours": 0.5, "date": "2026-11-03", "week": "S4"}, {"id": "d5-1", "program": "d5", "title": "Forbidden-pattern tests: no login, host or project path in any export or log", "owner": "R", "priority": 2, "status": "done", "hours": 0.5, "date": "2026-10-28", "week": "S3"}, {"id": "d5-2", "program": "d5", "title": "The static scan over every deliverable before it leaves", "owner": "R", "priority": 2, "status": "done", "hours": 0.25, "date": "2026-11-01", "week": "S4"}, {"id": "d5-3", "program": "d5", "title": "Deployment hardening on the application side", "owner": "H", "priority": 2, "status": "done", "hours": 1.0, "date": "2026-10-29", "week": "S3"}, {"id": "e1-1", "program": "e1", "title": "Streamlit experiments: layout, reading an export, the sentence tool", "owner": "H", "priority": 2, "status": "done", "hours": 6.0, "date": "2026-10-13", "week": "S1"}, {"id": "e1-2", "program": "e1", "title": "Mock-up of the pages for the live-testing check", "owner": "J", "priority": 3, "status": "done", "hours": 2.0, "date": "2026-10-13", "week": "S1"}, {"id": "e1-3", "program": "e1", "title": "Streamlit experiments alongside Hara", "owner": "J", "priority": 3, "status": "done", "hours": 3.0, "date": "2026-10-14", "week": "S1"}, {"id": "e1-4", "program": "e1", "title": "The sentence tool: a text box, the encoder call, the probabilities", "owner": "H", "priority": 2, "status": "done", "hours": 3.0, "date": "2026-10-15", "week": "S1"}, {"id": "e1-5", "program": "e1", "title": "Reading an export: the JSON form of a head", "owner": "H", "priority": 2, "status": "done", "hours": 2.0, "date": "2026-10-16", "week": "S1"}, {"id": "e1-6", "program": "e1", "title": "Read the FinGPT Network export into the page", "owner": "H", "priority": 1, "status": "done", "hours": 5.0, "date": "2026-10-21", "week": "S2"}, {"id": "e1-7", "program": "e1", "title": "The network drawn with its live activations", "owner": "H", "priority": 2, "status": "done", "hours": 3.0, "date": "2026-10-22", "week": "S2"}, {"id": "e1-8", "program": "e1", "title": "Front-end supervision: pages presentable and consistent", "owner": "J", "priority": 3, "status": "done", "hours": 1.5, "date": "2026-10-22", "week": "S2"}, {"id": "e1-9", "program": "e1", "title": "The Dialogue Network page: two readings from one trunk", "owner": "H", "priority": 1, "status": "done", "hours": 2.5, "date": "2026-10-26", "week": "S3"}, {"id": "e1-10", "program": "e1", "title": "The adapted heads: before and after on a sentence", "owner": "H", "priority": 2, "status": "done", "hours": 2.0, "date": "2026-10-28", "week": "S3"}, {"id": "e1-11", "program": "e1", "title": "Front-end supervision, Sprint 3", "owner": "J", "priority": 3, "status": "done", "hours": 1.5, "date": "2026-10-28", "week": "S3"}, {"id": "e1-12", "program": "e1", "title": "The word-logit query page: a sentence word by word, N/A for unknown words", "owner": "H", "priority": 2, "status": "done", "hours": 2.0, "date": "2026-10-30", "week": "S3"}, {"id": "e1-13", "program": "e1", "title": "All fourteen models on the page; the catalog", "owner": "H", "priority": 1, "status": "done", "hours": 2.5, "date": "2026-10-31", "week": "S4"}, {"id": "e1-14", "program": "e1", "title": "Front-end supervision, Sprint 4", "owner": "J", "priority": 3, "status": "done", "hours": 1.0, "date": "2026-11-01", "week": "S4"}, {"id": "e2-1", "program": "e2", "title": "Read the exported float16 weights and JSON summaries into the model store", "owner": "H", "priority": 1, "status": "done", "hours": 2.5, "date": "2026-10-27", "week": "S3"}, {"id": "e2-2", "program": "e2", "title": "Scan every export and summary for home paths, logins and addresses; refuse the file", "owner": "H", "priority": 1, "status": "done", "hours": 1.0, "date": "2026-10-29", "week": "S3"}, {"id": "e2-3", "program": "e2", "title": "Rebuild the store from the exports of the 3 November chain", "owner": "H", "priority": 1, "status": "prog", "hours": 2.0, "date": "2026-11-05", "week": "S4"}, {"id": "e2-4", "program": "e2", "title": "The dialogue model as two heads: emotion from dialogue/train, sentiment from dialogue/adapt/finance_train_grpo", "owner": "H", "priority": 1, "status": "todo", "hours": 2.0, "date": "2026-11-08", "week": "S5"}, {"id": "e2-5", "program": "e2", "title": "Which files carry which head, checked against results/README.md", "owner": "R", "priority": 2, "status": "todo", "hours": 1.0, "date": "2026-11-08", "week": "S5"}, {"id": "e2-6", "program": "e2", "title": "Parity against the 3 November summaries (ST-P-01) and redeploy", "owner": "H", "priority": 1, "status": "todo", "hours": 1.5, "date": "2026-11-09", "week": "S5"}, {"id": "e3-1", "program": "e3", "title": "HTTP service: /health and /encode, the 2,048 values as the heads were trained", "owner": "R", "priority": 2, "status": "done", "hours": 0.5, "date": "2026-10-27", "week": "S3"}, {"id": "e3-2", "program": "e3", "title": "Encoder optimised in the app: one load per process", "owner": "H", "priority": 2, "status": "done", "hours": 1.0, "date": "2026-10-28", "week": "S3"}, {"id": "e4-1", "program": "e4", "title": "First component tests", "owner": "H", "priority": 2, "status": "done", "hours": 2.0, "date": "2026-10-23", "week": "S2"}, {"id": "e4-2", "program": "e4", "title": "137 component tests", "owner": "H", "priority": 1, "status": "done", "hours": 1.5, "date": "2026-10-25", "week": "S3"}, {"id": "e4-3", "program": "e4", "title": "46 AppTest scenarios", "owner": "H", "priority": 1, "status": "done", "hours": 2.5, "date": "2026-10-31", "week": "S4"}, {"id": "e4-4", "program": "e4", "title": "15 non-functional checks (NF-07: no path, login or address in an export)", "owner": "H", "priority": 1, "status": "done", "hours": 1.5, "date": "2026-10-31", "week": "S4"}, {"id": "e4-5", "program": "e4", "title": "Parity tests against the pipeline's stored probabilities to 1e-5", "owner": "H", "priority": 1, "status": "done", "hours": 1.5, "date": "2026-11-01", "week": "S4"}, {"id": "e4-6", "program": "e4", "title": "Load test under a Playwright browser", "owner": "H", "priority": 2, "status": "done", "hours": 1.0, "date": "2026-11-01", "week": "S4"}, {"id": "e4-7", "program": "e4", "title": "Defect log for the application tests", "owner": "J", "priority": 3, "status": "done", "hours": 1.5, "date": "2026-10-29", "week": "S3"}, {"id": "e5-1", "program": "e5", "title": "Quick job on every push on Python 3.10 and 3.12", "owner": "H", "priority": 2, "status": "done", "hours": 1.0, "date": "2026-10-31", "week": "S4"}, {"id": "e5-2", "program": "e5", "title": "Full job on main", "owner": "H", "priority": 2, "status": "done", "hours": 0.5, "date": "2026-11-01", "week": "S4"}, {"id": "e6-1", "program": "e6", "title": "Hosting account and a first Streamlit page", "owner": "H", "priority": 3, "status": "done", "hours": 2.0, "date": "2026-10-09", "week": "W0"}, {"id": "e6-2", "program": "e6", "title": "Deployment pipeline: secrets, requirements, the hosting build", "owner": "H", "priority": 2, "status": "done", "hours": 2.0, "date": "2026-10-23", "week": "S2"}, {"id": "e6-3", "program": "e6", "title": "First deployment: the first few models live", "owner": "H", "priority": 1, "status": "done", "hours": 2.0, "date": "2026-10-25", "week": "S3"}, {"id": "e6-4", "program": "e6", "title": "Redeploy all fourteen models", "owner": "H", "priority": 1, "status": "done", "hours": 2.0, "date": "2026-11-01", "week": "S4"}, {"id": "e6-5", "program": "e6", "title": "Deployment notes and the findings in plain language", "owner": "H", "priority": 2, "status": "done", "hours": 1.0, "date": "2026-11-02", "week": "S4"}, {"id": "e7-1", "program": "e7", "title": "Unpack the heads from the model pages into model.pkl", "owner": "H", "priority": 3, "status": "done", "hours": 1.0, "date": "2026-10-26", "week": "S3"}, {"id": "e7-2", "program": "e7", "title": "Keep model.pkl as the store", "owner": "H", "priority": 4, "status": "canc", "hours": 0.5, "date": "2026-10-27", "week": "S3"}, {"id": "e8-1", "program": "e8", "title": "BI dashboard layout", "owner": "J", "priority": 4, "status": "done", "hours": 2.5, "date": "2026-10-18", "week": "S2"}, {"id": "e8-2", "program": "e8", "title": "Adjust the UI, flexbox in CSS", "owner": "J", "priority": 4, "status": "done", "hours": 1.5, "date": "2026-10-18", "week": "S2"}, {"id": "e8-3", "program": "e8", "title": "Wire the dashboard to the exports", "owner": "J", "priority": 4, "status": "canc", "hours": 0.5, "date": "2026-10-23", "week": "S2"}, {"id": "f1-1", "program": "f1", "title": "Two containers: the application and the encoder service, CPU only", "owner": "H", "priority": 2, "status": "todo", "hours": 3.0, "date": "2026-11-09", "week": "S5"}, {"id": "f1-2", "program": "f1", "title": "The model store from the release asset features.zip and the results folder", "owner": "R", "priority": 2, "status": "todo", "hours": 2.0, "date": "2026-11-10", "week": "S5"}, {"id": "f1-3", "program": "f1", "title": "HTTPS behind a reverse proxy; health checks", "owner": "H", "priority": 3, "status": "todo", "hours": 2.0, "date": "2026-11-11", "week": "S5"}, {"id": "f2-1", "program": "f2", "title": "Hosting options and cost: a small VM against the Streamlit hosting", "owner": "H", "priority": 3, "status": "todo", "hours": 1.0, "date": "2026-11-10", "week": "S5"}, {"id": "f2-2", "program": "f2", "title": "Secrets and the model store out of the image", "owner": "J", "priority": 3, "status": "todo", "hours": 1.0, "date": "2026-11-10", "week": "S5"}, {"id": "g1-1", "program": "g1", "title": "Technical sections, the test plan references, the numbers from the 3 November run", "owner": "R", "priority": 1, "status": "done", "hours": 1.0, "date": "2026-11-01", "week": "S4"}, {"id": "g1-2", "program": "g1", "title": "Management sections, timeline and milestones", "owner": "J", "priority": 1, "status": "done", "hours": 3.0, "date": "2026-11-01", "week": "S4"}, {"id": "g1-3", "program": "g1", "title": "Application section and the findings in plain language", "owner": "H", "priority": 2, "status": "done", "hours": 1.0, "date": "2026-11-01", "week": "S4"}, {"id": "g1-4", "program": "g1", "title": "The 3 November revision: the chain's four fixes and the three seeds", "owner": "R", "priority": 1, "status": "done", "hours": 0.5, "date": "2026-11-03", "week": "S4"}, {"id": "g1-5", "program": "g1", "title": "Team review of the document, the test plan and the deck", "owner": "J", "priority": 1, "status": "rev", "hours": 2.0, "date": "2026-11-04", "week": "S4"}, {"id": "g1-6", "program": "g1", "title": "Review with Dr Vo, Fri 6 Nov 2:30 pm", "owner": "J", "priority": 1, "status": "todo", "hours": 0.5, "date": "2026-11-06", "week": "S4"}, {"id": "g1-7", "program": "g1", "title": "Review of the A2 revision before the SuperComputer work", "owner": "H", "priority": 3, "status": "done", "hours": 2.0, "date": "2026-10-07", "week": "W0"}, {"id": "g2-1", "program": "g2", "title": "Four layers, cheapest first; every check id", "owner": "R", "priority": 2, "status": "done", "hours": 0.25, "date": "2026-10-31", "week": "S4"}, {"id": "g2-2", "program": "g2", "title": "The mutation table and what the layers caught", "owner": "R", "priority": 2, "status": "done", "hours": 0.25, "date": "2026-11-03", "week": "S4"}, {"id": "g3-1", "program": "g3", "title": "Group lead script: team, process, data", "owner": "J", "priority": 1, "status": "done", "hours": 2.0, "date": "2026-11-01", "week": "S4"}, {"id": "g3-2", "program": "g3", "title": "Technical lead script and the 50-slide deck", "owner": "R", "priority": 1, "status": "done", "hours": 1.0, "date": "2026-11-01", "week": "S4"}, {"id": "g3-3", "program": "g3", "title": "Front-end script: the application and the findings in plain language", "owner": "H", "priority": 2, "status": "done", "hours": 1.0, "date": "2026-11-02", "week": "S4"}, {"id": "g3-4", "program": "g3", "title": "First rehearsal of the three scripts", "owner": "J", "priority": 1, "status": "prog", "hours": 2.0, "date": "2026-11-05", "week": "S4"}, {"id": "g3-5", "program": "g3", "title": "GRPO slide updated from the 3 November run", "owner": "R", "priority": 2, "status": "todo", "hours": 1.0, "date": "2026-11-07", "week": "S5"}, {"id": "g3-6", "program": "g3", "title": "Final rehearsal", "owner": "J", "priority": 1, "status": "todo", "hours": 2.0, "date": "2026-11-10", "week": "S5"}, {"id": "g3-7", "program": "g3", "title": "Final rehearsal", "owner": "R", "priority": 1, "status": "todo", "hours": 2.0, "date": "2026-11-10", "week": "S5"}, {"id": "g3-8", "program": "g3", "title": "Final rehearsal", "owner": "H", "priority": 1, "status": "todo", "hours": 2.0, "date": "2026-11-10", "week": "S5"}, {"id": "g4-1", "program": "g4", "title": "What leaves the SuperComputer: float16 weights, word lists, JSON summaries", "owner": "R", "priority": 2, "status": "done", "hours": 0.5, "date": "2026-10-26", "week": "S3"}, {"id": "g4-2", "program": "g4", "title": "The redacted public repository", "owner": "R", "priority": 2, "status": "done", "hours": 0.5, "date": "2026-10-30", "week": "S3"}, {"id": "g4-3", "program": "g4", "title": "Review of the security write-up", "owner": "J", "priority": 2, "status": "done", "hours": 1.0, "date": "2026-10-30", "week": "S3"}, {"id": "g5-1", "program": "g5", "title": "Sprint 1 minutes and the defect list", "owner": "J", "priority": 2, "status": "done", "hours": 1.5, "date": "2026-10-16", "week": "S1"}, {"id": "g5-2", "program": "g5", "title": "Sprint 2 minutes and the defect list", "owner": "J", "priority": 2, "status": "done", "hours": 1.5, "date": "2026-10-23", "week": "S2"}, {"id": "g5-3", "program": "g5", "title": "Dashboard and splits review for Sprint 3", "owner": "J", "priority": 3, "status": "done", "hours": 1.0, "date": "2026-10-24", "week": "S3"}, {"id": "g5-4", "program": "g5", "title": "Sprint 3 minutes and the defect list", "owner": "J", "priority": 2, "status": "done", "hours": 1.5, "date": "2026-10-30", "week": "S3"}, {"id": "g5-5", "program": "g5", "title": "Sprint 4 minutes and the retrospective", "owner": "J", "priority": 2, "status": "todo", "hours": 1.5, "date": "2026-11-06", "week": "S4"}, {"id": "g5-6", "program": "g5", "title": "Retrospective actions onto the board", "owner": "J", "priority": 3, "status": "todo", "hours": 1.0, "date": "2026-11-07", "week": "S5"}, {"id": "g5-7", "program": "g5", "title": "Canvas submission checklist", "owner": "J", "priority": 2, "status": "todo", "hours": 1.0, "date": "2026-11-11", "week": "S5"}, {"id": "g6-1", "program": "g6", "title": "Agile commit guidelines and the pull-request gate", "owner": "J", "priority": 2, "status": "done", "hours": 1.5, "date": "2026-10-12", "week": "S1"}, {"id": "g6-2", "program": "g6", "title": "Set up a Miro board for the kanban", "owner": "J", "priority": 4, "status": "canc", "hours": 0.5, "date": "2026-11-04", "week": "S4"}, {"id": "g6-3", "program": "g6", "title": "GitHub Projects board sentiment_heads with the four columns", "owner": "R", "priority": 2, "status": "done", "hours": 0.5, "date": "2026-11-04", "week": "S4"}, {"id": "g6-4", "program": "g6", "title": "Final update pushed to main; the protocol cycle still to run", "owner": "R", "priority": 2, "status": "prog", "hours": 1.0, "date": "2026-11-05", "week": "S4"}, {"id": "g6-5", "program": "g6", "title": "Branch protection on main; the release v1.0.0 with features.zip", "owner": "R", "priority": 2, "status": "todo", "hours": 1.0, "date": "2026-11-07", "week": "S5"}], "edges": [["fd01", "fdgpu"], ["fdgpu", "fdlin"], ["fdlin", "fdinv"], ["fdinv", "fd07"], ["fdgpu", "fd07"], ["jexp", "jtfidf"], ["jexp", "jsim"], ["jsim", "jsoft"], ["jsoft", "ed01"], ["bened", "fdtr"], ["fine", "fdgpu"], ["repr", "fd10"], ["fd07", "fd08"], ["fd07", "fd10"], ["fd07", "fdtr"], ["fd07", "ed01"], ["ed01", "ed07"], ["ed07", "ed12"], ["ed12", "edmis"], ["fd07", "c6"], ["ed12", "c14"], ["fdlin", "c15"], ["jtfidf", "c16"], ["c2", "c10"], ["c3", "c10"], ["c4", "c11"], ["c5", "c11"], ["c6", "c12"], ["c7", "c12"], ["c8", "c12"], ["c9", "c17"], ["c0", "c10"], ["c10", "c11"], ["c11", "c12"], ["c12", "c13"], ["c12", "c14"], ["c12", "c15"], ["c12", "c16"], ["c1", "c17"], ["c17", "c18"], ["c18", "d3"], ["c6", "d1"], ["d1", "d2"], ["d2", "c18"], ["d3", "d4"], ["c14", "d3"], ["c15", "d3"], ["c16", "d3"], ["d5", "e2"], ["c12", "e2"], ["c14", "e2"], ["e2", "e1"], ["e3", "e1"], ["e1", "e4"], ["e4", "e5"], ["e5", "e6"], ["e7", "e2"], ["e8", "e1"], ["e6", "f1"], ["e3", "f1"], ["f1", "f2"], ["d3", "g2"], ["g2", "g1"], ["e4", "g1"], ["g1", "g3"], ["d5", "g4"], ["g5", "g6"]]}</script>
+<script>
+(function () {
+  const SEED = JSON.parse(document.getElementById('seed').textContent);
+  const KEY = 'sentiment-heads-tracker-v' + SEED.version;
+  const ST = SEED.status, TS = SEED.tstatus;
+  const TORDER = ['todo', 'prog', 'rev', 'done', 'canc'];
+  const PORDER = ['ns', 'ip', 'ur', 'co', 'ca'];
+  const $ = (s, r) => (r || document).querySelector(s);
+  const el = (tag, attrs, ...kids) => {
+    const n = document.createElement(tag);
+    for (const k in attrs || {}) {
+      if (k === 'class') n.className = attrs[k];
+      else if (k === 'text') n.textContent = attrs[k];
+      else if (k === 'html') n.innerHTML = attrs[k];
+      else if (k.startsWith('on')) n.addEventListener(k.slice(2), attrs[k]);
+      else if (attrs[k] !== null && attrs[k] !== undefined && attrs[k] !== false) n.setAttribute(k, attrs[k] === true ? '' : attrs[k]);
+    }
+    for (const kid of kids.flat()) if (kid !== null && kid !== undefined) n.append(kid.nodeType ? kid : document.createTextNode(kid));
+    return n;
+  };
+  const svgEl = (tag, attrs, ...kids) => {
+    const n = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    for (const k in attrs || {}) {
+      if (k === 'text') n.textContent = attrs[k];
+      else if (k.startsWith('on')) n.addEventListener(k.slice(2), attrs[k]);
+      else n.setAttribute(k, attrs[k]);
+    }
+    for (const kid of kids.flat()) if (kid) n.append(kid);
+    return n;
+  };
+
+  let S = load();
+  const ui = { sort: 'priority', status: '', owner: '', q: '', kProgram: '', kOwner: '', kSort: 'priority', zoom: 1, open: null, kExpand: {} };
+  try { Object.assign(ui, JSON.parse(localStorage.getItem(KEY + '-ui') || '{}')); } catch (e) {}
+  ui.open = null; ui.kExpand = {};
+
+  function load() {
+    try {
+      const raw = localStorage.getItem(KEY);
+      if (raw) {
+        const o = JSON.parse(raw);
+        if (o && o.version === SEED.version && Array.isArray(o.programs) && Array.isArray(o.todos)) return o;
+      }
+    } catch (e) {}
+    return JSON.parse(JSON.stringify(SEED));
+  }
+  function save() {
+    try {
+      localStorage.setItem(KEY, JSON.stringify(S));
+      localStorage.setItem(KEY + '-ui', JSON.stringify({ sort: ui.sort, kSort: ui.kSort, zoom: ui.zoom }));
+      $('#saved').textContent = 'Saved in this browser ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } catch (e) {
+      $('#saved').textContent = 'Not saved: browser storage is off. Export to keep your changes.';
+    }
+  }
+
+  const byId = () => Object.fromEntries(S.programs.map(p => [p.id, p]));
+  const teamById = Object.fromEntries(SEED.team.map(m => [m.id, m]));
+  const phaseById = Object.fromEntries(SEED.phases.map(p => [p.id, p]));
+  const weekOf = d => { const w = SEED.weeks.find(w => d >= w.start && d <= w.end); return w ? w.id : null; };
+  const todosOf = pid => S.todos.filter(t => t.program === pid);
+  const fmtDate = d => { if (!d) return ''; const [y, m, dd] = d.split('-'); return `${dd} ${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+m - 1]}`; };
+  const fmtH = h => (Math.round(h * 4) / 4).toString().replace(/\.0$/, '');
+  const today = () => new Date().toISOString().slice(0, 10);
+  const shortName = f => f.split(' (')[0].split(',')[0].trim();
+  const nodeLabel = p => {
+    let l = shortName(p.file).replace(/^sentiment-app\//, '').replace(/^fs_detailed\//, '');
+    if (l.length > 20 && l.includes('/')) l = l.replace(/\/$/, '').split('/').pop();
+    return l.length > 20 ? l.slice(0, 19) + '…' : l;
+  };
+
+  function applyRule(p) {
+    if (p.status === 'ca') return;
+    const live = todosOf(p.id).filter(t => t.status !== 'canc');
+    const allDone = live.length > 0 && live.every(t => t.status === 'done');
+    if (allDone) {
+      if (p.status !== 'co') { p.status = 'co'; p.auto = true; }
+    } else if (p.status === 'co' && p.auto) {
+      p.status = 'ip'; p.auto = false;
+    }
+  }
+  function hoursOf(pid) {
+    const ts = todosOf(pid);
+    const total = ts.reduce((a, t) => a + (+t.hours || 0), 0);
+    const done = ts.filter(t => t.status === 'done').reduce((a, t) => a + (+t.hours || 0), 0);
+    return { total, done };
+  }
+  function toast(msg) {
+    const t = el('div', { class: 'toast', role: 'status', text: msg });
+    document.body.append(t);
+    setTimeout(() => t.remove(), 2600);
+  }
+
+  function sortedPrograms() {
+    const list = S.programs.filter(p => {
+      if (ui.status && p.status !== ui.status) return false;
+      if (ui.owner && p.owner !== ui.owner) return false;
+      if (ui.q) {
+        const q = ui.q.toLowerCase();
+        if (!(p.file + ' ' + p.summary + ' ' + p.what).toLowerCase().includes(q)) return false;
+      }
+      return true;
+    });
+    const byPri = (a, b) => a.priority - b.priority || a.deadline.localeCompare(b.deadline) || a.file.localeCompare(b.file);
+    if (ui.sort === 'deadline') list.sort((a, b) => a.deadline.localeCompare(b.deadline) || byPri(a, b));
+    else if (ui.sort === 'phase') list.sort((a, b) => a.phase.localeCompare(b.phase) || byPri(a, b));
+    else list.sort(byPri);
+    return list;
+  }
+
+  function stars(r) {
+    if (r === null || r === undefined || r === '') return el('span', { class: 'stars pending', text: 'pending' });
+    const s = el('span', { class: 'stars', title: r + ' of 5' });
+    for (let i = 1; i <= 5; i++) s.append(el('span', { class: i <= r ? '' : 'off', text: '★' }));
+    return s;
+  }
+  function statusSelect(p) {
+    const sel = el('select', { class: 'status st-' + p.status, 'aria-label': 'Progress of ' + shortName(p.file), onchange: e => { p.status = e.target.value; p.auto = false; update(); } });
+    for (const k of PORDER) sel.append(el('option', { value: k, text: ST[k], selected: p.status === k }));
+    return sel;
+  }
+  function ownerSelect(p) {
+    const sel = el('select', { class: 'pri', onchange: e => { p.owner = e.target.value; update(); } });
+    for (const m of SEED.team) sel.append(el('option', { value: m.id, text: m.name, selected: p.owner === m.id }));
+    return sel;
+  }
+  function prioritySelect(p) {
+    const sel = el('select', { class: 'pri', 'aria-label': 'Priority', onchange: e => { p.priority = +e.target.value; update(); } });
+    for (let i = 1; i <= 5; i++) sel.append(el('option', { value: i, text: 'P' + i, selected: p.priority === i }));
+    return sel;
+  }
+  function deadlineInput(p) {
+    const wrap = el('div');
+    wrap.append(el('input', { class: 'date', type: 'date', value: p.deadline, 'aria-label': 'Deadline', onchange: e => { if (e.target.value) { p.deadline = e.target.value; update(); } } }));
+    if (p.deadline < today() && !['co', 'ca'].includes(p.status)) wrap.append(el('span', { class: 'overdue', text: 'past the deadline' }));
+    return wrap;
+  }
+  function meetingsCell(p) {
+    const cell = el('div');
+    const ul = el('ul', { class: 'meet' });
+    const sorted = [...p.meetings].sort((a, b) => a.date.localeCompare(b.date));
+    for (const m of sorted) {
+      ul.append(el('li', { title: m.note || '' },
+        el('span', { class: 'd', text: fmtDate(m.date) }), stars(m.rating),
+        el('button', { class: 'x', type: 'button', 'aria-label': 'Remove meeting', text: '×', onclick: () => { p.meetings.splice(p.meetings.indexOf(m), 1); update(); } })));
+    }
+    if (!sorted.length) ul.append(el('li', { class: 'muted small', text: 'no meeting yet' }));
+    cell.append(ul);
+    const form = el('div', { class: 'add-meet' });
+    const openBtn = el('button', { class: 'link', type: 'button', text: '+ meeting' });
+    const row = el('div', { class: 'row', hidden: true });
+    const date = el('input', { type: 'date', value: today(), 'aria-label': 'Meeting date' });
+    const rating = el('select', { 'aria-label': 'Rating 1 to 5' });
+    rating.append(el('option', { value: '', text: 'pending' }));
+    for (let i = 1; i <= 5; i++) rating.append(el('option', { value: i, text: i + (i === 1 ? ' unsatisfied' : i === 5 ? ' satisfied' : ''), selected: i === 4 }));
+    const note = el('input', { class: 'note', placeholder: 'What was agreed', maxlength: 200 });
+    const add = el('button', { class: 'btn small primary', type: 'button', text: 'Add', onclick: () => {
+      if (!date.value) return;
+      p.meetings.push({ date: date.value, rating: rating.value === '' ? null : +rating.value, note: note.value.trim() });
+      update();
+    } });
+    openBtn.addEventListener('click', () => { row.hidden = !row.hidden; form.classList.toggle('open', !row.hidden); if (!row.hidden) date.focus(); });
+    row.append(date, rating, note, add);
+    form.append(openBtn, row);
+    cell.append(form);
+    return cell;
+  }
+
+  function renderCounts() {
+    const c = $('#counts'); c.replaceChildren();
+    for (const k of PORDER) {
+      const n = S.programs.filter(p => p.status === k).length;
+      c.append(el('span', { class: 'chip st-' + k }, el('i', { class: 'dot' }), `${ST[k]} ${n}`));
+    }
+    const done = S.todos.filter(t => t.status === 'done').length;
+    const live = S.todos.filter(t => t.status !== 'canc').length;
+    const hDone = S.todos.filter(t => t.status === 'done').reduce((a, t) => a + (+t.hours || 0), 0);
+    const hOpen = S.todos.filter(t => t.status === 'todo' || t.status === 'prog' || t.status === 'rev').reduce((a, t) => a + (+t.hours || 0), 0);
+    c.append(el('span', { class: 'chip', text: `${done} of ${live} todos done` }), el('span', { class: 'chip', text: `${fmtH(hDone)} h done, ${fmtH(hOpen)} h open` }));
+  }
+
+  function renderTable() {
+    const body = $('#programBody'); body.replaceChildren();
+    const list = sortedPrograms();
+    let lastPhase = null;
+    for (const p of list) {
+      if (ui.sort === 'phase' && p.phase !== lastPhase) {
+        lastPhase = p.phase;
+        const ph = phaseById[p.phase];
+        body.append(el('tr', { class: 'group' }, el('td', { colspan: 8 }, ph.name, el('span', { text: ph.span }))));
+      }
+      const h = hoursOf(p.id);
+      const ts = todosOf(p.id), live = ts.filter(t => t.status !== 'canc'), done = live.filter(t => t.status === 'done').length;
+      const pct = live.length ? Math.round(100 * done / live.length) : 0;
+      const tr = el('tr', { id: 'row-' + p.id },
+        el('td', { 'data-l': 'Progress' }, statusSelect(p), p.auto && p.status === 'co' ? el('span', { class: 'auto-tag', text: 'set by the kanban' }) : null),
+        el('td', { 'data-l': 'Deadline' }, deadlineInput(p)),
+        el('td', { 'data-l': 'Priority' }, prioritySelect(p)),
+        el('td', { class: 'c-prog' },
+          el('button', { class: 'prog-name', type: 'button', text: p.file, onclick: () => openDrawer(p.id) }),
+          el('div', { class: 'prog-sum' + (p.status === 'ca' ? ' cancelled' : ''), text: p.summary }),
+          el('span', { class: 'tag phase', text: phaseById[p.phase].name }),
+          p.note ? el('span', { class: 'tag', text: p.note }) : null),
+        el('td', { 'data-l': 'Owner' }, el('span', { class: 'owner' }, el('span', { class: 'ava ' + p.owner, text: p.owner }), teamById[p.owner].name)),
+        el('td', { 'data-l': 'Hours', class: 'num' }, el('span', { class: 'mono', text: fmtH(h.total) + ' h' }), el('div', { class: 'small muted', text: h.done < h.total ? fmtH(h.done) + ' done' : 'all done' })),
+        el('td', { 'data-l': 'Todos' },
+          el('button', { class: 'link', type: 'button', text: `${done} of ${live.length} done`, onclick: () => showKanban(p.id) }),
+          el('div', { class: 'bar' }, el('i', { style: 'width:' + pct + '%' })),
+          ts.some(t => t.status === 'prog' || t.status === 'rev') ? el('div', { class: 'small muted', text: ts.filter(t => t.status === 'prog').length + ' in progress, ' + ts.filter(t => t.status === 'rev').length + ' in review' }) : null),
+        el('td', { 'data-l': 'Meetings', class: 'c-meet' }, meetingsCell(p)));
+      body.append(tr);
+    }
+    if (!list.length) body.append(el('tr', {}, el('td', { colspan: 8, class: 'empty', text: 'No program matches.' })));
+  }
+
+  // the pipeline chart
+  const NW = 192, NH = 46, CX = 218, RY = 62, X0 = 26, Y0 = 72;
+  function renderFlow() {
+    const wrap = $('#flowWrap'); wrap.replaceChildren();
+    const P = byId();
+    const cols = SEED.columns;
+    const maxRow = Math.max(...S.programs.map(p => p.row));
+    const W = X0 * 2 + cols.length * CX - (CX - NW), H = Y0 + (maxRow + 1) * RY + 10;
+    const svg = svgEl('svg', { viewBox: `0 0 ${W} ${H}`, width: Math.round(W * ui.zoom), height: Math.round(H * ui.zoom), role: 'img', 'aria-label': 'The pipeline, one box per program' });
+    const defs = svgEl('defs');
+    defs.append(svgEl('marker', { id: 'arr', viewBox: '0 0 10 10', refX: 9, refY: 5, markerWidth: 7, markerHeight: 7, orient: 'auto-start-reverse' }, svgEl('path', { d: 'M0 0 L10 5 L0 10 z' })));
+    defs.append(svgEl('marker', { id: 'arrLit', class: 'lit', viewBox: '0 0 10 10', refX: 9, refY: 5, markerWidth: 7, markerHeight: 7, orient: 'auto-start-reverse' }, svgEl('path', { d: 'M0 0 L10 5 L0 10 z' })));
+    svg.append(defs);
+    // phase bands over the columns
+    const bands = [['A', 0, 0], ['B', 1, 1], ['C', 2, 4], ['D', 5, 5], ['E', 6, 6], ['F', 7, 7], ['G', 8, 8]];
+    for (const [ph, c0, c1] of bands) {
+      const x = X0 + c0 * CX - 8, w = (c1 - c0) * CX + NW + 16;
+      svg.append(svgEl('rect', { class: 'band', x, y: 12, width: w, height: H - 20, rx: 10 }));
+      svg.append(svgEl('text', { class: 'band-label', x: x + 10, y: 32, text: phaseById[ph].name }));
+    }
+    const bandNames = new Set(SEED.phases.map(ph => ph.name.toLowerCase()));
+    for (const c of cols) if (!bandNames.has(c.label.toLowerCase())) svg.append(svgEl('text', { class: 'col-label', x: X0 + c.x * CX, y: 54, text: c.label }));
+    const pos = p => ({ x: X0 + p.col * CX, y: Y0 + p.row * RY });
+    const edgeLayer = svgEl('g');
+    const edgeEls = [];
+    for (const [a, b] of S.edges) {
+      const pa = P[a], pb = P[b]; if (!pa || !pb) continue;
+      const A = pos(pa), B = pos(pb);
+      let d, back = false;
+      if (pb.col > pa.col) {
+        const x1 = A.x + NW, y1 = A.y + NH / 2, x2 = B.x, y2 = B.y + NH / 2, dx = Math.max(40, (x2 - x1) / 2);
+        d = `M${x1} ${y1} C${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`;
+      } else if (pb.col === pa.col) {
+        if (Math.abs(pb.row - pa.row) === 1) {
+          const x = A.x + NW / 2, y1 = pb.row > pa.row ? A.y + NH : A.y, y2 = pb.row > pa.row ? B.y : B.y + NH;
+          d = `M${x} ${y1} L${x} ${y2}`;
+        } else {
+          const x = A.x + NW, y1 = A.y + NH / 2, y2 = B.y + NH / 2, bulge = 46;
+          d = `M${x} ${y1} C${x + bulge} ${y1}, ${x + bulge} ${y2}, ${x} ${y2}`;
+        }
+      } else {
+        back = true;
+        const x1 = A.x, y1 = A.y + NH / 2, x2 = B.x + NW, y2 = B.y + NH / 2, dx = Math.max(40, (x1 - x2) / 2);
+        d = `M${x1} ${y1} C${x1 - dx} ${y1}, ${x2 + dx} ${y2}, ${x2} ${y2}`;
+      }
+      const e = svgEl('path', { class: 'edge' + (back ? ' back' : ''), d, 'marker-end': 'url(#arr)' });
+      e.dataset.a = a; e.dataset.b = b;
+      edgeLayer.append(e); edgeEls.push(e);
+    }
+    svg.append(edgeLayer);
+    const nodeLayer = svgEl('g');
+    const light = (id, on) => {
+      for (const e of edgeEls) {
+        const hit = e.dataset.a === id || e.dataset.b === id;
+        e.classList.toggle('lit', on && hit);
+        e.classList.toggle('dim', on && !hit);
+        e.setAttribute('marker-end', on && hit ? 'url(#arrLit)' : 'url(#arr)');
+      }
+    };
+    for (const p of S.programs) {
+      const { x, y } = pos(p);
+      const g = svgEl('g', { class: 'node st-' + p.status + (p.status === 'ca' ? ' ca' : '') + (ui.open === p.id ? ' on' : ''), transform: `translate(${x} ${y})`, tabindex: 0, role: 'button', 'aria-label': p.file });
+      g.append(svgEl('title', { text: p.file + ' (' + ST[p.status] + ')' }));
+      g.append(svgEl('rect', { class: 'box', width: NW, height: NH, rx: 7 }));
+      g.append(svgEl('path', { class: 'stripe st-' + p.status, d: `M7 0 h4 v${NH} h-4 a7 7 0 0 1 -7 -7 v${-(NH - 14)} a7 7 0 0 1 7 -7 z` }));
+      g.append(svgEl('text', { class: 'label', x: 17, y: 19, text: nodeLabel(p) }));
+      const sub = p.status === 'ca' ? 'cancelled' : (ST[p.status] + ' · ' + fmtDate(p.deadline));
+      g.append(svgEl('text', { class: 'sub', x: 17, y: 35, text: sub }));
+      g.append(svgEl('circle', { class: 'ava-c ' + p.owner, cx: NW - 16, cy: NH / 2, r: 9 }));
+      g.append(svgEl('text', { class: 'ava-t', x: NW - 16, y: NH / 2 + 3, 'text-anchor': 'middle', text: p.owner }));
+      g.addEventListener('click', () => openDrawer(p.id));
+      g.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDrawer(p.id); } });
+      g.addEventListener('mouseenter', () => light(p.id, true));
+      g.addEventListener('mouseleave', () => light(p.id, false));
+      g.addEventListener('focus', () => light(p.id, true));
+      g.addEventListener('blur', () => light(p.id, false));
+      nodeLayer.append(g);
+    }
+    svg.append(nodeLayer);
+    wrap.append(svg);
+    const lg = $('#legend'); lg.replaceChildren();
+    for (const k of PORDER) lg.append(el('span', {}, el('i', { class: 'sw', style: 'background:var(--' + k + ')' }), ST[k]));
+    lg.append(el('span', { text: 'dashed box: cancelled' }), el('span', { text: 'dashed arrow: feeds an earlier column' }));
+    for (const m of SEED.team) lg.append(el('span', {}, el('span', { class: 'ava ' + m.id, text: m.id, style: 'width:16px;height:16px;font-size:9px;margin-right:5px;vertical-align:-3px' }), m.name + ', ' + m.role));
+  }
+
+  // the kanban
+  function renderKanban() {
+    const board = $('#kanbanBoard'); board.replaceChildren();
+    const P = byId();
+    const pSel = $('#kProgram');
+    const keep = ui.kProgram;
+    pSel.replaceChildren(el('option', { value: '', text: 'all programs' }));
+    for (const p of [...S.programs].sort((a, b) => a.priority - b.priority || a.file.localeCompare(b.file))) pSel.append(el('option', { value: p.id, text: 'P' + p.priority + '  ' + shortName(p.file), selected: p.id === keep }));
+    pSel.value = keep;
+    const list = S.todos.filter(t => (!ui.kProgram || t.program === ui.kProgram) && (!ui.kOwner || t.owner === ui.kOwner));
+    const pri = (a, b) => a.priority - b.priority || (P[a.program].priority - P[b.program].priority) || (a.date || '').localeCompare(b.date || '');
+    const byProg = (a, b) => (P[a.program].priority - P[b.program].priority) || P[a.program].file.localeCompare(P[b.program].file) || a.priority - b.priority || (a.date || '').localeCompare(b.date || '');
+    for (const st of TORDER) {
+      const items = list.filter(t => t.status === st).sort(ui.kSort === 'program' ? byProg : pri);
+      const col = el('div', { class: 'kcol', 'data-st': st });
+      col.append(el('h4', {}, TS[st], el('span', { class: 'n', text: items.length })));
+      col.addEventListener('dragover', e => { e.preventDefault(); col.classList.add('over'); });
+      col.addEventListener('dragleave', () => col.classList.remove('over'));
+      col.addEventListener('drop', e => {
+        e.preventDefault(); col.classList.remove('over');
+        const id = e.dataTransfer.getData('text/plain');
+        const t = S.todos.find(t => t.id === id);
+        if (t && t.status !== st) { t.status = st; applyRule(P[t.program]); update(); toast(TS[st] + ': ' + t.title.slice(0, 50)); }
+      });
+      let lastProg = null;
+      const LIMIT = 12;
+      const shown = ui.kExpand[st] ? items : items.slice(0, LIMIT);
+      for (const t of shown) {
+        if (ui.kSort === 'program' && t.program !== lastProg) { lastProg = t.program; col.append(el('div', { class: 'klabel', text: shortName(P[t.program].file) })); }
+        col.append(card(t, P));
+      }
+      if (items.length > shown.length) col.append(el('button', { class: 'btn small', type: 'button', text: 'Show all ' + items.length, onclick: () => { ui.kExpand[st] = true; renderKanban(); } }));
+      else if (ui.kExpand[st] && items.length > LIMIT) col.append(el('button', { class: 'btn small', type: 'button', text: 'Show fewer', onclick: () => { ui.kExpand[st] = false; renderKanban(); } }));
+      if (!items.length) col.append(el('div', { class: 'empty', text: 'nothing here' }));
+      board.append(col);
+    }
+  }
+  function statusSel(t, P, cls) {
+    const sel = el('select', { class: cls, 'aria-label': 'Status of the todo', onchange: e => { t.status = e.target.value; applyRule(P[t.program]); update(); } });
+    for (const k of TORDER) sel.append(el('option', { value: k, text: TS[k], selected: t.status === k }));
+    return sel;
+  }
+  function card(t, P) {
+    const p = P[t.program];
+    const c = el('div', { class: 'card' + (t.status === 'canc' ? ' canc' : ''), draggable: 'true' });
+    c.addEventListener('dragstart', e => { e.dataTransfer.setData('text/plain', t.id); e.dataTransfer.effectAllowed = 'move'; c.classList.add('dragging'); });
+    c.addEventListener('dragend', () => c.classList.remove('dragging'));
+    c.append(el('div', { class: 't', text: t.title }));
+    c.append(el('div', { class: 'm' },
+      el('span', { class: 'pbadge p' + t.priority, text: 'P' + t.priority }),
+      el('button', { class: 'link mono', type: 'button', text: shortName(p.file), title: 'Open the program', onclick: () => openDrawer(p.id) }),
+      el('span', { class: 'ava ' + t.owner, title: teamById[t.owner].name, text: t.owner }),
+      el('span', { class: 'mono', text: fmtH(t.hours) + ' h' }),
+      el('span', { class: 'mono', text: (t.week || 'no week') + ' · ' + fmtDate(t.date) }),
+      el('button', { class: 'x del', type: 'button', 'aria-label': 'Delete the todo', text: '×', style: 'opacity:.6', onclick: () => { if (c.dataset.sure) { S.todos.splice(S.todos.indexOf(t), 1); applyRule(p); update(); } else { c.dataset.sure = '1'; toast('Click the cross again to delete the todo'); setTimeout(() => { delete c.dataset.sure; }, 3000); } } })));
+    c.append(statusSel(t, P, 'ts'));
+    return c;
+  }
+  function showKanban(pid) {
+    ui.kProgram = pid; renderKanban();
+    document.getElementById('kanban').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // the hours
+  function renderHours() {
+    const tbl = $('#hoursTable'); tbl.replaceChildren();
+    const head = el('tr', {}, el('th', { text: 'Person' }));
+    for (const w of SEED.weeks) head.append(el('th', {}, w.label, el('small', { text: fmtDate(w.start) + ' to ' + fmtDate(w.end) })));
+    head.append(el('th', { text: 'Total' }), el('th', { text: 'Still open' }));
+    tbl.append(el('thead', {}, head));
+    const tb = el('tbody');
+    const colTot = {}, grand = { total: 0, open: 0 };
+    for (const m of SEED.team) {
+      const tr = el('tr', {}, el('td', {}, el('span', { class: 'owner' }, el('span', { class: 'ava ' + m.id, text: m.id }), m.name), el('div', { class: 'small muted', text: m.role })));
+      let tot = 0, open = 0;
+      for (const w of SEED.weeks) {
+        const ts = S.todos.filter(t => t.owner === m.id && t.week === w.id);
+        const h = ts.reduce((a, t) => a + (+t.hours || 0), 0);
+        const o = ts.filter(t => t.status === 'todo' || t.status === 'prog' || t.status === 'rev').reduce((a, t) => a + (+t.hours || 0), 0);
+        tot += h; open += o; colTot[w.id] = (colTot[w.id] || 0) + h;
+        const td = el('td', { class: 'h' + (h > SEED.cap ? ' over' : '') }, fmtH(h) + ' / ' + SEED.cap, el('div', { class: 'b' }, el('i', { style: 'width:' + Math.min(100, 100 * h / SEED.cap) + '%' })));
+        if (o > 0) td.append(el('span', { class: 'o', text: fmtH(o) + ' h still open' }));
+        tr.append(td);
+      }
+      const outside = S.todos.filter(t => t.owner === m.id && !t.week).reduce((a, t) => a + (+t.hours || 0), 0);
+      tr.append(el('td', { class: 'h', text: fmtH(tot) + (outside ? ' (+' + fmtH(outside) + ' outside the weeks)' : '') }), el('td', { class: 'h', text: fmtH(open) + ' h' }));
+      grand.total += tot; grand.open += open;
+      tb.append(tr);
+    }
+    const tr = el('tr', { class: 'total' }, el('td', { text: 'Team' }));
+    for (const w of SEED.weeks) tr.append(el('td', { class: 'h', text: fmtH(colTot[w.id] || 0) + ' / ' + SEED.cap * SEED.team.length }));
+    tr.append(el('td', { class: 'h', text: fmtH(grand.total) }), el('td', { class: 'h', text: fmtH(grand.open) + ' h' }));
+    tb.append(tr);
+    tbl.append(tb);
+    const over = [];
+    for (const m of SEED.team) for (const w of SEED.weeks) {
+      const h = S.todos.filter(t => t.owner === m.id && t.week === w.id).reduce((a, t) => a + (+t.hours || 0), 0);
+      if (h > SEED.cap) over.push(m.name + ' in ' + w.label);
+    }
+    $('#hoursNote').textContent = (over.length ? 'Over the pattern: ' + over.join(', ') + '. ' : 'Every week fits the pattern. ') +
+      'The 18 hours a week include the live-testing check that opens every session, the planning on the first Saturday and the review and retrospective on the last Friday, so the task hours sit under the cap. The week before the sprints had no fixed pattern.';
+  }
+
+  // the drawer
+  function archSvg(p) {
+    const nodes = p.arch || [];
+    if (!nodes.length) return el('p', { class: 'empty', text: 'No architecture recorded.' });
+    const W = 440, BW = 360, BH = 50, GAP = 22, X = (W - BW) / 2;
+    const H = nodes.length * (BH + GAP) - GAP + 8;
+    const svg = svgEl('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': 'Internal architecture of ' + shortName(p.file) });
+    svg.append(svgEl('defs', {}, svgEl('marker', { id: 'arcArr', viewBox: '0 0 10 10', refX: 9, refY: 5, markerWidth: 6, markerHeight: 6, orient: 'auto' }, svgEl('path', { d: 'M0 0 L10 5 L0 10 z' }))));
+    nodes.forEach((n, i) => {
+      const y = 4 + i * (BH + GAP);
+      svg.append(svgEl('rect', { x: X, y, width: BW, height: BH, rx: 8 }));
+      svg.append(svgEl('text', { class: 'n', x: X + 12, y: y + 20, text: n.n.length > 44 ? n.n.slice(0, 43) + '…' : n.n }));
+      svg.append(svgEl('text', { class: 'd', x: X + 12, y: y + 37, text: n.d.length > 58 ? n.d.slice(0, 57) + '…' : n.d }));
+      if (i < nodes.length - 1) svg.append(svgEl('path', { d: `M${W / 2} ${y + BH} L${W / 2} ${y + BH + GAP - 1}`, 'marker-end': 'url(#arcArr)' }));
+    });
+    return svg;
+  }
+  function chipsOf(refs, P) {
+    const box = el('div', { class: 'chips' });
+    if (!refs || !refs.length) box.append(el('span', { class: 'chip plain', text: 'nothing recorded' }));
+    for (const r of refs || []) {
+      if (P[r]) box.append(el('button', { class: 'chip', type: 'button', text: shortName(P[r].file), onclick: () => openDrawer(r) }));
+      else box.append(el('span', { class: 'chip plain', text: r }));
+    }
+    return box;
+  }
+  function openDrawer(pid) {
+    ui.open = pid;
+    renderDrawer();
+    renderFlow();
+  }
+  function closeDrawer() { ui.open = null; $('#drawerHost').replaceChildren(); renderFlow(); }
+  function renderDrawer() {
+    const host = $('#drawerHost'); host.replaceChildren();
+    if (!ui.open) return;
+    const P = byId(), p = P[ui.open];
+    if (!p) { ui.open = null; return; }
+    const ts = todosOf(p.id).sort((a, b) => a.priority - b.priority || (a.date || '').localeCompare(b.date || ''));
+    const affectedBy = S.programs.filter(q => (q.affects || []).includes(p.id) && !(p.depends || []).includes(q.id)).map(q => q.id);
+    const dependents = S.programs.filter(q => (q.depends || []).includes(p.id) && !(p.affects || []).includes(q.id)).map(q => q.id);
+    const h = hoursOf(p.id);
+    const d = el('aside', { class: 'drawer', role: 'dialog', 'aria-label': p.file, tabindex: '-1' },
+      el('header', {},
+        el('div', { class: 'head-row' }, el('div', { class: 'file', text: p.file }), el('button', { class: 'btn close', type: 'button', text: 'Close', onclick: closeDrawer })),
+        el('div', { class: 'meta' },
+          el('span', { class: 'chip st-' + p.status }, el('i', { class: 'dot' }), ST[p.status]),
+          el('span', { class: 'chip', text: phaseById[p.phase].name }),
+          el('span', { class: 'chip', text: 'P' + p.priority }),
+          el('span', { class: 'chip', text: 'due ' + fmtDate(p.deadline) }),
+          el('span', { class: 'chip' }, el('span', { class: 'ava ' + p.owner, style: 'width:16px;height:16px;font-size:9px', text: p.owner }), teamById[p.owner].name),
+          el('span', { class: 'chip mono', text: fmtH(h.total) + ' h' })),
+        el('p', { class: 'muted', style: 'margin-top:10px', text: p.summary }),
+        p.note ? el('p', { class: 'small', style: 'margin-top:6px;color:var(--ca)', text: p.note }) : null),
+      el('div', { class: 'block' }, el('h3', { text: 'Internal architecture' }), el('div', { class: 'arch' }, archSvg(p))),
+      el('div', { class: 'block' }, el('h3', { text: 'What it does' }), el('p', { class: 'what', text: p.what })),
+      el('div', { class: 'block' }, el('h3', { text: 'Depends on (run or written first)' }), chipsOf([...(p.depends || []), ...affectedBy.filter(x => !(p.depends || []).includes(x))], P)),
+      el('div', { class: 'block' }, el('h3', { text: 'Affects (changes here reach these)' }), chipsOf([...(p.affects || []), ...dependents.filter(x => !(p.affects || []).includes(x))], P)),
+      el('div', { class: 'block' }, el('h3', { text: 'Reads and writes' }),
+        el('div', { class: 'io' },
+          el('div', {}, el('div', { class: 'small muted', style: 'margin-bottom:4px', text: 'reads' }), el('ul', {}, (p.reads && p.reads.length ? p.reads : ['nothing on disk']).map(r => el('li', { text: r })))),
+          el('div', {}, el('div', { class: 'small muted', style: 'margin-bottom:4px', text: 'writes' }), el('ul', {}, (p.writes && p.writes.length ? p.writes : ['nothing on disk']).map(r => el('li', { text: r })))))),
+      el('div', { class: 'block' },
+        el('h3', {}, 'Todos ', el('button', { class: 'link', type: 'button', text: 'open in the kanban', onclick: () => { closeDrawer(); showKanban(p.id); } })),
+        ts.length ? el('ul', { class: 'tlist' }, ts.map(t => el('li', { class: t.status === 'canc' ? 'canc' : '' },
+          el('span', { class: 't', text: t.title }), statusSel(t, P, 'ts'),
+          el('div', { class: 'm' }, el('span', { class: 'pbadge p' + t.priority, text: 'P' + t.priority }), el('span', { class: 'ava ' + t.owner, style: 'width:16px;height:16px;font-size:9px', text: t.owner }), el('span', { class: 'mono', text: fmtH(t.hours) + ' h' }), el('span', { class: 'mono', text: (t.week || 'no week') + ' · ' + fmtDate(t.date) }))))) : el('p', { class: 'empty', text: 'No todo under this program yet.' })),
+      el('div', { class: 'block' }, el('h3', { text: 'Meetings' }), meetingsCell(p)),
+      el('div', { class: 'block' }, el('h3', { text: 'Progress, deadline, priority, owner' }),
+        el('div', { class: 'ctrl-grid' }, statusSelect(p), deadlineInput(p), prioritySelect(p), ownerSelect(p))));
+    const back = el('div', { class: 'backdrop', onclick: closeDrawer });
+    host.append(back, d);
+    d.focus();
+  }
+
+  function fillFilters() {
+    const fs = $('#fStatus'); fs.replaceChildren(el('option', { value: '', text: 'all' }));
+    for (const k of PORDER) fs.append(el('option', { value: k, text: ST[k], selected: ui.status === k }));
+    for (const id of ['fOwner', 'kOwner', 'nOwner']) {
+      const s = $('#' + id); s.replaceChildren();
+      if (id !== 'nOwner') s.append(el('option', { value: '', text: 'all' }));
+      for (const m of SEED.team) s.append(el('option', { value: m.id, text: m.name }));
+    }
+    const np = $('#nProgram'); np.replaceChildren();
+    for (const p of [...S.programs].sort((a, b) => a.priority - b.priority || a.file.localeCompare(b.file))) np.append(el('option', { value: p.id, text: 'P' + p.priority + '  ' + shortName(p.file) }));
+    $('#nDate').value = today();
+  }
+
+  function update() {
+    for (const p of S.programs) applyRule(p);
+    save();
+    renderCounts(); renderTable(); renderFlow(); renderKanban(); renderHours();
+    if (ui.open) renderDrawer();
+  }
+
+  // wiring
+  $('#search').addEventListener('input', e => { ui.q = e.target.value.trim(); renderTable(); });
+  $('#fStatus').addEventListener('change', e => { ui.status = e.target.value; renderTable(); });
+  $('#fOwner').addEventListener('change', e => { ui.owner = e.target.value; renderTable(); });
+  $('#sortSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; ui.sort = b.dataset.v; for (const x of $('#sortSeg').children) x.classList.toggle('on', x === b); save(); renderTable(); });
+  $('#kSortSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; ui.kSort = b.dataset.v; for (const x of $('#kSortSeg').children) x.classList.toggle('on', x === b); save(); renderKanban(); });
+  $('#kProgram').addEventListener('change', e => { ui.kProgram = e.target.value; renderKanban(); });
+  $('#kOwner').addEventListener('change', e => { ui.kOwner = e.target.value; renderKanban(); });
+  $('#zoomSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; ui.zoom = b.dataset.z === '1' ? 1 : Math.min(1.6, Math.max(.5, ui.zoom + (b.dataset.z === '+' ? .15 : -.15))); save(); renderFlow(); });
+  $('#addTodoBtn').addEventListener('click', () => { const f = $('#addTodo'); f.classList.toggle('open'); if (f.classList.contains('open')) { if (ui.kProgram) $('#nProgram').value = ui.kProgram; $('#nTitle').focus(); } });
+  $('#cancelTodo').addEventListener('click', () => $('#addTodo').classList.remove('open'));
+  $('#addTodo').addEventListener('submit', e => {
+    e.preventDefault();
+    const title = $('#nTitle').value.trim(), pid = $('#nProgram').value, date = $('#nDate').value;
+    if (!title || !pid) { $('#nErr').textContent = 'A todo needs a title and a program.'; return; }
+    $('#nErr').textContent = '';
+    S.todos.push({ id: 't' + Date.now().toString(36), program: pid, title, owner: $('#nOwner').value, priority: +$('#nPri').value, status: 'todo', hours: +$('#nHours').value || 0, date, week: date ? weekOf(date) : null });
+    $('#nTitle').value = ''; $('#addTodo').classList.remove('open');
+    update(); toast('Added to Todo');
+  });
+  $('#exportBtn').addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify(S, null, 1)], { type: 'application/json' });
+    const a = el('a', { href: URL.createObjectURL(blob), download: 'sentiment_heads_tracker_' + today() + '.json' });
+    document.body.append(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  });
+  $('#importFile').addEventListener('change', e => {
+    const f = e.target.files[0]; if (!f) return;
+    const r = new FileReader();
+    r.onload = () => {
+      try {
+        const o = JSON.parse(r.result);
+        if (!o || !Array.isArray(o.programs) || !Array.isArray(o.todos)) throw new Error('not a tracker file');
+        o.version = SEED.version; o.edges = o.edges || SEED.edges;
+        S = o; fillFilters(); update(); toast('Imported ' + f.name);
+      } catch (err) { toast('Could not import: ' + err.message); }
+      e.target.value = '';
+    };
+    r.readAsText(f);
+  });
+  $('#resetBtn').addEventListener('click', () => { $('#resetConfirm').hidden = false; $('#resetBtn').hidden = true; });
+  $('#resetNo').addEventListener('click', () => { $('#resetConfirm').hidden = true; $('#resetBtn').hidden = false; });
+  $('#resetYes').addEventListener('click', () => {
+    S = JSON.parse(JSON.stringify(SEED)); ui.kProgram = ''; ui.open = null; $('#drawerHost').replaceChildren();
+    fillFilters(); update(); toast('Back to the record');
+    $('#resetConfirm').hidden = true; $('#resetBtn').hidden = false;
+  });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && ui.open) closeDrawer(); });
+  const links = [...document.querySelectorAll('nav.tabs a')];
+  const sections = [...document.querySelectorAll('section')];
+  const markNav = () => {
+    let cur = sections[0];
+    for (const s of sections) if (s.getBoundingClientRect().top <= 140) cur = s;
+    for (const l of links) l.classList.toggle('on', l.getAttribute('href') === '#' + cur.id);
+  };
+  document.addEventListener('scroll', markNav, { passive: true }); markNav();
+
+  for (const x of $('#sortSeg').children) x.classList.toggle('on', x.dataset.v === ui.sort);
+  for (const x of $('#kSortSeg').children) x.classList.toggle('on', x.dataset.v === ui.kSort);
+  fillFilters();
+  for (const p of S.programs) applyRule(p);
+  renderCounts(); renderTable(); renderFlow(); renderKanban(); renderHours();
+  let hadSaved = false;
+  try { hadSaved = !!localStorage.getItem(KEY); } catch (e) {}
+  $('#saved').textContent = hadSaved ? 'Loaded your saved copy' : 'Showing the record of the project';
+})();
+</script>
+</body>
+</html>

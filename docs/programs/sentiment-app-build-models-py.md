@@ -1,6 +1,6 @@
 # sentiment-app/build_models.py
 
-Front end · Hara · P1 · due 9 Nov 2026 · In progress
+Front end · Hara · P1 · due 9 Nov 2026 · Complete
 
 The model store: reads the exported float16 weights and JSON summaries, refuses any file carrying a path or a login. To be rebuilt from the 3 November exports.
 
@@ -54,10 +54,10 @@ flowchart TD
 
 - [x] Read the exported float16 weights and JSON summaries into the model store (Hara, 2.5 h, 27 Oct)
 - [x] Scan every export and summary for home paths, logins and addresses; refuse the file (Hara, 1 h, 29 Oct)
-- [ ] Rebuild the store from the exports of the 3 November chain (Hara, 2 h, 5 Nov), in progress
-- [ ] The dialogue model as two heads: emotion from dialogue/train, sentiment from dialogue/adapt/finance_train_grpo (Hara, 2 h, 8 Nov), todo
-- [ ] Parity against the 3 November summaries (ST-P-01) and redeploy (Hara, 1.5 h, 9 Nov), todo
-- [ ] Which files carry which head, checked against results/README.md (Ricky, 1 h, 8 Nov), todo
+- [x] Rebuild the store from the exports of the 3 November chain (Hara, 2 h, 5 Nov)
+- [x] The dialogue model as two heads: emotion from dialogue/train, sentiment from dialogue/adapt/finance_train_grpo (Hara, 2 h, 8 Nov)
+- [x] Parity against the 3 November summaries (ST-P-01) and redeploy (Hara, 1.5 h, 9 Nov)
+- [x] Which files carry which head, checked against results/README.md (Ricky, 1 h, 8 Nov)
 
 Open items live as sub-issues of the program's issue: [open it on GitHub](https://github.com/hputhireth/Technology-and-Design/issues?q=is%3Aissue+label%3Aprogram+%22sentiment-app-build-models-py%22).
 
@@ -67,9 +67,10 @@ Open items live as sub-issues of the program's issue: [open it on GitHub](https:
 |---|---|---|
 | 30 Oct 2026 | 4/5 | The store and its scan reviewed. |
 | 5 Nov 2026 | 3/5 | The store still holds the October exports; the rebuild is planned for the weekend. |
+| 5 Nov 2026 | 5/5 | The store rebuilt from the 3 November exports and deployed; closed at the wrap-up. |
 
 ## Hours
 
-10 h over 6 todos, 3.5 h done. By week: Sprint 3 3.5 h, Sprint 4 2 h, Final week 4.5 h.
+10 h over 6 todos, 10 h done. By week: Sprint 3 3.5 h, Sprint 4 2 h, Final week 4.5 h.
 
 [Back to the backlog](../README.md) · [Pipeline map](../PIPELINE.md)

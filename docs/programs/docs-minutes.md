@@ -1,6 +1,6 @@
 # docs/minutes/ (minutes, the defect log, the backlog)
 
-Documents and process · Johnny · P2 · due 6 Nov 2026 · In progress
+Documents and process · Johnny · P2 · due 6 Nov 2026 · Complete
 
 Johnny's record of every session: minutes, the defect list raised at the live-testing checks, the sprint backlogs and the retrospectives.
 
@@ -43,10 +43,10 @@ flowchart TD
 - [x] Sprint 1 minutes and the defect list (Johnny, 1.5 h, 16 Oct)
 - [x] Sprint 2 minutes and the defect list (Johnny, 1.5 h, 23 Oct)
 - [x] Sprint 3 minutes and the defect list (Johnny, 1.5 h, 30 Oct)
-- [ ] Sprint 4 minutes and the retrospective (Johnny, 1.5 h, 6 Nov), todo
-- [ ] Canvas submission checklist (Johnny, 1 h, 11 Nov), todo
+- [x] Sprint 4 minutes and the retrospective (Johnny, 1.5 h, 6 Nov)
+- [x] Canvas submission checklist (Johnny, 1 h, 11 Nov)
 - [x] Dashboard and splits review for Sprint 3 (Johnny, 1 h, 24 Oct)
-- [ ] Retrospective actions onto the board (Johnny, 1 h, 7 Nov), todo
+- [x] Retrospective actions onto the board (Johnny, 1 h, 7 Nov)
 
 Open items live as sub-issues of the program's issue: [open it on GitHub](https://github.com/hputhireth/Technology-and-Design/issues?q=is%3Aissue+label%3Aprogram+%22docs-minutes%22).
 
@@ -61,6 +61,6 @@ Open items live as sub-issues of the program's issue: [open it on GitHub](https:
 
 ## Hours
 
-9 h over 7 todos, 5.5 h done. By week: Sprint 1 1.5 h, Sprint 2 1.5 h, Sprint 3 2.5 h, Sprint 4 1.5 h, Final week 2 h.
+9 h over 7 todos, 9 h done. By week: Sprint 1 1.5 h, Sprint 2 1.5 h, Sprint 3 2.5 h, Sprint 4 1.5 h, Final week 2 h.
 
 [Back to the backlog](../README.md) · [Pipeline map](../PIPELINE.md)

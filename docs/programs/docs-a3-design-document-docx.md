@@ -48,7 +48,7 @@ flowchart TD
 - [x] Technical sections, the test plan references, the numbers from the 3 November run (Ricky, 1 h, 1 Nov)
 - [x] Management sections, timeline and milestones (Johnny, 3 h, 1 Nov)
 - [x] The 3 November revision: the chain's four fixes and the three seeds (Ricky, 0.5 h, 3 Nov)
-- [ ] Team review of the document, the test plan and the deck (Johnny, 2 h, 4 Nov), in review
+- [x] Team review of the document, the test plan and the deck (Johnny, 2 h, 4 Nov)
 - [ ] Review with Dr Vo, Fri 6 Nov 2:30 pm (Johnny, 0.5 h, 6 Nov), todo
 - [x] Application section and the findings in plain language (Hara, 1 h, 1 Nov)
 - [x] Review of the A2 revision before the SuperComputer work (Hara, 2 h, 7 Oct)
@@ -65,6 +65,6 @@ Open items live as sub-issues of the program's issue: [open it on GitHub](https:
 
 ## Hours
 
-10 h over 7 todos, 7.5 h done. By week: Sprint 4 8 h, Before the sprints 2 h.
+10 h over 7 todos, 9.5 h done. By week: Sprint 4 8 h, Before the sprints 2 h.
 
 [Back to the backlog](../README.md) · [Pipeline map](../PIPELINE.md)

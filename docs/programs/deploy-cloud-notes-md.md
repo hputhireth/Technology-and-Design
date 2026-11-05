@@ -1,8 +1,10 @@
 # deploy/cloud_notes.md
 
-Cloud system · Hara · P4 · due 11 Nov 2026 · Not started
+Cloud system · Hara · P4 · due 11 Nov 2026 · Cancelled
 
 Hosting options and cost, secrets and the model store out of the image.
+
+> Cancelled on 5 November with the cloud system.
 
 ## What it does
 
@@ -37,8 +39,8 @@ flowchart TD
 
 ## Todos
 
-- [ ] Hosting options and cost: a small VM against the Streamlit hosting (Hara, 1 h, 10 Nov), todo
-- [ ] Secrets and the model store out of the image (Johnny, 1 h, 10 Nov), todo
+- [ ] ~~Hosting options and cost: a small VM against the Streamlit hosting~~ (Hara, 1 h, 10 Nov), cancelled
+- [ ] ~~Secrets and the model store out of the image~~ (Johnny, 1 h, 10 Nov), cancelled
 
 Open items live as sub-issues of the program's issue: [open it on GitHub](https://github.com/hputhireth/Technology-and-Design/issues?q=is%3Aissue+label%3Aprogram+%22deploy-cloud-notes-md%22).
 
@@ -46,7 +48,7 @@ Open items live as sub-issues of the program's issue: [open it on GitHub](https:
 
 | Date | Rating | Note |
 |---|---|---|
-| 6 Nov 2026 | pending | To be scoped after the review with Dr Vo. |
+| 5 Nov 2026 | 3/5 | Cancelled with the cloud system. |
 
 ## Hours
 

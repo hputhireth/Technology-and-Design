@@ -248,7 +248,6 @@ flowchart LR
   classDef live stroke-width:3px
   classDef other stroke-dasharray: 2 2,fill:none,color:#777
   class e7,e8 cancelled
-  class e2 live
   class c12,c14,d5,f1,g1 other
 ```
 
@@ -268,7 +267,7 @@ flowchart LR
   classDef cancelled stroke-dasharray: 4 3,opacity:0.55
   classDef live stroke-width:3px
   classDef other stroke-dasharray: 2 2,fill:none,color:#777
-  class f1,f2 live
+  class f1,f2 cancelled
   class e3,e6 other
 ```
 
@@ -296,7 +295,7 @@ flowchart LR
   classDef cancelled stroke-dasharray: 4 3,opacity:0.55
   classDef live stroke-width:3px
   classDef other stroke-dasharray: 2 2,fill:none,color:#777
-  class g1,g3,g5,g6 live
+  class g1 live
   class d3,d5,e4 other
 ```
 
@@ -456,8 +455,8 @@ flowchart LR
   classDef cancelled stroke-dasharray: 4 3,opacity:0.55
   classDef live stroke-width:3px
   classDef other stroke-dasharray: 2 2,fill:none,color:#777
-  class jtfidf,jsim,jsoft,fine,repr,e7,e8 cancelled
-  class e2,f1,f2,g1,g3,g5,g6 live
+  class jtfidf,jsim,jsoft,fine,repr,e7,e8,f1,f2 cancelled
+  class g1 live
 ```
 
 ## The boxes
@@ -508,20 +507,20 @@ flowchart LR
 | Test layers | `tests/integration/mutate.py` | Complete | [tests-integration-mutate-py.md](programs/tests-integration-mutate-py.md) |
 | Test layers | `tests/forbidden_patterns.py` | Complete | [tests-forbidden-patterns-py.md](programs/tests-forbidden-patterns-py.md) |
 | Front end | `sentiment-app/app.py` | Complete | [sentiment-app-app-py.md](programs/sentiment-app-app-py.md) |
-| Front end | `sentiment-app/build_models.py` | In progress | [sentiment-app-build-models-py.md](programs/sentiment-app-build-models-py.md) |
+| Front end | `sentiment-app/build_models.py` | Complete | [sentiment-app-build-models-py.md](programs/sentiment-app-build-models-py.md) |
 | Front end | `fd_encode_server.py` | Complete | [fd-encode-server-py.md](programs/fd-encode-server-py.md) |
 | Front end | `sentiment-app/tests/` | Complete | [sentiment-app-tests.md](programs/sentiment-app-tests.md) |
 | Front end | `.github/workflows/ci.yml` | Complete | [github-workflows-ci-yml.md](programs/github-workflows-ci-yml.md) |
 | Front end | `sentiment-app/README.md and the deployment` | Complete | [sentiment-app-readme-md-and-the-deployment.md](programs/sentiment-app-readme-md-and-the-deployment.md) |
 | Front end | `streamlit-a3/train_model.py` | Cancelled | [streamlit-a3-train-model-py.md](programs/streamlit-a3-train-model-py.md) |
 | Front end | `dashboard/index.html` | Cancelled | [dashboard-index-html.md](programs/dashboard-index-html.md) |
-| Cloud system | `deploy/Dockerfile` | Not started | [deploy-dockerfile.md](programs/deploy-dockerfile.md) |
-| Cloud system | `deploy/cloud_notes.md` | Not started | [deploy-cloud-notes-md.md](programs/deploy-cloud-notes-md.md) |
+| Cloud system | `deploy/Dockerfile` | Cancelled | [deploy-dockerfile.md](programs/deploy-dockerfile.md) |
+| Cloud system | `deploy/cloud_notes.md` | Cancelled | [deploy-cloud-notes-md.md](programs/deploy-cloud-notes-md.md) |
 | Documents and process | `docs/A3_Design_Document.docx` | Under review | [docs-a3-design-document-docx.md](programs/docs-a3-design-document-docx.md) |
 | Documents and process | `docs/test_plan.md` | Complete | [docs-test-plan-md.md](programs/docs-test-plan-md.md) |
-| Documents and process | `docs/presentation/` | In progress | [docs-presentation.md](programs/docs-presentation.md) |
+| Documents and process | `docs/presentation/` | Complete | [docs-presentation.md](programs/docs-presentation.md) |
 | Documents and process | `docs/security_writeup.md` | Complete | [docs-security-writeup-md.md](programs/docs-security-writeup-md.md) |
-| Documents and process | `docs/minutes/` | In progress | [docs-minutes.md](programs/docs-minutes.md) |
-| Documents and process | `.github/` | In progress | [github.md](programs/github.md) |
+| Documents and process | `docs/minutes/` | Complete | [docs-minutes.md](programs/docs-minutes.md) |
+| Documents and process | `.github/` | Complete | [github.md](programs/github.md) |
 
 [Back to the backlog](README.md)

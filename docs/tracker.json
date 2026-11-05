@@ -1,0 +1,6221 @@
+{
+ "version": 1,
+ "title": "Sentiment Heads Tracker",
+ "today": "2026-11-05",
+ "cap": 18.0,
+ "team": [
+  {
+   "id": "R",
+   "name": "Ricky",
+   "full": "Puthireth Horng",
+   "role": "Technical Lead"
+  },
+  {
+   "id": "J",
+   "name": "Johnny",
+   "full": "Tran Hoang Nam Nguyen",
+   "role": "Group Lead"
+  },
+  {
+   "id": "H",
+   "name": "Hara",
+   "full": "Sok Eang Meng",
+   "role": "Front-End and Deployment Lead"
+  }
+ ],
+ "weeks": [
+  {
+   "id": "W0",
+   "label": "Before the sprints",
+   "start": "2026-10-05",
+   "end": "2026-10-09"
+  },
+  {
+   "id": "S1",
+   "label": "Sprint 1",
+   "start": "2026-10-10",
+   "end": "2026-10-16"
+  },
+  {
+   "id": "S2",
+   "label": "Sprint 2",
+   "start": "2026-10-17",
+   "end": "2026-10-23"
+  },
+  {
+   "id": "S3",
+   "label": "Sprint 3",
+   "start": "2026-10-24",
+   "end": "2026-10-30"
+  },
+  {
+   "id": "S4",
+   "label": "Sprint 4",
+   "start": "2026-10-31",
+   "end": "2026-11-06"
+  },
+  {
+   "id": "S5",
+   "label": "Final week",
+   "start": "2026-11-07",
+   "end": "2026-11-11"
+  }
+ ],
+ "phases": [
+  {
+   "id": "A",
+   "name": "Encoding research",
+   "span": "1 to 10 Oct",
+   "about": "First access to the SuperComputer, the first encoding pass, the first linear model and the data investigation."
+  },
+  {
+   "id": "B",
+   "name": "Model research",
+   "span": "Sprints 1 to 3",
+   "about": "The research pipeline fs_detailed: the head search under the protocol, the audit, the inspection, the Dialogue Network and the reinforcement suite."
+  },
+  {
+   "id": "C",
+   "name": "Final pipeline",
+   "span": "27 Oct to 3 Nov",
+   "about": "The final repository sentiment_heads: one configuration per corpus, nine common modules, seven scripts and the Slurm chain that ran end to end on 3 November."
+  },
+  {
+   "id": "D",
+   "name": "Test layers",
+   "span": "29 Oct to 3 Nov",
+   "about": "Unit, smoke, integration and mutation, written before the step each one checks, plus the security scan."
+  },
+  {
+   "id": "E",
+   "name": "Front end",
+   "span": "12 Oct to 9 Nov",
+   "about": "The Streamlit application, its model store, the encoder service, its 213 tests, CI and the deployment."
+  },
+  {
+   "id": "F",
+   "name": "Cloud system",
+   "span": "after 6 Nov",
+   "about": "Containers for the application and the encoder service, the model store from the release asset, hosting notes."
+  },
+  {
+   "id": "G",
+   "name": "Documents and process",
+   "span": "whole project",
+   "about": "The design document, the test plan, the presentation, the security write-up, the minutes and the repository protocol."
+  }
+ ],
+ "status": {
+  "ns": "Not started",
+  "ip": "In progress",
+  "ur": "Under review",
+  "co": "Complete",
+  "ca": "Cancelled"
+ },
+ "tstatus": {
+  "todo": "Todo",
+  "prog": "In progress",
+  "rev": "In review",
+  "done": "Done",
+  "canc": "Cancelled"
+ },
+ "columns": [
+  {
+   "x": 0,
+   "label": "Encoding research"
+  },
+  {
+   "x": 1,
+   "label": "Model research"
+  },
+  {
+   "x": 2,
+   "label": "common/"
+  },
+  {
+   "x": 3,
+   "label": "scripts/ and configs/"
+  },
+  {
+   "x": 4,
+   "label": "env/ and slurm/"
+  },
+  {
+   "x": 5,
+   "label": "tests/"
+  },
+  {
+   "x": 6,
+   "label": "Front end"
+  },
+  {
+   "x": 7,
+   "label": "Cloud system"
+  },
+  {
+   "x": 8,
+   "label": "Documents and process"
+  }
+ ],
+ "programs": [
+  {
+   "id": "fd01",
+   "file": "fs_detailed/fd_01_prepare.py",
+   "phase": "A",
+   "owner": "R",
+   "priority": 3,
+   "status": "co",
+   "deadline": "2026-10-06",
+   "summary": "The research pipeline's preparation of FinGPT: cleaning, the nine shades to three classes, duplicates folded, a group key.",
+   "what": "Reads data/raw/fs_train.csv, repairs the Windows-1252 mojibake, applies NFC, strips zero-width characters and normalises whitespace while keeping punctuation. Maps the nine sentiment shades to negative, neutral and positive and keeps the shade in its own column. Folds exact duplicates into one row with a count and gives every row a near-duplicate group so that no split ever separates two versions of the same sentence. Writes one table per set with a content hash.",
+   "depends": [
+    "data/raw/fs_train.csv",
+    "scripts in the research pipeline share one config file"
+   ],
+   "affects": [
+    "fdgpu",
+    "fdlin",
+    "fd07",
+    "c10"
+   ],
+   "arch": [
+    {
+     "n": "read csv",
+     "d": "fs_train.csv, 76,772 rows"
+    },
+    {
+     "n": "fix_mojibake, NFC, whitespace",
+     "d": "374 repairs, 2 label conflicts"
+    },
+    {
+     "n": "map shades to three classes",
+     "d": "shade kept in its own column"
+    },
+    {
+     "n": "fold duplicates",
+     "d": "30,209 distinct texts"
+    },
+    {
+     "n": "near-duplicate group key",
+     "d": "groups never cross a split"
+    },
+    {
+     "n": "write table + hash",
+     "d": "data/cache/<config>/train.csv"
+    }
+   ],
+   "reads": [
+    "data/raw/fs_train.csv"
+   ],
+   "writes": [
+    "data/cache/fd_<hash>/train.csv",
+    "manifest.json",
+    "label_counts.json"
+   ],
+   "meetings": [
+    {
+     "date": "2026-10-06",
+     "rating": 3,
+     "note": "Prepared tables walked through on the call: 374 mojibake repairs and 2 label conflicts shown."
+    }
+   ],
+   "col": 0,
+   "row": 0,
+   "note": null
+  },
+  {
+   "id": "fdgpu",
+   "file": "fs_detailed/fd_gpu_encode.py",
+   "phase": "A",
+   "owner": "R",
+   "priority": 3,
+   "status": "co",
+   "deadline": "2026-10-06",
+   "summary": "The first encoding pass: bge-large-en-v1.5 frozen, fp16 on one P100, 2,048 values per text, cached under a content hash.",
+   "what": "Loads the encoder offline from the Hugging Face cache, reads every prepared text in windows of 510 tokens with a 32-token overlap, pools the [CLS] vector joined with the masked mean over the tokens, averages the windows of a long text and stores the result as float16 under the SHA-256 of the weights, the tokenizer, the text column, the pooling and the length settings. A second run with the same inputs finds the cache and does nothing. 30,209 texts took 1.8 minutes.",
+   "depends": [
+    "fd01",
+    "hf_cache/ with the encoder weights"
+   ],
+   "affects": [
+    "fdlin",
+    "fd07",
+    "c11"
+   ],
+   "arch": [
+    {
+     "n": "load encoder offline",
+     "d": "BAAI/bge-large-en-v1.5, 24 layers"
+    },
+    {
+     "n": "window the text",
+     "d": "510 tokens, 32 overlap"
+    },
+    {
+     "n": "forward pass fp16",
+     "d": "one P100, token budget per batch"
+    },
+    {
+     "n": "pool",
+     "d": "[CLS] joined with the masked mean, 2,048"
+    },
+    {
+     "n": "average the windows",
+     "d": "one vector per text"
+    },
+    {
+     "n": "save under the content hash",
+     "d": "features/<key>/pooled.npy"
+    }
+   ],
+   "reads": [
+    "data/cache/<config>/*.csv",
+    "hf_cache/"
+   ],
+   "writes": [
+    "features/<key>/pooled.npy",
+    "ids.csv",
+    "manifest.json"
+   ],
+   "meetings": [
+    {
+     "date": "2026-10-06",
+     "rating": 4,
+     "note": "Encoding time far under the A2 estimate: 1.8 minutes for the whole corpus."
+    }
+   ],
+   "col": 0,
+   "row": 1,
+   "note": null
+  },
+  {
+   "id": "fdlin",
+   "file": "fs_detailed/fd_linear.py",
+   "phase": "A",
+   "owner": "R",
+   "priority": 4,
+   "status": "co",
+   "deadline": "2026-10-06",
+   "summary": "The first model on the SuperComputer: a multinomial logit on the frozen features. 57 percent on our own training set.",
+   "what": "Fits a multinomial logistic regression on the cached 2,048 features and scores it on the training set and on SEntFiN. The 57 percent on our own training rows, and worse on the test, is the result that started the four-day investigation and the paper study. The script stayed in the research pipeline as the ancestor of the linear control.",
+   "depends": [
+    "fdgpu"
+   ],
+   "affects": [
+    "fdinv",
+    "c15"
+   ],
+   "arch": [
+    {
+     "n": "load features and labels",
+     "d": "from the cache"
+    },
+    {
+     "n": "fit multinomial logit",
+     "d": "L-BFGS, L2 penalty"
+    },
+    {
+     "n": "score training set",
+     "d": "57 percent"
+    },
+    {
+     "n": "score SEntFiN",
+     "d": "worse than the training set"
+    }
+   ],
+   "reads": [
+    "features/<key>/pooled.npy",
+    "data/cache/<config>/train.csv"
+   ],
+   "writes": [
+    "results/fd/linear_first/summary.json"
+   ],
+   "meetings": [
+    {
+     "date": "2026-10-06",
+     "rating": 2,
+     "note": "57 percent on our own training set, worse on the test; the investigation agreed on the spot."
+    }
+   ],
+   "col": 0,
+   "row": 2,
+   "note": null
+  },
+  {
+   "id": "fdinv",
+   "file": "fs_detailed/fd_investigate.py",
+   "phase": "A",
+   "owner": "R",
+   "priority": 4,
+   "status": "co",
+   "deadline": "2026-10-10",
+   "summary": "The data investigation of 7 to 10 October: how the encoder's position moves when a sentence changes polarity.",
+   "what": "Takes pairs of sentences that differ in polarity and measures how far the pooled vector moves, on the training set and on the SEntFiN headlines, and compares the training labels with the encoder's nearest neighbours. It showed that the information is there but a single linear boundary does not read it, and that the training labels themselves were part of the problem. Its write-up opened Sprint 1.",
+   "depends": [
+    "fdlin",
+    "fdgpu"
+   ],
+   "affects": [
+    "fd07",
+    "fd08"
+   ],
+   "arch": [
+    {
+     "n": "polarity pairs",
+     "d": "grew against fell, and the like"
+    },
+    {
+     "n": "movement of the pooled vector",
+     "d": "training set"
+    },
+    {
+     "n": "the same on SEntFiN",
+     "d": "headlines"
+    },
+    {
+     "n": "labels against neighbours",
+     "d": "the labels are part of the problem"
+    },
+    {
+     "n": "write-up",
+     "d": "read at the Sprint 1 planning"
+    }
+   ],
+   "reads": [
+    "features/<key>/pooled.npy",
+    "data/cache/<config>/*.csv"
+   ],
+   "writes": [
+    "shared notes: the investigation read-out"
+   ],
+   "meetings": [
+    {
+     "date": "2026-10-09",
+     "rating": 3,
+     "note": "The information is there; a single linear boundary does not read it."
+    },
+    {
+     "date": "2026-10-10",
+     "rating": 4,
+     "note": "Sprint 1 planned on the strength of the read-out: a deep learning pipeline."
+    }
+   ],
+   "col": 0,
+   "row": 3,
+   "note": null
+  },
+  {
+   "id": "jexp",
+   "file": "data/explore_general.py",
+   "phase": "A",
+   "owner": "J",
+   "priority": 4,
+   "status": "co",
+   "deadline": "2026-10-05",
+   "summary": "Johnny's cleaning and exploratory analysis of the general dataset (emotion-emotion_69k.csv): skew, anomalies, quality charts.",
+   "what": "Loads the general emotion dataset, cleans it, renames the files to say what they hold, and draws the class skew and the anomaly charts the team used for its quality check. The exploration fed the data-quality follow-up of the label audit; the general-domain models built on it were exploratory only.",
+   "depends": [
+    "data/raw/ of the public repository"
+   ],
+   "affects": [
+    "jtfidf",
+    "jsim",
+    "fd08"
+   ],
+   "arch": [
+    {
+     "n": "load csv",
+     "d": "emotion-emotion_69k.csv"
+    },
+    {
+     "n": "clean and rename",
+     "d": "the general dataset"
+    },
+    {
+     "n": "class skew",
+     "d": "charts"
+    },
+    {
+     "n": "anomalies",
+     "d": "charts for the quality check"
+    }
+   ],
+   "reads": [
+    "emotion-emotion_69k.csv"
+   ],
+   "writes": [
+    "figures of the quality check"
+   ],
+   "meetings": [
+    {
+     "date": "2026-10-05",
+     "rating": 4,
+     "note": "Quality charts reviewed on the first call of the week."
+    }
+   ],
+   "col": 0,
+   "row": 5,
+   "note": null
+  },
+  {
+   "id": "jtfidf",
+   "file": "models/general_tfidf_logreg.py",
+   "phase": "A",
+   "owner": "J",
+   "priority": 5,
+   "status": "ca",
+   "deadline": "2026-10-05",
+   "summary": "A logistic regression on TF-IDF features for the general domain. Explored, then walked back.",
+   "what": "Johnny's experimental general-domain model: TF-IDF features and a logistic regression on the general dataset. It was built to explore, not to deliver, and was dropped once the frozen-encoder route was chosen. Its role as a bag-of-words control passed to the word logit of the final repository, on the finance corpora.",
+   "depends": [
+    "jexp"
+   ],
+   "affects": [
+    "c16"
+   ],
+   "arch": [
+    {
+     "n": "TF-IDF features",
+     "d": "on the general dataset"
+    },
+    {
+     "n": "logistic regression",
+     "d": "one model"
+    },
+    {
+     "n": "score",
+     "d": "exploratory"
+    }
+   ],
+   "reads": [
+    "emotion-emotion_69k.csv"
+   ],
+   "writes": [
+    "none kept"
+   ],
+   "meetings": [
+    {
+     "date": "2026-10-06",
+     "rating": 3,
+     "note": "Explored only; not for the delivery."
+    }
+   ],
+   "col": 0,
+   "row": 6,
+   "note": "Walked back on 10 October: the word logit of the final repository is the bag-of-words control."
+  },
+  {
+   "id": "jsim",
+   "file": "models/emotion_label_similarity.py",
+   "phase": "A",
+   "owner": "J",
+   "priority": 5,
+   "status": "ca",
+   "deadline": "2026-10-08",
+   "summary": "Pairwise similarity of the 32 encoded emotion labels, drawn as a heatmap. Dropped: the intensity pairs sit on top of each other.",
+   "what": "Encodes the 32 emotion label names with the encoder, computes their pairwise cosine similarity and draws it with seaborn, with a batch size limit added to the encoding. The heatmap showed that afraid and terrified, angry and furious, sad and devastated are indistinguishable to the encoder, which is one reason the valence route was dropped.",
+   "depends": [
+    "jexp",
+    "fdgpu"
+   ],
+   "affects": [
+    "jsoft"
+   ],
+   "arch": [
+    {
+     "n": "encode the 32 labels",
+     "d": "batch size limited"
+    },
+    {
+     "n": "pairwise cosine similarity",
+     "d": "32 x 32"
+    },
+    {
+     "n": "heatmap",
+     "d": "seaborn"
+    }
+   ],
+   "reads": [
+    "the 32 emotion names"
+   ],
+   "writes": [
+    "similarity heatmap"
+   ],
+   "meetings": [
+    {
+     "date": "2026-10-09",
+     "rating": 2,
+     "note": "The intensity pairs sit on top of each other; the route was dropped."
+    }
+   ],
+   "col": 0,
+   "row": 7,
+   "note": "Dropped on 9 October."
+  },
+  {
+   "id": "jsoft",
+   "file": "models/softmax_emotion_to_sentiment.py",
+   "phase": "A",
+   "owner": "J",
+   "priority": 5,
+   "status": "ca",
+   "deadline": "2026-10-08",
+   "summary": "A softmax over the encoded emotion labels to derive a sentiment: the A2 valence idea. Replaced by distillation.",
+   "what": "The Assignment 2 plan read sentiment off an emotion head through Warriner's valence groups. This script tried the first step on the general dataset: a softmax over the similarities of a text to the encoded emotion labels, mapped to a sentiment. It was replaced by distillation: the FinGPT Network reads every dialogue window once and its readings become the sentiment column the Dialogue Network learns.",
+   "depends": [
+    "jsim"
+   ],
+   "affects": [
+    "ed01"
+   ],
+   "arch": [
+    {
+     "n": "similarity to the 32 labels",
+     "d": "per text"
+    },
+    {
+     "n": "softmax",
+     "d": "a distribution over emotions"
+    },
+    {
+     "n": "valence groups",
+     "d": "to a sentiment"
+    },
+    {
+     "n": "score on the general dataset",
+     "d": "exploratory"
+    }
+   ],
+   "reads": [
+    "emotion-emotion_69k.csv",
+    "the encoded labels"
+   ],
+   "writes": [
+    "none kept"
+   ],
+   "meetings": [
+    {
+     "date": "2026-10-18",
+     "rating": 2,
+     "note": "Walked back; the dialogue head gets a learned sentiment output instead."
+    }
+   ],
+   "col": 0,
+   "row": 8,
+   "note": "Replaced on 18 October by the distilled sentiment column of the dialogue windows."
+  },
+  {
+   "id": "bened",
+   "file": "data/benedetti_check.py",
+   "phase": "A",
+   "owner": "J",
+   "priority": 4,
+   "status": "co",
+   "deadline": "2026-10-09",
+   "summary": "The check that dismissed the Kaggle Finance News Sentiments file as a test set: undocumented labels, 93 against 46 percent agreement.",
+   "what": "Johnny flagged the Benedetti file: undocumented labels and an overlap with FinGPT. Ricky's label analysis confirmed it: the same head agrees with 93 percent of its rows that are also in FinGPT and 46 percent of the rest, so the labels are not learnable in the way SEntFiN's are. SEntFiN 1.0 stayed the external test.",
+   "depends": [
+    "fd07"
+   ],
+   "affects": [
+    "the dataset table of the design document"
+   ],
+   "arch": [
+    {
+     "n": "overlap with FinGPT",
+     "d": "by normalised text"
+    },
+    {
+     "n": "agreement on the overlap",
+     "d": "93 percent"
+    },
+    {
+     "n": "agreement on the rest",
+     "d": "46 percent"
+    },
+    {
+     "n": "decision",
+     "d": "dismissed as a test set"
+    }
+   ],
+   "reads": [
+    "Finance News Sentiments (Kaggle), 32,569 rows",
+    "results/fd/train/nn/nn_model.json"
+   ],
+   "writes": [
+    "section II.F of the design document"
+   ],
+   "meetings": [
+    {
+     "date": "2026-10-09",
+     "rating": 4,
+     "note": "Dismissed as a test set; SEntFiN 1.0 stays the external test."
+    }
+   ],
+   "col": 0,
+   "row": 4,
+   "note": null
+  },
+  {
+   "id": "fine",
+   "file": "research/finetune_encoder.py",
+   "phase": "A",
+   "owner": "R",
+   "priority": 5,
+   "status": "ca",
+   "deadline": "2026-10-05",
+   "summary": "The Assignment 2 plan: full fine-tuning of the 335M encoder for M1 to M3 and a DoRA adapter for M4. Never written.",
+   "what": "Assignment 2 proposed letting the sentiment gradient reach the attention and feed-forward matrices, with micro-batches of 16, gradient checkpointing and fp16 loss scaling on the P100, about 35 GPU-hours. The cost check of 29 and 30 September and the frozen-feature literature (Kumar et al. 2022) decided against it, Dr Vo agreed the scope cut by email, and the encoder stayed frozen.",
+   "depends": [
+    "the P100: 12 GB, fp16 only, no tensor cores"
+   ],
+   "affects": [
+    "fdgpu",
+    "repr"
+   ],
+   "arch": [
+    {
+     "n": "micro-batches of 16",
+     "d": "planned"
+    },
+    {
+     "n": "gradient checkpointing",
+     "d": "planned"
+    },
+    {
+     "n": "fp16 loss scaling",
+     "d": "planned"
+    },
+    {
+     "n": "DoRA adapter for M4",
+     "d": "planned"
+    },
+    {
+     "n": "cost check",
+     "d": "about 35 GPU-hours: cancelled"
+    }
+   ],
+   "reads": [],
+   "writes": [],
+   "meetings": [
+    {
+     "date": "2026-10-05",
+     "rating": 4,
+     "note": "Scope cut confirmed with Dr Vo by email; access under his project."
+    }
+   ],
+   "col": 0,
+   "row": 9,
+   "note": "Cancelled before the sprints: the encoder is frozen throughout."
+  },
+  {
+   "id": "repr",
+   "file": "research/representation_analysis.py",
+   "phase": "A",
+   "owner": "R",
+   "priority": 5,
+   "status": "ca",
+   "deadline": "2026-10-10",
+   "summary": "UMAP, GMM and CKA on the fine-tuned spaces, as planned in A2. With the encoder frozen the space is fixed, so the head is inspected instead.",
+   "what": "The Assignment 2 representation analysis compared the pooled space before and after fine-tuning. With a frozen encoder there is no second space to compare, so the analysis moved to the head: the random-label control, the label audit, the Hessian, seed connectivity and probes of fd_10.",
+   "depends": [
+    "fine"
+   ],
+   "affects": [
+    "fd10"
+   ],
+   "arch": [
+    {
+     "n": "UMAP of the pooled space",
+     "d": "tried briefly"
+    },
+    {
+     "n": "GMM",
+     "d": "cancelled"
+    },
+    {
+     "n": "CKA before and after",
+     "d": "no second space: cancelled"
+    }
+   ],
+   "reads": [],
+   "writes": [],
+   "meetings": [
+    {
+     "date": "2026-10-10",
+     "rating": 3,
+     "note": "With the encoder frozen the space is fixed; the head is what we inspect."
+    }
+   ],
+   "col": 0,
+   "row": 10,
+   "note": "Replaced by the head inspection of fd_10_nn_inspect.py."
+  },
+  {
+   "id": "fd07",
+   "file": "fs_detailed/fd_07_nn.py",
+   "phase": "B",
+   "owner": "R",
+   "priority": 2,
+   "status": "co",
+   "deadline": "2026-10-19",
+   "summary": "The head search on FinGPT under the protocol: 34 configurations, successive halving, 15 runs each. The first network memorised; c12 came out.",
+   "what": "Stage one of the research pipeline for the network heads. The first feed-forward head on the cached features memorised its training set: training accuracy kept climbing while held-out accuracy fell. The paper study that followed set the protocol: a confirmation split held out by group before anything is fitted, StratifiedGroupKFold five by three seeds, label smoothing, an exponential moving average of the weights, early stopping on the validation cross-entropy, a temperature fitted on the out-of-fold logits. The search ran as the job of Monday 19 October (59 minutes) and chose c12: 2,048 to 256 leaky ReLU to 128 tanh to 3, 557,827 weights, 0.8044 macro-F1 cross-validated, 0.798 on the confirmation split.",
+   "depends": [
+    "fd01",
+    "fdgpu",
+    "fdinv"
+   ],
+   "affects": [
+    "fd08",
+    "fd10",
+    "fdtr",
+    "ed01",
+    "c6",
+    "c12",
+    "bened"
+   ],
+   "arch": [
+    {
+     "n": "confirmation split first",
+     "d": "15 percent by group"
+    },
+    {
+     "n": "StratifiedGroupKFold 5 x 3",
+     "d": "on the development rows"
+    },
+    {
+     "n": "candidate heads",
+     "d": "34 configurations"
+    },
+    {
+     "n": "fit",
+     "d": "AdamW, warm-up, cosine, EMA, early stop"
+    },
+    {
+     "n": "successive halving",
+     "d": "15 runs for the survivors"
+    },
+    {
+     "n": "temperature on OOF logits",
+     "d": "one per reading"
+    },
+    {
+     "n": "choose c12",
+     "d": "highest mean macro-F1"
+    },
+    {
+     "n": "export",
+     "d": "nn_selected.json, nn_folds.csv, nn_confirmation.json"
+    }
+   ],
+   "reads": [
+    "features/<key>/pooled.npy",
+    "data/cache/fd_<hash>/train.csv"
+   ],
+   "writes": [
+    "results/fd/train/nn/nn_selected.json",
+    "nn_folds.csv",
+    "nn_confirmation.json",
+    "inside_summary.json"
+   ],
+   "meetings": [
+    {
+     "date": "2026-10-13",
+     "rating": 2,
+     "note": "The first network memorises its training set."
+    },
+    {
+     "date": "2026-10-16",
+     "rating": 3,
+     "note": "Sprint 1 review: the protocol taken from the papers, page by page."
+    },
+    {
+     "date": "2026-10-20",
+     "rating": 5,
+     "note": "c12 at 0.8044 cross-validated and 0.798 on the confirmation split."
+    }
+   ],
+   "col": 1,
+   "row": 0,
+   "note": null
+  },
+  {
+   "id": "fd08",
+   "file": "fs_detailed/fd_08_label_audit.py",
+   "phase": "B",
+   "owner": "R",
+   "priority": 3,
+   "status": "co",
+   "deadline": "2026-10-22",
+   "summary": "The label audit and the random-label control: every validation row's predicted class recorded, the head on shuffled labels.",
+   "what": "Records the predicted class of every validation row across the 15 runs so the rows the head never learns can be read, and trains the same head on shuffled labels to show how much of the training accuracy is memorisation. Johnny's data-quality follow-up on the audited rows named the convention gap between the annotators.",
+   "depends": [
+    "fd07",
+    "jexp"
+   ],
+   "affects": [
+    "fdtr",
+    "the data section of the design document"
+   ],
+   "arch": [
+    {
+     "n": "validation predictions",
+     "d": "every row, 15 runs"
+    },
+    {
+     "n": "never-learned rows",
+     "d": "listed"
+    },
+    {
+     "n": "random-label control",
+     "d": "the head on shuffled labels"
+    },
+    {
+     "n": "audit table",
+     "d": "for the data-quality follow-up"
+    }
+   ],
+   "reads": [
+    "results/fd/train/nn/nn_folds.csv"
+   ],
+   "writes": [
+    "results/fd/audit/*.csv"
+   ],
+   "meetings": [
+    {
+     "date": "2026-10-21",
+     "rating": 4,
+     "note": "Audit reviewed; the convention gap named."
+    }
+   ],
+   "col": 1,
+   "row": 1,
+   "note": null
+  },
+  {
+   "id": "fd10",
+   "file": "fs_detailed/fd_10_nn_inspect.py",
+   "phase": "B",
+   "owner": "R",
+   "priority": 3,
+   "status": "co",
+   "deadline": "2026-10-23",
+   "summary": "The inspection of the chosen head: Hessian trace, seed connectivity, linear probes. Eleven minutes.",
+   "what": "What replaced the representation analysis of Assignment 2. With the encoder frozen the space does not change, so the head is examined: the trace of the Hessian at the solution, whether the solutions of different seeds connect along a low-loss path, and what linear probes read from each hidden layer.",
+   "depends": [
+    "fd07",
+    "repr"
+   ],
+   "affects": [
+    "the analysis section of the design document"
+   ],
+   "arch": [
+    {
+     "n": "Hessian trace",
+     "d": "at the solution"
+    },
+    {
+     "n": "seed connectivity",
+     "d": "low-loss path between seeds"
+    },
+    {
+     "n": "linear probes",
+     "d": "on the hidden layers"
+    },
+    {
+     "n": "report",
+     "d": "11 minutes"
+    }
+   ],
+   "reads": [
+    "results/fd/train/nn/nn_selected.json",
+    "features"
+   ],
+   "writes": [
+    "results/fd/inspect/*.json"
+   ],
+   "meetings": [
+    {
+     "date": "2026-10-23",
+     "rating": 4,
+     "note": "Sprint 2 review: the full model research demonstrated."
+    }
+   ],
+   "col": 1,
+   "row": 2,
+   "note": null
+  },
+  {
+   "id": "fdtr",
+   "file": "fs_detailed/fd_transfer_prior.py",
+   "phase": "B",
+   "owner": "R",
+   "priority": 3,
+   "status": "co",
+   "deadline": "2026-10-23",
+   "summary": "Zero-shot transfer to SEntFiN and the prior corrections: EM, BBSE and balanced all lost to the uncorrected probabilities.",
+   "what": "Scores the FinGPT Network on the 10,532 labelled SEntFiN headlines without any adaptation (73.5 percent) and applies the three prior corrections proposed in Assignment 2. They reach 0.643, 0.669 and 0.734 against 0.735 uncorrected: the SEntFiN errors are a convention shift, not a change of class mix, so no prior correction repairs them and none ships.",
+   "depends": [
+    "fd07"
+   ],
+   "affects": [
+    "c13",
+    "ed12"
+   ],
+   "arch": [
+    {
+     "n": "zero-shot on SEntFiN",
+     "d": "73.5 percent"
+    },
+    {
+     "n": "EM correction",
+     "d": "0.643"
+    },
+    {
+     "n": "BBSE",
+     "d": "0.669"
+    },
+    {
+     "n": "balanced",
+     "d": "0.734"
+    },
+    {
+     "n": "decision",
+     "d": "uncorrected probabilities ship"
+    }
+   ],
+   "reads": [
+    "results/fd/train/nn/nn_selected.json",
+    "features of SEntFiN"
+   ],
+   "writes": [
+    "results/fd/sentfin/*.json"
+   ],
+   "meetings": [
+    {
+     "date": "2026-10-23",
+     "rating": 3,
+     "note": "Uncorrected probabilities kept; the errors are a convention shift."
+    }
+   ],
+   "col": 1,
+   "row": 3,
+   "note": null
+  },
+  {
+   "id": "ed01",
+   "file": "fs_detailed/ed_01_prepare.py, ed_gpu_encode.py",
+   "phase": "B",
+   "owner": "R",
+   "priority": 3,
+   "status": "co",
+   "deadline": "2026-10-24",
+   "summary": "The dialogue windows: two turns in conversation order, the FinGPT Network's reading as the sentiment column, 64,566 windows encoded.",
+   "what": "Builds two-turn windows of EmpatheticDialogues in conversation order, keeps the speaker's emotion (32 classes) and adds the sentiment column by distillation: the FinGPT Network reads every window once (negative 3.9 percent, neutral 85.6, positive 10.5). Groups are conversations, so no split separates two windows of one conversation. The windows are encoded on the P100 in 3.9 minutes.",
+   "depends": [
+    "fd07",
+    "jsoft"
+   ],
+   "affects": [
+    "ed07",
+    "c10",
+    "c11"
+   ],
+   "arch": [
+    {
+     "n": "two-turn windows",
+     "d": "64,591, in conversation order"
+    },
+    {
+     "n": "fold duplicates",
+     "d": "64,566"
+    },
+    {
+     "n": "FinGPT Network reads every window",
+     "d": "the distilled sentiment column"
+    },
+    {
+     "n": "group by conversation",
+     "d": "55,341 development, 9,225 confirmation"
+    },
+    {
+     "n": "encode on the P100",
+     "d": "3.9 minutes"
+    }
+   ],
+   "reads": [
+    "data/raw/empathetic_training.csv",
+    "results/fd/train/nn/nn_selected.json"
+   ],
+   "writes": [
+    "data/cache/ed_<hash>/train.csv",
+    "features/<key>/pooled.npy"
+   ],
+   "meetings": [
+    {
+     "date": "2026-10-24",
+     "rating": 4,
+     "note": "Sprint 3 planning: the Dialogue Network and the reinforcement suite."
+    }
+   ],
+   "col": 1,
+   "row": 4,
+   "note": null
+  },
+  {
+   "id": "ed07",
+   "file": "fs_detailed/ed_07_nn.py",
+   "phase": "B",
+   "owner": "R",
+   "priority": 2,
+   "status": "co",
+   "deadline": "2026-10-25",
+   "summary": "The Dialogue Network search: one trunk, two outputs (sentiment and 32 emotions). Job of Sunday 25 October, 141 minutes; c31 chosen.",
+   "what": "The same protocol as fd_07 with two readings from one trunk: the loss is the sum of the two readings' cross-entropies with the emotion term weighted, the folds are grouped by conversation, and one temperature is fitted per reading. c31 came out: 2,048 to 256 ReLU to 128 SiLU to 32 ELU to [3 | 32], 562,723 weights, 0.8555 sentiment and 0.3723 emotion macro-F1 cross-validated, 74.5 percent on SEntFiN without ever seeing a finance label.",
+   "depends": [
+    "ed01",
+    "fd07"
+   ],
+   "affects": [
+    "ed12",
+    "c6",
+    "c12"
+   ],
+   "arch": [
+    {
+     "n": "conversation-grouped folds",
+     "d": "5 x 3"
+    },
+    {
+     "n": "one trunk, two outputs",
+     "d": "[3 | 32]"
+    },
+    {
+     "n": "summed loss",
+     "d": "emotion term weighted"
+    },
+    {
+     "n": "halving search",
+     "d": "141 minutes"
+    },
+    {
+     "n": "temperatures",
+     "d": "1.037 and 1.098"
+    },
+    {
+     "n": "predict SEntFiN",
+     "d": "74.5 percent zero-shot"
+    }
+   ],
+   "reads": [
+    "features/<key>/pooled.npy",
+    "data/cache/ed_<hash>/train.csv"
+   ],
+   "writes": [
+    "results/ed/train/nn/nn_selected.json",
+    "nn_folds.csv",
+    "nn_confirmation.json"
+   ],
+   "meetings": [
+    {
+     "date": "2026-10-25",
+     "rating": 4,
+     "note": "The Dialogue Network reviewed on the Sunday call."
+    },
+    {
+     "date": "2026-10-26",
+     "rating": 4,
+     "note": "Live-testing check: the two readings from one trunk."
+    }
+   ],
+   "col": 1,
+   "row": 5,
+   "note": null
+  },
+  {
+   "id": "ed12",
+   "file": "fs_detailed/ed_12_rl.py",
+   "phase": "B",
+   "owner": "R",
+   "priority": 2,
+   "status": "co",
+   "deadline": "2026-10-26",
+   "summary": "The reinforcement suite: the closed form, leashed SFT, REINFORCE, GRPO, PPO and a Q layer, full-information and bandit feedback, 36 runs.",
+   "what": "Formulates adaptation as a contextual bandit under a KL leash with a retention term, then runs every method on every corpus, before and after: the closed form of the leashed objective, leashed supervised fine-tuning, REINFORCE, GRPO, PPO with the ratio clipped to [0.8, 1.2], a Q layer, and the bandit variants with the off-policy estimators on the log. The job of 25 October 15:47 ran 22 adaptation runs in 9 minutes 19 seconds. REINFORCE, PPO and the Q layer tied with GRPO or fell behind it when every label is known, so only the closed form and GRPO went into the final repository.",
+   "depends": [
+    "ed07",
+    "fd07",
+    "fdtr"
+   ],
+   "affects": [
+    "edmis",
+    "c14"
+   ],
+   "arch": [
+    {
+     "n": "problem formulation",
+     "d": "contextual bandit, KL leash, retention"
+    },
+    {
+     "n": "closed form",
+     "d": "softmax(log pi_ref + onehot / beta)"
+    },
+    {
+     "n": "leashed SFT",
+     "d": "a method"
+    },
+    {
+     "n": "REINFORCE / GRPO / PPO",
+     "d": "sampled methods"
+    },
+    {
+     "n": "Q layer",
+     "d": "forgot most"
+    },
+    {
+     "n": "bandit feedback",
+     "d": "off-policy estimators"
+    },
+    {
+     "n": "both stages, every corpus",
+     "d": "before and after"
+    },
+    {
+     "n": "RL reports",
+     "d": "one page per model"
+    }
+   ],
+   "reads": [
+    "results/fd/train/nn/*.json",
+    "results/ed/train/nn/*.json",
+    "features"
+   ],
+   "writes": [
+    "results/ed/rl/<method>/summary.json",
+    "adapt_log.csv"
+   ],
+   "meetings": [
+    {
+     "date": "2026-10-26",
+     "rating": 4,
+     "note": "Gains and retention reviewed method by method."
+    },
+    {
+     "date": "2026-10-30",
+     "rating": 4,
+     "note": "Sprint 3 review: only the closed form and GRPO ship."
+    }
+   ],
+   "col": 1,
+   "row": 6,
+   "note": null
+  },
+  {
+   "id": "edmis",
+   "file": "fs_detailed/ed_rl_mistakes.py",
+   "phase": "B",
+   "owner": "R",
+   "priority": 4,
+   "status": "co",
+   "deadline": "2026-10-27",
+   "summary": "The misread rows only: the selection-bias experiment. The closed form gains 6.8 points for 0.3 lost; every sampled method learned never neutral.",
+   "what": "Trains only on the rows of the training half that the starting head misreads. The closed form reaches 80.3 percent on the held-out half for 0.3 FinGPT points lost. The sampled methods on the same rows all learned to avoid neutral and ended below where they started: a biased sample, so the setting ships for the closed form only, as --rows wrong of adapt.py.",
+   "depends": [
+    "ed12"
+   ],
+   "affects": [
+    "c14"
+   ],
+   "arch": [
+    {
+     "n": "misread rows of the training half",
+     "d": "1,399 headlines"
+    },
+    {
+     "n": "closed form",
+     "d": "80.3 percent for 0.3 lost"
+    },
+    {
+     "n": "sampled methods",
+     "d": "never neutral: below the start"
+    },
+    {
+     "n": "decision",
+     "d": "--rows wrong, closed form only"
+    }
+   ],
+   "reads": [
+    "results/fd/train/nn/*.json",
+    "features of SEntFiN"
+   ],
+   "writes": [
+    "results/ed/rl_mistakes/summary.json"
+   ],
+   "meetings": [
+    {
+     "date": "2026-10-27",
+     "rating": 3,
+     "note": "A biased sample for the sampled methods; kept for the closed form only."
+    }
+   ],
+   "col": 1,
+   "row": 7,
+   "note": null
+  },
+  {
+   "id": "c0",
+   "file": "configs/finance.json, configs/dialogue.json",
+   "phase": "C",
+   "owner": "R",
+   "priority": 2,
+   "status": "co",
+   "deadline": "2026-10-30",
+   "summary": "One configuration per corpus: the files, the labels, the head, the protocol and the adaptation settings.",
+   "what": "Everything a script needs to know about a corpus: the raw files and the prediction sets, the readings with their label maps, the head (widths, activations, dropout, weight decay), the protocol (confirmation fraction 0.15, 5 folds, 3 seeds, 100 epochs, patience 10, warm-up 1, cosine floor 0.1, EMA 0.999) and the adaptation block (beta 0.3, beta_grpo 0.1, group 4, retain 1, 20 epochs, lr 3e-4, batch 256, holdout 0.5). The dialogue config adds the emotion reading and grouping by conversation.",
+   "depends": [
+    "fd07",
+    "ed07",
+    "ed12"
+   ],
+   "affects": [
+    "c2",
+    "c10",
+    "c11",
+    "c12",
+    "c13",
+    "c14",
+    "c15",
+    "c16",
+    "d3"
+   ],
+   "arch": [
+    {
+     "n": "files",
+     "d": "raw tables and prediction sets"
+    },
+    {
+     "n": "readings",
+     "d": "label maps per reading"
+    },
+    {
+     "n": "head",
+     "d": "widths, activations, dropout"
+    },
+    {
+     "n": "protocol",
+     "d": "folds, seeds, epochs, patience, EMA"
+    },
+    {
+     "n": "adapt",
+     "d": "beta, beta_grpo, group, retain, holdout"
+    }
+   ],
+   "reads": [],
+   "writes": [
+    "configs/finance.json",
+    "configs/dialogue.json"
+   ],
+   "meetings": [
+    {
+     "date": "2026-10-27",
+     "rating": 4,
+     "note": "Lean repository agreed: one config file per corpus."
+    }
+   ],
+   "col": 3,
+   "row": 0,
+   "note": null
+  },
+  {
+   "id": "c1",
+   "file": "env/paths.sh, env/setup.sh",
+   "phase": "C",
+   "owner": "R",
+   "priority": 2,
+   "status": "co",
+   "deadline": "2026-11-02",
+   "summary": "The environment: the project root and offline flags every shell and job source, and the venv built once on the cluster's Python module.",
+   "what": "paths.sh exports the project root, the Hugging Face cache, the offline flags and the venv; setup.sh builds the venv on the loaded Python module, installs torch from the CUDA 12.6 wheels (the last that run on the P100), the packages and the encoder, and records the module name in venv/PYMOD so every job loads the same one. The first chain submission of 2 November had built the venv on the node's own Python 3.9 with CUDA 12.8 wheels, which dropped the P100; the rebuild on python/3.11.5 fixed it.",
+   "depends": [
+    "module load gcccore/13.2.0 python/3.11.5",
+    "requirements.txt"
+   ],
+   "affects": [
+    "c17",
+    "c18",
+    "d1",
+    "d2"
+   ],
+   "arch": [
+    {
+     "n": "source paths.sh",
+     "d": "root, caches, offline flags"
+    },
+    {
+     "n": "module load",
+     "d": "python/3.11.5"
+    },
+    {
+     "n": "python -m venv",
+     "d": "under the root"
+    },
+    {
+     "n": "torch from cu126 wheels",
+     "d": "sm_60 listed"
+    },
+    {
+     "n": "pip install -r requirements.txt",
+     "d": "packages"
+    },
+    {
+     "n": "record venv/PYMOD",
+     "d": "every job loads it"
+    }
+   ],
+   "reads": [
+    "requirements.txt"
+   ],
+   "writes": [
+    "venv/",
+    "venv/PYMOD",
+    "hf_cache/"
+   ],
+   "meetings": [
+    {
+     "date": "2026-11-02",
+     "rating": 2,
+     "note": "First chain submission on Python 3.9 with the CUDA 12.8 wheels: jobs cancelled, environment rebuilt."
+    }
+   ],
+   "col": 4,
+   "row": 0,
+   "note": null
+  },
+  {
+   "id": "c2",
+   "file": "common/paths.py",
+   "phase": "C",
+   "owner": "R",
+   "priority": 3,
+   "status": "co",
+   "deadline": "2026-11-01",
+   "summary": "The folder layout under the project root: root(), load_config(), cache_dir(), results_dir().",
+   "what": "Every path a script touches goes through this module, so no absolute path appears in any tracked file. load_config finds a config as a path, as a name under configs/, or as a name under the project root, which is where the smoke chain writes its tiny configs.",
+   "depends": [
+    "c0",
+    "env/paths.sh"
+   ],
+   "affects": [
+    "c3",
+    "c4",
+    "c5",
+    "c8",
+    "c10",
+    "c11",
+    "c12",
+    "c13",
+    "c14",
+    "c15",
+    "c16"
+   ],
+   "arch": [
+    {
+     "n": "root()",
+     "d": "$COS_ROOT"
+    },
+    {
+     "n": "code_root()",
+     "d": "the repository"
+    },
+    {
+     "n": "load_config()",
+     "d": "path, configs/, or root"
+    },
+    {
+     "n": "cache_dir()",
+     "d": "data/cache/<config>"
+    },
+    {
+     "n": "results_dir()",
+     "d": "results/<config>/..."
+    }
+   ],
+   "reads": [
+    "configs/*.json"
+   ],
+   "writes": [],
+   "meetings": [
+    {
+     "date": "2026-10-28",
+     "rating": 4,
+     "note": "Walkthrough of the lean repository at the live-testing check."
+    }
+   ],
+   "col": 2,
+   "row": 0,
+   "note": null
+  },
+  {
+   "id": "c3",
+   "file": "common/text.py",
+   "phase": "C",
+   "owner": "R",
+   "priority": 2,
+   "status": "co",
+   "deadline": "2026-10-28",
+   "summary": "Cleaning, label normalisation, duplicate keys, groups and the grouped splits.",
+   "what": "fix_mojibake and clean_text repair and normalise a text; normalise_labels maps a column onto a reading's classes; near_duplicate_keys and run_keys build the group keys; grouped_folds and confirmation_split hold groups together across every split. UT-D and UT-N test every branch against closed-form answers.",
+   "depends": [
+    "c2"
+   ],
+   "affects": [
+    "c10",
+    "c12",
+    "c14",
+    "c15",
+    "c16",
+    "d1"
+   ],
+   "arch": [
+    {
+     "n": "fix_mojibake",
+     "d": "Windows-1252 repairs"
+    },
+    {
+     "n": "clean_text",
+     "d": "NFC, zero-width, whitespace"
+    },
+    {
+     "n": "normalise_labels",
+     "d": "onto the reading's classes"
+    },
+    {
+     "n": "near_duplicate_keys",
+     "d": "group key"
+    },
+    {
+     "n": "grouped_folds",
+     "d": "StratifiedGroupKFold"
+    },
+    {
+     "n": "confirmation_split",
+     "d": "15 percent by group"
+    }
+   ],
+   "reads": [],
+   "writes": [],
+   "meetings": [
+    {
+     "date": "2026-10-28",
+     "rating": 4,
+     "note": "Walkthrough of the lean repository."
+    }
+   ],
+   "col": 2,
+   "row": 1,
+   "note": null
+  },
+  {
+   "id": "c4",
+   "file": "common/cache.py",
+   "phase": "C",
+   "owner": "R",
+   "priority": 3,
+   "status": "co",
+   "deadline": "2026-10-28",
+   "summary": "The content-hash feature cache: the key, the manifest, save and load.",
+   "what": "sha256_file and sha256_column digest the weights, the tokenizer and the text column; feature_key joins them with the pooling and the length settings; save_features writes pooled.npy in float16 with ids.csv and a manifest; load_features returns the cache or None. No hostname, working directory or job id goes into the manifest.",
+   "depends": [
+    "c2"
+   ],
+   "affects": [
+    "c5",
+    "c8",
+    "c11",
+    "d1"
+   ],
+   "arch": [
+    {
+     "n": "sha256_file / sha256_column",
+     "d": "weights, tokenizer, texts"
+    },
+    {
+     "n": "feature_key()",
+     "d": "the content hash"
+    },
+    {
+     "n": "save_features()",
+     "d": "pooled.npy fp16, ids.csv, manifest.json"
+    },
+    {
+     "n": "load_features()",
+     "d": "the cache or None"
+    }
+   ],
+   "reads": [],
+   "writes": [
+    "features/<key>/pooled.npy",
+    "ids.csv",
+    "manifest.json"
+   ],
+   "meetings": [
+    {
+     "date": "2026-10-28",
+     "rating": 4,
+     "note": "Walkthrough of the lean repository."
+    }
+   ],
+   "col": 2,
+   "row": 2,
+   "note": null
+  },
+  {
+   "id": "c5",
+   "file": "common/encoder.py",
+   "phase": "C",
+   "owner": "R",
+   "priority": 2,
+   "status": "co",
+   "deadline": "2026-10-28",
+   "summary": "Offline loading of the encoder, pooling, and the windowed forward pass.",
+   "what": "model_dir and weights_file find the encoder in the offline cache; digests hash the weights and the tokenizer for the cache key; load puts the model on the device in eval mode; pool joins the [CLS] vector with the masked mean; encode reads long texts in windows of 510 tokens with a 32-token overlap under a token budget and averages the windows. UT-E tests the window count at 1, 509, 510, 511, 988 and 989 tokens.",
+   "depends": [
+    "c4",
+    "c2",
+    "hf_cache/"
+   ],
+   "affects": [
+    "c11",
+    "d1",
+    "e3"
+   ],
+   "arch": [
+    {
+     "n": "model_dir / weights_file",
+     "d": "offline cache"
+    },
+    {
+     "n": "digests()",
+     "d": "for the cache key"
+    },
+    {
+     "n": "load()",
+     "d": "eval, device"
+    },
+    {
+     "n": "pool()",
+     "d": "[CLS] + masked mean"
+    },
+    {
+     "n": "encode()",
+     "d": "windows 510/32, token budget, average"
+    }
+   ],
+   "reads": [
+    "hf_cache/"
+   ],
+   "writes": [],
+   "meetings": [
+    {
+     "date": "2026-10-28",
+     "rating": 4,
+     "note": "Walkthrough of the lean repository."
+    }
+   ],
+   "col": 2,
+   "row": 3,
+   "note": null
+  },
+  {
+   "id": "c6",
+   "file": "common/head.py",
+   "phase": "C",
+   "owner": "R",
+   "priority": 1,
+   "status": "co",
+   "deadline": "2026-10-29",
+   "summary": "The head, standardisation, the training loop, inference and the JSON form the application reads.",
+   "what": "MultiHead is a trunk of linear layers with one output layer per reading. standardise fits mean and sd on the training rows; fit runs AdamW with a one-epoch warm-up and a cosine floor, an EMA of the weights, smoothed cross-entropy and early stopping on the validation cross-entropy; predict_logits and predict_proba run inference with the temperatures; to_json and from_json are the export, float16 weights with the activations and temperatures, that the numpy pass, the integration checker and the application all read.",
+   "depends": [
+    "c7",
+    "fd07",
+    "ed07"
+   ],
+   "affects": [
+    "c12",
+    "c13",
+    "c14",
+    "c15",
+    "d1",
+    "d3",
+    "e2"
+   ],
+   "arch": [
+    {
+     "n": "MultiHead",
+     "d": "trunk + one output per reading"
+    },
+    {
+     "n": "standardise()",
+     "d": "mean and sd on the training rows"
+    },
+    {
+     "n": "fit()",
+     "d": "AdamW, warm-up, cosine floor, EMA, early stop"
+    },
+    {
+     "n": "predict_proba()",
+     "d": "with the temperatures"
+    },
+    {
+     "n": "to_json()",
+     "d": "the export"
+    },
+    {
+     "n": "from_json()",
+     "d": "reload"
+    }
+   ],
+   "reads": [],
+   "writes": [
+    "nn_model.json (through the scripts)"
+   ],
+   "meetings": [
+    {
+     "date": "2026-10-29",
+     "rating": 4,
+     "note": "Export format agreed with Hara: mean, sd, trunk, outputs, temperatures."
+    }
+   ],
+   "col": 2,
+   "row": 4,
+   "note": null
+  },
+  {
+   "id": "c7",
+   "file": "common/metrics.py",
+   "phase": "C",
+   "owner": "R",
+   "priority": 2,
+   "status": "co",
+   "deadline": "2026-11-01",
+   "summary": "Accuracy, macro-F1, log-loss, AUC, confusion, the bootstrap, the corrected resampled t-test and the temperature.",
+   "what": "evaluate returns every metric of a prediction table; bootstrap_macro_f1 gives the interval of the confirmation score; corrected_resampled_t is Nadeau and Bengio's test on paired fold-by-seed differences with the variance corrected for the overlap of training sets; fit_temperature finds the scalar that divides the logits; ece the calibration error over 15 bins.",
+   "depends": [],
+   "affects": [
+    "c6",
+    "c12",
+    "c13",
+    "c14",
+    "c15",
+    "c16",
+    "d1"
+   ],
+   "arch": [
+    {
+     "n": "softmax / evaluate",
+     "d": "accuracy, macro-F1, log-loss, AUC"
+    },
+    {
+     "n": "confusion()",
+     "d": "K x K"
+    },
+    {
+     "n": "bootstrap_macro_f1()",
+     "d": "1,000 draws"
+    },
+    {
+     "n": "corrected_resampled_t()",
+     "d": "Nadeau and Bengio"
+    },
+    {
+     "n": "fit_temperature()",
+     "d": "on OOF logits"
+    },
+    {
+     "n": "ece()",
+     "d": "15 bins"
+    }
+   ],
+   "reads": [],
+   "writes": [],
+   "meetings": [
+    {
+     "date": "2026-10-31",
+     "rating": 4,
+     "note": "The corrected t-test on known values at the live-testing check."
+    }
+   ],
+   "col": 2,
+   "row": 5,
+   "note": null
+  },
+  {
+   "id": "c8",
+   "file": "common/sets.py",
+   "phase": "C",
+   "owner": "R",
+   "priority": 3,
+   "status": "co",
+   "deadline": "2026-10-28",
+   "summary": "A prepared table with its cached features and its labels, in one call.",
+   "what": "load_set reads the prepared table of a set, finds its features under the content hash and returns the frame, the feature matrix and the label arrays per reading; labels maps the columns onto the readings' classes.",
+   "depends": [
+    "c4",
+    "c5",
+    "c2"
+   ],
+   "affects": [
+    "c12",
+    "c13",
+    "c14",
+    "c15"
+   ],
+   "arch": [
+    {
+     "n": "feature_key()",
+     "d": "from the config and the texts"
+    },
+    {
+     "n": "load_set()",
+     "d": "frame, features, labels"
+    },
+    {
+     "n": "labels()",
+     "d": "per reading"
+    }
+   ],
+   "reads": [
+    "data/cache/<config>/<set>.csv",
+    "features/<key>/pooled.npy"
+   ],
+   "writes": [],
+   "meetings": [
+    {
+     "date": "2026-10-28",
+     "rating": 4,
+     "note": "Walkthrough of the lean repository."
+    }
+   ],
+   "col": 2,
+   "row": 6,
+   "note": null
+  },
+  {
+   "id": "c9",
+   "file": "common/runlog.py",
+   "phase": "C",
+   "owner": "R",
+   "priority": 2,
+   "status": "co",
+   "deadline": "2026-11-01",
+   "summary": "The dated PASS/FAIL log every test layer and the chain write: one line per check, a .json mirror, no host or path.",
+   "what": "RunLog opens <stage>_<date>.log and its .json mirror under logs/, writes a header with the reference of the design document, one dated line per check with its id, message and seconds, counts the verdicts and closes with the PASS or FAIL summary line and the exit code. The forbidden-pattern scan keeps hosts, logins and paths out of it.",
+   "depends": [],
+   "affects": [
+    "d1",
+    "d2",
+    "d3",
+    "d4",
+    "c17"
+   ],
+   "arch": [
+    {
+     "n": "RunLog(stage, folder, reference)",
+     "d": "opens .log and .json"
+    },
+    {
+     "n": "header()",
+     "d": "the reference line"
+    },
+    {
+     "n": "check(ident, ok, message, seconds)",
+     "d": "one dated line"
+    },
+    {
+     "n": "counts()",
+     "d": "passed, failed, skipped"
+    },
+    {
+     "n": "close(exit_code)",
+     "d": "the summary line"
+    }
+   ],
+   "reads": [],
+   "writes": [
+    "logs/<stage>_<date>.log",
+    "logs/<stage>_<date>.json"
+   ],
+   "meetings": [
+    {
+     "date": "2026-11-01",
+     "rating": 4,
+     "note": "Log format shown at the live-testing check; the same line in every layer."
+    }
+   ],
+   "col": 2,
+   "row": 7,
+   "note": null
+  },
+  {
+   "id": "c10",
+   "file": "scripts/prepare.py",
+   "phase": "C",
+   "owner": "R",
+   "priority": 1,
+   "status": "co",
+   "deadline": "2026-10-28",
+   "summary": "Step 1: clean, normalise the labels, fold duplicates, group, and write one table per set with a content hash. Seconds, on the login node.",
+   "what": "For one config: reads the raw training file and every prediction file, cleans the text, puts the labels on their configured names, folds exact duplicates of the training set with a count, assigns groups (near-duplicate key for finance, conversation for dialogue) and writes the prepared tables with a manifest, label counts and a length audit (how_short). CH-01 of the chain: 6 seconds for both corpora.",
+   "depends": [
+    "c0",
+    "c2",
+    "c3",
+    "data/raw/"
+   ],
+   "affects": [
+    "c11",
+    "c12",
+    "c13",
+    "d3"
+   ],
+   "arch": [
+    {
+     "n": "load_config",
+     "d": "finance or dialogue"
+    },
+    {
+     "n": "prepare(train)",
+     "d": "clean, labels, fold, group"
+    },
+    {
+     "n": "prepare(prediction sets)",
+     "d": "sentfin"
+    },
+    {
+     "n": "length audit",
+     "d": "how_short"
+    },
+    {
+     "n": "write tables",
+     "d": "data/cache/<config>/ with the hash"
+    }
+   ],
+   "reads": [
+    "data/raw/fs_train.csv",
+    "data/raw/empathetic_training.csv",
+    "data/raw/predict/sentfin.csv"
+   ],
+   "writes": [
+    "data/cache/<config>/train.csv",
+    "sentfin.csv",
+    "manifest.json",
+    "label_counts.json",
+    "length_audit.json"
+   ],
+   "meetings": [
+    {
+     "date": "2026-10-28",
+     "rating": 4,
+     "note": "Walkthrough of the lean repository."
+    }
+   ],
+   "col": 3,
+   "row": 1,
+   "note": null
+  },
+  {
+   "id": "c11",
+   "file": "scripts/encode.py",
+   "phase": "C",
+   "owner": "R",
+   "priority": 1,
+   "status": "co",
+   "deadline": "2026-10-28",
+   "summary": "Step 2: the frozen encoder over every prepared set, fp16 on one GPU; skips a set whose key is in the cache. CH-02: 33 seconds.",
+   "what": "For each prepared set of a config it computes the feature key from the encoder digests, the text column, the pooling and the length settings, loads the cache if the key exists and otherwise runs the windowed forward pass and saves the features. On 3 November the three caches were found under their hashes, so the job took 33 seconds (7.8 GPU-minutes when they were first written).",
+   "depends": [
+    "c10",
+    "c4",
+    "c5",
+    "c2"
+   ],
+   "affects": [
+    "c12",
+    "c13",
+    "c14",
+    "c15",
+    "d3"
+   ],
+   "arch": [
+    {
+     "n": "load_config",
+     "d": "finance or dialogue"
+    },
+    {
+     "n": "feature_key_of()",
+     "d": "digests + text + pooling + length"
+    },
+    {
+     "n": "cache hit?",
+     "d": "load_features"
+    },
+    {
+     "n": "encode()",
+     "d": "windows, fp16, GPU"
+    },
+    {
+     "n": "save_features()",
+     "d": "pooled.npy, ids.csv, manifest"
+    }
+   ],
+   "reads": [
+    "data/cache/<config>/*.csv",
+    "hf_cache/"
+   ],
+   "writes": [
+    "features/<key>/pooled.npy",
+    "ids.csv",
+    "manifest.json"
+   ],
+   "meetings": [
+    {
+     "date": "2026-10-28",
+     "rating": 4,
+     "note": "Walkthrough of the lean repository."
+    }
+   ],
+   "col": 3,
+   "row": 2,
+   "note": null
+  },
+  {
+   "id": "c12",
+   "file": "scripts/train.py",
+   "phase": "C",
+   "owner": "R",
+   "priority": 1,
+   "status": "co",
+   "deadline": "2026-10-29",
+   "summary": "Steps 3 to 7: confirmation split, StratifiedGroupKFold 5 x 3 on the chosen configuration, temperature, final fit, confirmation scored once, export.",
+   "what": "Holds the confirmation split out first, runs the grouped folds by seed on the fixed configuration and records every validation fold in folds.csv (read by the controls and the integration test), fits one temperature per reading on the out-of-fold logits, refits on all development rows for the median best epoch, scores the confirmation split once with a bootstrap interval and exports the head. CH-03 and CH-04 of the chain: 9 min 10 s for finance, 6 min 25 s for dialogue; both networks came back to the fourth decimal of the research pipeline's numbers.",
+   "depends": [
+    "c11",
+    "c10",
+    "c0",
+    "c6",
+    "c7",
+    "c8",
+    "c3"
+   ],
+   "affects": [
+    "c13",
+    "c14",
+    "c15",
+    "c16",
+    "d3",
+    "e2"
+   ],
+   "arch": [
+    {
+     "n": "load_set(train)",
+     "d": "features and labels"
+    },
+    {
+     "n": "confirmation_split",
+     "d": "15 percent by group, held out first"
+    },
+    {
+     "n": "StratifiedGroupKFold 5 x 3",
+     "d": "fit per fold, record folds.csv"
+    },
+    {
+     "n": "fit_temperature",
+     "d": "on the OOF logits"
+    },
+    {
+     "n": "final fit",
+     "d": "median best epoch, all development rows"
+    },
+    {
+     "n": "confirmation scored once",
+     "d": "bootstrap interval"
+    },
+    {
+     "n": "export",
+     "d": "nn_model.json, summary.json, cv_runs.csv"
+    }
+   ],
+   "reads": [
+    "data/cache/<config>/train.csv",
+    "features/<key>/pooled.npy",
+    "configs/<config>.json"
+   ],
+   "writes": [
+    "results/<config>/train/nn_model.json",
+    "summary.json",
+    "cv_runs.csv",
+    "folds.csv",
+    "confirmation_ids.csv",
+    "confusion_<reading>.csv"
+   ],
+   "meetings": [
+    {
+     "date": "2026-10-29",
+     "rating": 4,
+     "note": "train.py walked through against Appendix B."
+    },
+    {
+     "date": "2026-11-03",
+     "rating": 5,
+     "note": "The two networks reproduce to the fourth decimal."
+    }
+   ],
+   "col": 3,
+   "row": 3,
+   "note": null
+  },
+  {
+   "id": "c13",
+   "file": "scripts/predict.py",
+   "phase": "C",
+   "owner": "R",
+   "priority": 2,
+   "status": "co",
+   "deadline": "2026-10-29",
+   "summary": "A trained head on every prediction set: pieces averaged per original row, metrics where labels exist. Seconds, inside the train job.",
+   "what": "Loads the exported head, runs it on the cached features of each prediction set, averages the pieces of a long text per original row, writes predictions.csv with the probabilities of every reading and metrics.json with a confusion matrix where the set has labels. sbatch slurm/predict.sh <config> prepares and encodes a new file under data/raw/predict/ first.",
+   "depends": [
+    "c12",
+    "c11",
+    "c6",
+    "c7",
+    "c8"
+   ],
+   "affects": [
+    "c14",
+    "d3",
+    "e2"
+   ],
+   "arch": [
+    {
+     "n": "from_json",
+     "d": "the exported head"
+    },
+    {
+     "n": "load_set(prediction set)",
+     "d": "features"
+    },
+    {
+     "n": "predict_proba",
+     "d": "temperatures applied"
+    },
+    {
+     "n": "average pieces",
+     "d": "per original row"
+    },
+    {
+     "n": "write",
+     "d": "predictions.csv, metrics.json, confusion"
+    }
+   ],
+   "reads": [
+    "results/<config>/train/nn_model.json",
+    "features of the prediction sets"
+   ],
+   "writes": [
+    "results/<config>/<set>/predictions.csv",
+    "metrics.json"
+   ],
+   "meetings": [
+    {
+     "date": "2026-10-29",
+     "rating": 4,
+     "note": "predict.py walked through."
+    }
+   ],
+   "col": 3,
+   "row": 4,
+   "note": null
+  },
+  {
+   "id": "c14",
+   "file": "scripts/adapt.py",
+   "phase": "C",
+   "owner": "R",
+   "priority": 1,
+   "status": "co",
+   "deadline": "2026-11-02",
+   "summary": "Step 8: the leashed objective in two forms, the closed form and GRPO, all rows or the misread rows, with the retention term. Eight runs in 3 min 19 s.",
+   "what": "Moves a trained head to a new corpus without losing what it knows. exact_loss fits the head to softmax(log pi_ref + onehot(y) / beta) at beta 0.3; grpo_advantage and grpo_loss sample four classes per row, centre and scale the rewards within the group and take the policy gradient with beta 0.1 on the KL to the starting head. Under both a retention term, the forward KL on the head's own development rows, holds the old readings. Half of the new corpus is held out by group; --rows wrong trains only on the misread rows of the training half. CH-05 of the chain: the eight runs; the two shipped GRPO stages repeated on three seeds.",
+   "depends": [
+    "c12",
+    "c13",
+    "c0",
+    "c6",
+    "c7",
+    "c8",
+    "c3",
+    "ed12",
+    "edmis"
+   ],
+   "affects": [
+    "d3",
+    "e2",
+    "g3"
+   ],
+   "arch": [
+    {
+     "n": "load start head and corpora",
+     "d": "home rows and the new corpus"
+    },
+    {
+     "n": "held_mask",
+     "d": "half by group, or the misread rows"
+    },
+    {
+     "n": "exact_loss",
+     "d": "closed form, beta 0.3"
+    },
+    {
+     "n": "grpo_loss",
+     "d": "G 4, group-normalised advantage, beta 0.1"
+    },
+    {
+     "n": "retention term",
+     "d": "forward KL on home development rows"
+    },
+    {
+     "n": "AdamW, clipped at 1",
+     "d": "20 epochs"
+    },
+    {
+     "n": "evaluate per epoch",
+     "d": "new, transfer and home corpora"
+    },
+    {
+     "n": "export",
+     "d": "nn_model.json, summary.json, adapt_log.csv, weight_changes.csv"
+    }
+   ],
+   "reads": [
+    "results/<config>/train/nn_model.json",
+    "features of both corpora",
+    "configs/*.json"
+   ],
+   "writes": [
+    "results/<config>/adapt/<run>/nn_model.json",
+    "summary.json",
+    "adapt_log.csv",
+    "predictions_<set>.csv",
+    "weight_changes.csv"
+   ],
+   "meetings": [
+    {
+     "date": "2026-10-30",
+     "rating": 4,
+     "note": "The closed form and GRPO side by side at the Sprint 3 review."
+    },
+    {
+     "date": "2026-11-03",
+     "rating": 5,
+     "note": "84.4 (sd 0.2) for 78.8 kept; the dialogue head at 78.6 with its emotion reading intact."
+    }
+   ],
+   "col": 3,
+   "row": 5,
+   "note": null
+  },
+  {
+   "id": "c15",
+   "file": "scripts/linear.py",
+   "phase": "C",
+   "owner": "R",
+   "priority": 2,
+   "status": "co",
+   "deadline": "2026-10-31",
+   "summary": "The linear control: ridge logistic regression on the same 2,048 features, the network's folds and confirmation rows, paired by the corrected t-test.",
+   "what": "Reads the network's folds.csv and confirmation ids so that the control sees exactly the same rows, chooses C on two folds, fits the multinomial logit with L-BFGS on every fold and seed, scores the confirmation split and SEntFiN, and pairs the fold-by-seed macro-F1 against the network with the corrected resampled t-test and a paired bootstrap. CH-06: 66 min 42 s, the longest job of the chain (L-BFGS makes several hundred passes over a 360 MB matrix per fit).",
+   "depends": [
+    "c12",
+    "c7",
+    "c6",
+    "c8",
+    "fdlin"
+   ],
+   "affects": [
+    "d3",
+    "g1"
+   ],
+   "arch": [
+    {
+     "n": "read_folds",
+     "d": "the network's folds.csv and confirmation ids"
+    },
+    {
+     "n": "C on two folds",
+     "d": "grouped"
+    },
+    {
+     "n": "fit_logit per fold and seed",
+     "d": "L-BFGS, L2"
+    },
+    {
+     "n": "confirmation and SEntFiN",
+     "d": "scored once"
+    },
+    {
+     "n": "paired_difference",
+     "d": "bootstrap"
+    },
+    {
+     "n": "corrected_resampled_t",
+     "d": "against the network"
+    },
+    {
+     "n": "export",
+     "d": "linear_model.json, summary.json"
+    }
+   ],
+   "reads": [
+    "results/<config>/train/folds.csv",
+    "confirmation_ids.csv",
+    "features"
+   ],
+   "writes": [
+    "results/<config>/linear/linear_model.json",
+    "summary.json",
+    "cv_runs.csv",
+    "<set>/predictions.csv"
+   ],
+   "meetings": [
+    {
+     "date": "2026-10-31",
+     "rating": 4,
+     "note": "+0.018 macro-F1 for the hidden layers on FinGPT, p 5e-8; a tie on the dialogue data."
+    }
+   ],
+   "col": 3,
+   "row": 6,
+   "note": null
+  },
+  {
+   "id": "c16",
+   "file": "scripts/words.py",
+   "phase": "C",
+   "owner": "R",
+   "priority": 2,
+   "status": "co",
+   "deadline": "2026-10-31",
+   "summary": "The word logit: a multinomial logit on word indicators, identified by its ridge penalty, one model per corpus, with its trigger words. The control for the encoder.",
+   "what": "words_of reads the distinct words of a text; indicators builds the sparse matrix; fit_logit fits the multinomial logit with L2 by L-BFGS with C chosen by grouped cross-validation; read and predict score a text word by word with N/A for a text with no known word; trigger_words lists the words whose top class probability exceeds 0.5 (4,648 on SEntFiN). CH-07: 7 min 31 s for the three models. The trigger table is written with six decimals after a word at 0.50004 recomputed on the other side of 0.5.",
+   "depends": [
+    "c10",
+    "c3",
+    "c7",
+    "jtfidf"
+   ],
+   "affects": [
+    "d3",
+    "e1",
+    "g1"
+   ],
+   "arch": [
+    {
+     "n": "words_of",
+     "d": "[a-z]+(?:'[a-z]+)?"
+    },
+    {
+     "n": "indicators",
+     "d": "sparse matrix"
+    },
+    {
+     "n": "own_split / network_split",
+     "d": "same rows as the network"
+    },
+    {
+     "n": "fit_logit",
+     "d": "C by grouped CV, L-BFGS"
+    },
+    {
+     "n": "read / predict",
+     "d": "P(class | word), N/A"
+    },
+    {
+     "n": "trigger_words",
+     "d": "top probability above 0.5"
+    },
+    {
+     "n": "export",
+     "d": "words_model.json, trigger_words.csv"
+    }
+   ],
+   "reads": [
+    "data/cache/<config>/<set>.csv",
+    "results/<config>/train/folds.csv"
+   ],
+   "writes": [
+    "results/<config>/words/<set>/words_model.json",
+    "summary.json",
+    "trigger_words.csv",
+    "cv_runs.csv"
+   ],
+   "meetings": [
+    {
+     "date": "2026-10-31",
+     "rating": 4,
+     "note": "FinGPT at 71.0, SEntFiN at 58.9 zero-shot and 79.8 in domain."
+    },
+    {
+     "date": "2026-11-03",
+     "rating": 3,
+     "note": "A word at 0.50004 recomputed on the other side of 0.5; six decimals now."
+    }
+   ],
+   "col": 3,
+   "row": 7,
+   "note": null
+  },
+  {
+   "id": "c17",
+   "file": "slurm/_header.sh, encode.sh, train.sh, predict.sh, adapt.sh, linear.sh, words.sh",
+   "phase": "C",
+   "owner": "R",
+   "priority": 1,
+   "status": "co",
+   "deadline": "2026-11-02",
+   "summary": "The job scripts with their allocations; the shared header writes one dated PASS or FAIL line with the wall time to the chain log.",
+   "what": "Each job script sets its stage id and reference, sources env/paths.sh and _header.sh, and runs its script. _header.sh records the node, the allocation and the Python in the job's own log, traps the exit and appends one dated line with the duration to logs/chain_<date>.log. The configuration travels as a positional argument, because sbatch does not pass environment variables into a job: the second fault of 3 November, when both training jobs trained the finance head.",
+   "depends": [
+    "c1",
+    "c9"
+   ],
+   "affects": [
+    "c18",
+    "d3"
+   ],
+   "arch": [
+    {
+     "n": "STAGE, STAGE_ID, REFERENCE",
+     "d": "per job"
+    },
+    {
+     "n": "source env/paths.sh",
+     "d": "root and venv"
+    },
+    {
+     "n": "source _header.sh",
+     "d": "start line, trap"
+    },
+    {
+     "n": "run the script",
+     "d": "with the positional config"
+    },
+    {
+     "n": "stage_finish",
+     "d": "PASS or FAIL line with the wall time"
+    }
+   ],
+   "reads": [],
+   "writes": [
+    "logs/<stage>_<jobid>.txt",
+    "logs/chain_<date>.log"
+   ],
+   "meetings": [
+    {
+     "date": "2026-11-02",
+     "rating": 2,
+     "note": "Two CH-03 lines in the chain log: sbatch does not pass environment variables into a job."
+    }
+   ],
+   "col": 4,
+   "row": 1,
+   "note": null
+  },
+  {
+   "id": "c18",
+   "file": "slurm/chain.sh",
+   "phase": "C",
+   "owner": "R",
+   "priority": 1,
+   "status": "co",
+   "deadline": "2026-11-03",
+   "summary": "The whole chain as one submission: prepare on the login node, then seven jobs with afterok dependencies, the integration test last.",
+   "what": "Runs prepare for both configs, then submits encode, the two training jobs, adapt, linear and words with afterok dependencies, and the integration test depending on all of them, so the test never runs on a partial tree. Submitted four times on 2 and 3 November: the environment fault, the positional config, three checker fixes against the real tree, the mutation count; the fourth submission ended with CH-08 PASS, 154 checks, and the archive was packed and its checksum verified.",
+   "depends": [
+    "c17",
+    "c1",
+    "d2"
+   ],
+   "affects": [
+    "d3",
+    "d4",
+    "g1"
+   ],
+   "arch": [
+    {
+     "n": "prepare x2",
+     "d": "login node, CH-01"
+    },
+    {
+     "n": "sbatch encode",
+     "d": "CH-02"
+    },
+    {
+     "n": "train finance, train dialogue",
+     "d": "afterok encode"
+    },
+    {
+     "n": "adapt, linear, words",
+     "d": "afterok both trainings"
+    },
+    {
+     "n": "integration_test",
+     "d": "afterok all: CH-08"
+    },
+    {
+     "n": "archive",
+     "d": "sha256 and manifest"
+    }
+   ],
+   "reads": [],
+   "writes": [
+    "logs/chain_<date>.log",
+    "the archive of the project folder"
+   ],
+   "meetings": [
+    {
+     "date": "2026-11-02",
+     "rating": 2,
+     "note": "Submissions one and two failed on the environment and the configuration."
+    },
+    {
+     "date": "2026-11-03",
+     "rating": 5,
+     "note": "Submission four: 154 PASS, 8 FAIL on the broken copy, exit 0 on the clean tree."
+    }
+   ],
+   "col": 4,
+   "row": 2,
+   "note": null
+  },
+  {
+   "id": "d1",
+   "file": "tests/unit/ (111 tests), conftest.py, numpy_head.py, make_tiny.py",
+   "phase": "D",
+   "owner": "R",
+   "priority": 1,
+   "status": "co",
+   "deadline": "2026-11-01",
+   "summary": "Every function of common/* against closed-form answers, and the torch head against an independent numpy pass: the parity oracle.",
+   "what": "UT-D covers the cleaning branches, UT-B the word reader, UT-N the grouping, the confirmation split and the corrected t-test on known values, UT-E the window count at 1, 509, 510, 511, 988 and 989 tokens with a tiny random encoder from make_tiny.py, UT-R the closed-form tilt and the GRPO advantage, UT-G the dated log. numpy_head.py reruns an exported head without torch and is the oracle the integration test and the application's parity tests rest on. conftest.py writes logs/unit_<date>.log, .json and a junit xml. 111 passed in 15.4 seconds on 3 November.",
+   "depends": [
+    "c3",
+    "c4",
+    "c5",
+    "c6",
+    "c7",
+    "c9",
+    "c14",
+    "c15",
+    "c16"
+   ],
+   "affects": [
+    "d2",
+    "d3",
+    "e4",
+    "g2"
+   ],
+   "arch": [
+    {
+     "n": "conftest.py",
+     "d": "the dated log and the junit xml"
+    },
+    {
+     "n": "make_tiny.py",
+     "d": "a tiny random encoder"
+    },
+    {
+     "n": "numpy_head.py",
+     "d": "the independent pass"
+    },
+    {
+     "n": "UT-D / UT-B / UT-N",
+     "d": "cleaning, words, splits, the t-test"
+    },
+    {
+     "n": "UT-E",
+     "d": "window boundaries"
+    },
+    {
+     "n": "UT-R",
+     "d": "tilt and advantage"
+    },
+    {
+     "n": "UT-G",
+     "d": "the log itself"
+    }
+   ],
+   "reads": [
+    "the modules under common/"
+   ],
+   "writes": [
+    "logs/unit_<date>.log",
+    ".json",
+    ".xml"
+   ],
+   "meetings": [
+    {
+     "date": "2026-11-01",
+     "rating": 4,
+     "note": "111 passed in 15 seconds at the live-testing check."
+    }
+   ],
+   "col": 5,
+   "row": 0,
+   "note": null
+  },
+  {
+   "id": "d2",
+   "file": "tests/smoke.sh, tests/run_local.sh",
+   "phase": "D",
+   "owner": "R",
+   "priority": 1,
+   "status": "co",
+   "deadline": "2026-11-01",
+   "summary": "The whole chain on synthetic data with a tiny random encoder, 25 steps in under three minutes, run on the login node before anything is submitted.",
+   "what": "Builds synthetic corpora and the tiny encoder, runs prepare, encode, train and predict for both configs, the eight adaptations, the two linear controls, the three word logits, then the integration checker on the result tree (154 checks, no bounds) and on a copy broken five ways (8 FAIL lines, exit 1). run_local.sh runs the unit suite then the smoke chain. It is the layer that exposed the mutation-count fault before the fourth submission.",
+   "depends": [
+    "d1",
+    "c10",
+    "c11",
+    "c12",
+    "c13",
+    "c14",
+    "c15",
+    "c16",
+    "d3",
+    "d4"
+   ],
+   "affects": [
+    "c18",
+    "g2"
+   ],
+   "arch": [
+    {
+     "n": "SM-01 synthetic corpora",
+     "d": "and the tiny encoder"
+    },
+    {
+     "n": "prepare, encode",
+     "d": "both configs"
+    },
+    {
+     "n": "train, predict",
+     "d": "both configs"
+    },
+    {
+     "n": "eight adaptations",
+     "d": "closed form, GRPO, rows wrong"
+    },
+    {
+     "n": "linear x2, words x3",
+     "d": "the controls"
+    },
+    {
+     "n": "SM-23 checker on the clean tree",
+     "d": "154 checks"
+    },
+    {
+     "n": "SM-24, SM-25 five faults, 8 FAIL",
+     "d": "exit 1"
+    }
+   ],
+   "reads": [],
+   "writes": [
+    "logs/smoke_<date>.log",
+    "a temporary synthetic root"
+   ],
+   "meetings": [
+    {
+     "date": "2026-11-01",
+     "rating": 4,
+     "note": "25 steps in 140 seconds on the login node."
+    },
+    {
+     "date": "2026-11-03",
+     "rating": 4,
+     "note": "SM-25 confirmed the mutation-count fix before the resubmission."
+    }
+   ],
+   "col": 5,
+   "row": 1,
+   "note": null
+  },
+  {
+   "id": "d3",
+   "file": "tests/integration/check_results.py, bounds.json, slurm/integration_test.sh",
+   "phase": "D",
+   "owner": "R",
+   "priority": 1,
+   "status": "co",
+   "deadline": "2026-11-03",
+   "summary": "154 checks over every model's files: schema, parity to 1e-6, split hygiene, the bounds of the design document. The last job of the chain.",
+   "what": "Opens each of the fourteen model directories (ten checks each) and runs fourteen checks across models: the export reloads, the numpy pass equals the torch pass and the stored number to 1e-6, confirmation ids are disjoint from every training fold and shared with the controls, the learning log has steps = epochs x ceil(rows / batch), the GRPO trunk differs from its start while mean, sd and temperatures do not, the confirmation score lies inside the cross-validation band, and every headline number of the document holds to its bound in bounds.json. Writes results/integration_report.txt and exits 0 or 1; integration_test.sh runs it as CH-08.",
+   "depends": [
+    "d1",
+    "c12",
+    "c13",
+    "c14",
+    "c15",
+    "c16",
+    "c9"
+   ],
+   "affects": [
+    "d4",
+    "c18",
+    "g1",
+    "g2"
+   ],
+   "arch": [
+    {
+     "n": "open 14 model directories",
+     "d": "ten checks each"
+    },
+    {
+     "n": "reload export",
+     "d": "from_json and numpy_head"
+    },
+    {
+     "n": "parity",
+     "d": "torch, numpy, stored: 1e-6"
+    },
+    {
+     "n": "split hygiene",
+     "d": "ids disjoint, shared with the controls"
+    },
+    {
+     "n": "learning log and weights",
+     "d": "steps, moved trunk, fixed mean and sd"
+    },
+    {
+     "n": "bounds.json",
+     "d": "every headline number"
+    },
+    {
+     "n": "14 checks across models",
+     "d": "ladders, splits, manifests, tables"
+    },
+    {
+     "n": "report and exit",
+     "d": "integration_report.txt, 0 or 1"
+    }
+   ],
+   "reads": [
+    "results/**",
+    "features/<key>/manifest.json",
+    "data/cache/*/manifest.json",
+    "tests/integration/bounds.json"
+   ],
+   "writes": [
+    "results/integration_report.txt",
+    "logs/integration_<date>.log"
+   ],
+   "meetings": [
+    {
+     "date": "2026-11-02",
+     "rating": 3,
+     "note": "149 of 154 on the first complete run: manifests, decimals and a copied band."
+    },
+    {
+     "date": "2026-11-03",
+     "rating": 5,
+     "note": "154 PASS in 12.8 seconds as the last job of the chain."
+    }
+   ],
+   "col": 5,
+   "row": 2,
+   "note": null
+  },
+  {
+   "id": "d4",
+   "file": "tests/integration/mutate.py",
+   "phase": "D",
+   "owner": "R",
+   "priority": 2,
+   "status": "co",
+   "deadline": "2026-11-03",
+   "summary": "Five faults seeded into a copy of the results; the checker must fail with exactly 8 FAIL lines and exit 1.",
+   "what": "M1 appends a confirmation id to a training fold, M2 lowers a stored accuracy by 0.01, M3 replaces a GRPO trunk by its start, M4 truncates a bias vector, M5 removes the trigger word copra. Each fault maps to a different check, so the run shows the checker's coverage. The first version raised the accuracy, which also crossed the upper bound and gave 9 FAIL lines, and a doubled submission made the day's log count 16; both fixed on 3 November.",
+   "depends": [
+    "d3"
+   ],
+   "affects": [
+    "c18",
+    "d2",
+    "g2"
+   ],
+   "arch": [
+    {
+     "n": "copy the results tree",
+     "d": "mutants/"
+    },
+    {
+     "n": "M1 split hygiene",
+     "d": "id into a fold"
+    },
+    {
+     "n": "M2 stored accuracy",
+     "d": "lowered by 0.01"
+    },
+    {
+     "n": "M3 GRPO trunk",
+     "d": "replaced by its start"
+    },
+    {
+     "n": "M4 bias vector",
+     "d": "truncated"
+    },
+    {
+     "n": "M5 trigger word",
+     "d": "copra removed"
+    },
+    {
+     "n": "checker on the copy",
+     "d": "exactly 8 FAIL, exit 1"
+    }
+   ],
+   "reads": [
+    "results/**"
+   ],
+   "writes": [
+    "mutants/**",
+    "logs/mutation_<date>.log"
+   ],
+   "meetings": [
+    {
+     "date": "2026-11-03",
+     "rating": 4,
+     "note": "8 FAIL, exit 1 on the broken copy; the clean tree 154 PASS."
+    }
+   ],
+   "col": 5,
+   "row": 3,
+   "note": null
+  },
+  {
+   "id": "d5",
+   "file": "tests/forbidden_patterns.py (the security scan)",
+   "phase": "D",
+   "owner": "R",
+   "priority": 2,
+   "status": "co",
+   "deadline": "2026-11-01",
+   "summary": "Nothing leaves the SuperComputer carrying a login, a host name or a project path: the forbidden-pattern tests and the static scan of every deliverable.",
+   "what": "A test over every export, summary and log that refuses a file carrying a home path, a login or an address (NF-07 and ST-F-07 on the application side), and a static scan run over every document, slide and figure before it leaves. The public repository carries the login redacted; the result files carry paths relative to the project root only.",
+   "depends": [
+    "c9",
+    "c6"
+   ],
+   "affects": [
+    "e2",
+    "e4",
+    "g4"
+   ],
+   "arch": [
+    {
+     "n": "patterns",
+     "d": "home paths, logins, hosts, addresses"
+    },
+    {
+     "n": "scan exports and summaries",
+     "d": "refuse the file"
+    },
+    {
+     "n": "scan logs",
+     "d": "the dated logs"
+    },
+    {
+     "n": "static scan of deliverables",
+     "d": "documents, slides, figures"
+    },
+    {
+     "n": "redact",
+     "d": "the public repository"
+    }
+   ],
+   "reads": [
+    "results/**",
+    "logs/**",
+    "the deliverables"
+   ],
+   "writes": [
+    "the scan report"
+   ],
+   "meetings": [
+    {
+     "date": "2026-10-30",
+     "rating": 4,
+     "note": "Security write-up reviewed; the scan run over the public copy."
+    }
+   ],
+   "col": 5,
+   "row": 4,
+   "note": null
+  },
+  {
+   "id": "e1",
+   "file": "sentiment-app/app.py",
+   "phase": "E",
+   "owner": "H",
+   "priority": 1,
+   "status": "co",
+   "deadline": "2026-11-01",
+   "summary": "The Streamlit application: a sentence through any of the fourteen models, the network drawn with its live activations, the word logit word by word.",
+   "what": "Hara's application, built from the first experiments of 12 October to the first deployment of 25 October and the redeployment of all fourteen models on 1 November. It reads the model store, calls the encoder service for a new sentence, runs the heads on a CPU with the same numpy pass the unit tests use, draws the network a sentence passes through with the calculation steps, and reads a sentence word by word for the word logit with N/A for unknown words. 368 statements, 99 percent covered.",
+   "depends": [
+    "e2",
+    "e3",
+    "c16"
+   ],
+   "affects": [
+    "e4",
+    "e6",
+    "f1",
+    "g3"
+   ],
+   "arch": [
+    {
+     "n": "page and catalog",
+     "d": "fourteen models"
+    },
+    {
+     "n": "sentence input",
+     "d": "text area"
+    },
+    {
+     "n": "encoder service call",
+     "d": "2,048 values"
+    },
+    {
+     "n": "run_head (numpy pass)",
+     "d": "mean, sd, trunk, output, temperature"
+    },
+    {
+     "n": "network drawn",
+     "d": "live activations"
+    },
+    {
+     "n": "word logit page",
+     "d": "word by word, N/A"
+    },
+    {
+     "n": "result and the 2,048 values",
+     "d": "metric, bars, table"
+    }
+   ],
+   "reads": [
+    "the model store built by build_models.py"
+   ],
+   "writes": [],
+   "meetings": [
+    {
+     "date": "2026-10-16",
+     "rating": 3,
+     "note": "First Streamlit experiments shown at the Sprint 1 review."
+    },
+    {
+     "date": "2026-10-23",
+     "rating": 4,
+     "note": "The FinGPT Network export read into the page."
+    },
+    {
+     "date": "2026-10-30",
+     "rating": 4,
+     "note": "The Dialogue Network page and the adapted heads."
+    },
+    {
+     "date": "2026-11-01",
+     "rating": 5,
+     "note": "All fourteen models live."
+    }
+   ],
+   "col": 6,
+   "row": 0,
+   "note": null
+  },
+  {
+   "id": "e2",
+   "file": "sentiment-app/build_models.py",
+   "phase": "E",
+   "owner": "H",
+   "priority": 1,
+   "status": "ip",
+   "deadline": "2026-11-09",
+   "summary": "The model store: reads the exported float16 weights and JSON summaries, refuses any file carrying a path or a login. To be rebuilt from the 3 November exports.",
+   "what": "Builds the store app.py reads from the exports of the pipeline: the trained networks, the adapted heads, the two controls and the word tables, with the golden readings for the parity tests. Every export and summary is scanned for home paths, logins and addresses and refused if one is found. The store still holds the October exports; it is to be rebuilt from the chain of 3 November, with the dialogue model shipped as two heads on the same features, emotion from dialogue/train and sentiment from dialogue/adapt/finance_train_grpo.",
+   "depends": [
+    "c12",
+    "c13",
+    "c14",
+    "c15",
+    "c16",
+    "c6",
+    "d5"
+   ],
+   "affects": [
+    "e1",
+    "e4",
+    "f1"
+   ],
+   "arch": [
+    {
+     "n": "read exports",
+     "d": "nn_model.json, summary.json, words_model.json"
+    },
+    {
+     "n": "scan",
+     "d": "paths, logins, addresses: refuse"
+    },
+    {
+     "n": "catalog",
+     "d": "fourteen models and their names"
+    },
+    {
+     "n": "golden readings",
+     "d": "for the parity tests"
+    },
+    {
+     "n": "dialogue as two heads",
+     "d": "emotion from train, sentiment from GRPO"
+    },
+    {
+     "n": "write the store",
+     "d": "one folder app.py reads"
+    }
+   ],
+   "reads": [
+    "results/**/nn_model.json",
+    "summary.json",
+    "words_model.json",
+    "trigger_words.csv"
+   ],
+   "writes": [
+    "the model store",
+    "golden_readings.json"
+   ],
+   "meetings": [
+    {
+     "date": "2026-10-30",
+     "rating": 4,
+     "note": "The store and its scan reviewed."
+    },
+    {
+     "date": "2026-11-05",
+     "rating": 3,
+     "note": "The store still holds the October exports; the rebuild is planned for the weekend."
+    }
+   ],
+   "col": 6,
+   "row": 1,
+   "note": null
+  },
+  {
+   "id": "e3",
+   "file": "fd_encode_server.py",
+   "phase": "E",
+   "owner": "R",
+   "priority": 2,
+   "status": "co",
+   "deadline": "2026-10-28",
+   "summary": "The encoder service: a local HTTP server that turns a sentence into the 2,048 values the heads were trained on.",
+   "what": "Loads bge-large-en-v1.5 once and serves GET /health and GET /encode?text=..., returning the [CLS] vector joined with the mean over the tokens, unnormalised, with the token count and the seconds. The application calls it for a new sentence; in the app the encoder is held in a cached resource so it loads once per process.",
+   "depends": [
+    "c5"
+   ],
+   "affects": [
+    "e1",
+    "f1"
+   ],
+   "arch": [
+    {
+     "n": "load encoder once",
+     "d": "tokenizer and model, eval"
+    },
+    {
+     "n": "GET /health",
+     "d": "ok"
+    },
+    {
+     "n": "GET /encode?text",
+     "d": "2,048 values, tokens, seconds"
+    },
+    {
+     "n": "CORS header",
+     "d": "the model pages call it from the browser"
+    }
+   ],
+   "reads": [
+    "hf_cache/ or the hub"
+   ],
+   "writes": [],
+   "meetings": [
+    {
+     "date": "2026-10-27",
+     "rating": 4,
+     "note": "The encoder service and the lean repository shown together."
+    }
+   ],
+   "col": 6,
+   "row": 2,
+   "note": null
+  },
+  {
+   "id": "e4",
+   "file": "sentiment-app/tests/ (213 tests)",
+   "phase": "E",
+   "owner": "H",
+   "priority": 1,
+   "status": "co",
+   "deadline": "2026-11-01",
+   "summary": "137 component tests, 46 AppTest scenarios, 15 non-functional checks, the parity tests to 1e-5 and a load test under a Playwright browser.",
+   "what": "The application's own suite. The component tests cover the store, the catalog and the numpy pass; the AppTest scenarios drive the pages; the non-functional checks include NF-07, no path, login or address in any export; ST-P-01 holds every shipped head to the pipeline's stored probabilities to 1e-5 on the golden rows; the load test runs under a Playwright browser. 213 passed, 1 skipped, 98 percent coverage.",
+   "depends": [
+    "e1",
+    "e2",
+    "d1",
+    "d5"
+   ],
+   "affects": [
+    "e5",
+    "g2"
+   ],
+   "arch": [
+    {
+     "n": "component tests",
+     "d": "137"
+    },
+    {
+     "n": "AppTest scenarios",
+     "d": "46"
+    },
+    {
+     "n": "non-functional",
+     "d": "15, NF-07"
+    },
+    {
+     "n": "parity ST-P-01",
+     "d": "1e-5 on the golden rows"
+    },
+    {
+     "n": "load test",
+     "d": "Playwright browser"
+    },
+    {
+     "n": "coverage",
+     "d": "98 percent"
+    }
+   ],
+   "reads": [
+    "the model store",
+    "golden_readings.json"
+   ],
+   "writes": [
+    "the test report"
+   ],
+   "meetings": [
+    {
+     "date": "2026-10-30",
+     "rating": 4,
+     "note": "Component tests and the first AppTest scenarios."
+    },
+    {
+     "date": "2026-11-01",
+     "rating": 5,
+     "note": "213 passed, 1 skipped, 98 percent coverage."
+    }
+   ],
+   "col": 6,
+   "row": 3,
+   "note": null
+  },
+  {
+   "id": "e5",
+   "file": ".github/workflows/ci.yml (application)",
+   "phase": "E",
+   "owner": "H",
+   "priority": 2,
+   "status": "co",
+   "deadline": "2026-11-01",
+   "summary": "The application's CI: the quick job on every push on Python 3.10 and 3.12, the full job on main.",
+   "what": "The quick job installs the application and runs the component tests on two Python versions on every push; the full job on main adds the AppTest scenarios, the non-functional checks, the parity tests and the load test.",
+   "depends": [
+    "e4"
+   ],
+   "affects": [
+    "e6"
+   ],
+   "arch": [
+    {
+     "n": "on push",
+     "d": "quick job, Python 3.10 and 3.12"
+    },
+    {
+     "n": "on main",
+     "d": "the full job"
+    },
+    {
+     "n": "artefacts",
+     "d": "the test report"
+    }
+   ],
+   "reads": [],
+   "writes": [],
+   "meetings": [
+    {
+     "date": "2026-11-01",
+     "rating": 4,
+     "note": "CI green on the redeployment commit."
+    }
+   ],
+   "col": 6,
+   "row": 4,
+   "note": null
+  },
+  {
+   "id": "e6",
+   "file": "sentiment-app/README.md and the deployment",
+   "phase": "E",
+   "owner": "H",
+   "priority": 2,
+   "status": "co",
+   "deadline": "2026-11-02",
+   "summary": "The hosted Streamlit page the live-testing sessions tested against: first deployment 25 October, all fourteen models by 1 November.",
+   "what": "The deployment pipeline (secrets, requirements, the hosting build), the first deployment with the first few models, the redeployment of all fourteen, and the README with the deployment notes and the findings in plain language.",
+   "depends": [
+    "e1",
+    "e5"
+   ],
+   "affects": [
+    "f1",
+    "g3"
+   ],
+   "arch": [
+    {
+     "n": "hosting account",
+     "d": "and a first page"
+    },
+    {
+     "n": "deployment pipeline",
+     "d": "secrets, requirements, build"
+    },
+    {
+     "n": "first deployment",
+     "d": "25 Oct"
+    },
+    {
+     "n": "redeploy all fourteen",
+     "d": "1 Nov"
+    },
+    {
+     "n": "README",
+     "d": "deployment notes, findings in plain language"
+    }
+   ],
+   "reads": [],
+   "writes": [
+    "the deployed page"
+   ],
+   "meetings": [
+    {
+     "date": "2026-10-25",
+     "rating": 4,
+     "note": "First deployment demonstrated on the Sunday call."
+    },
+    {
+     "date": "2026-11-01",
+     "rating": 5,
+     "note": "All fourteen models redeployed."
+    }
+   ],
+   "col": 6,
+   "row": 5,
+   "note": null
+  },
+  {
+   "id": "e7",
+   "file": "streamlit-a3/train_model.py (model.pkl from the model pages)",
+   "phase": "E",
+   "owner": "H",
+   "priority": 5,
+   "status": "ca",
+   "deadline": "2026-10-27",
+   "summary": "The first store: the heads unpacked from the model pages into one model.pkl. Replaced by build_models.py reading the exports.",
+   "what": "The first deployment read each head's weights out of its model page (model_a.html and the like) and pickled them together so the app loaded one file. Once the pipeline exported nn_model.json directly, the store was rebuilt from the exports and the pickle route was dropped.",
+   "depends": [
+    "the model pages of the research pipeline"
+   ],
+   "affects": [
+    "e2"
+   ],
+   "arch": [
+    {
+     "n": "read the model page",
+     "d": "const D = ... JSON"
+    },
+    {
+     "n": "decode base64 weights",
+     "d": "float32"
+    },
+    {
+     "n": "pickle the heads",
+     "d": "model.pkl"
+    },
+    {
+     "n": "app loads one file",
+     "d": "replaced"
+    }
+   ],
+   "reads": [
+    "model_a.html",
+    "model_a_sentfin.html",
+    "dialogue_head_fingpt_sentfin.html"
+   ],
+   "writes": [
+    "model.pkl"
+   ],
+   "meetings": [
+    {
+     "date": "2026-10-27",
+     "rating": 3,
+     "note": "Dropped in favour of the exports."
+    }
+   ],
+   "col": 6,
+   "row": 6,
+   "note": "Replaced on 27 October by build_models.py, which reads the exports directly."
+  },
+  {
+   "id": "e8",
+   "file": "dashboard/index.html (BI dashboard layout)",
+   "phase": "E",
+   "owner": "J",
+   "priority": 5,
+   "status": "ca",
+   "deadline": "2026-10-18",
+   "summary": "Johnny's BI dashboard layout with flexbox, 18 October. Dropped at the Sprint 2 review: the Streamlit app is the front end.",
+   "what": "A static dashboard layout in HTML and CSS for the results, started while the Streamlit experiments were running. The two front ends would have duplicated each other, so the dashboard was dropped and Johnny's front-end work became supervision of the Streamlit pages.",
+   "depends": [],
+   "affects": [
+    "e1"
+   ],
+   "arch": [
+    {
+     "n": "layout",
+     "d": "BI dashboard"
+    },
+    {
+     "n": "flexbox CSS",
+     "d": "adjusted UI"
+    },
+    {
+     "n": "wire to the exports",
+     "d": "cancelled"
+    }
+   ],
+   "reads": [],
+   "writes": [],
+   "meetings": [
+    {
+     "date": "2026-10-23",
+     "rating": 2,
+     "note": "Dropped at the Sprint 2 review: one front end."
+    }
+   ],
+   "col": 6,
+   "row": 7,
+   "note": "Dropped on 23 October."
+  },
+  {
+   "id": "f1",
+   "file": "deploy/Dockerfile, deploy/compose.yml",
+   "phase": "F",
+   "owner": "H",
+   "priority": 3,
+   "status": "ns",
+   "deadline": "2026-11-11",
+   "summary": "Two containers, the application and the encoder service, CPU only, with the model store from the release asset and HTTPS behind a reverse proxy.",
+   "what": "The cloud system of the roadmap: the application and the encoder service as two containers that run on a CPU, the model store built from the results folder and the release asset features.zip, health checks, and HTTPS behind a reverse proxy. To be scoped after the review with Dr Vo.",
+   "depends": [
+    "e1",
+    "e3",
+    "e2"
+   ],
+   "affects": [
+    "f2"
+   ],
+   "arch": [
+    {
+     "n": "Dockerfile: app",
+     "d": "Streamlit, the store"
+    },
+    {
+     "n": "Dockerfile: encoder service",
+     "d": "bge-large, CPU"
+    },
+    {
+     "n": "compose.yml",
+     "d": "two services, a network"
+    },
+    {
+     "n": "model store from the release",
+     "d": "features.zip, results/"
+    },
+    {
+     "n": "reverse proxy",
+     "d": "HTTPS, health checks"
+    }
+   ],
+   "reads": [
+    "the release asset features.zip",
+    "results/"
+   ],
+   "writes": [
+    "images and compose.yml"
+   ],
+   "meetings": [
+    {
+     "date": "2026-11-06",
+     "rating": null,
+     "note": "To be scoped after the review with Dr Vo."
+    }
+   ],
+   "col": 7,
+   "row": 0,
+   "note": null
+  },
+  {
+   "id": "f2",
+   "file": "deploy/cloud_notes.md",
+   "phase": "F",
+   "owner": "H",
+   "priority": 4,
+   "status": "ns",
+   "deadline": "2026-11-11",
+   "summary": "Hosting options and cost, secrets and the model store out of the image.",
+   "what": "The notes that decide where the containers run: a small virtual machine against the Streamlit hosting, the monthly cost, how the secrets and the model store stay out of the image, and who holds the keys.",
+   "depends": [
+    "f1"
+   ],
+   "affects": [],
+   "arch": [
+    {
+     "n": "options",
+     "d": "a small VM against the Streamlit hosting"
+    },
+    {
+     "n": "cost",
+     "d": "per month"
+    },
+    {
+     "n": "secrets",
+     "d": "out of the image"
+    },
+    {
+     "n": "keys",
+     "d": "who holds them"
+    }
+   ],
+   "reads": [],
+   "writes": [
+    "deploy/cloud_notes.md"
+   ],
+   "meetings": [
+    {
+     "date": "2026-11-06",
+     "rating": null,
+     "note": "To be scoped after the review with Dr Vo."
+    }
+   ],
+   "col": 7,
+   "row": 1,
+   "note": null
+  },
+  {
+   "id": "g1",
+   "file": "docs/A3_Design_Document.docx",
+   "phase": "G",
+   "owner": "R",
+   "priority": 1,
+   "status": "ur",
+   "deadline": "2026-11-06",
+   "summary": "The design document: technical sections by Ricky, management sections by Johnny, the application by Hara; revised 3 November; team review to 5 November.",
+   "what": "Every number in it is read from the chain of 3 November or marked as the research pipeline's. The 1 November version carried the test plan references; the 3 November revision added the chain's four fixes and the three seeds. The team reviewed it from 2 to 5 November; the review with Dr Vo is on Friday 6 November at 2:30 pm.",
+   "depends": [
+    "c18",
+    "d3",
+    "e4",
+    "g2"
+   ],
+   "affects": [
+    "g3"
+   ],
+   "arch": [
+    {
+     "n": "technical sections",
+     "d": "architecture, protocol, RL, tests"
+    },
+    {
+     "n": "management sections",
+     "d": "timeline, sprints, duties"
+    },
+    {
+     "n": "application section",
+     "d": "and the findings in plain language"
+    },
+    {
+     "n": "3 Nov revision",
+     "d": "four fixes, three seeds"
+    },
+    {
+     "n": "team review",
+     "d": "2 to 5 Nov"
+    },
+    {
+     "n": "review with Dr Vo",
+     "d": "Fri 6 Nov"
+    }
+   ],
+   "reads": [
+    "results/**",
+    "logs/*_20261103.log"
+   ],
+   "writes": [
+    "A3_Design_Document_3Nov.docx"
+   ],
+   "meetings": [
+    {
+     "date": "2026-11-01",
+     "rating": 4,
+     "note": "The 1 November version read through at the Sunday session."
+    },
+    {
+     "date": "2026-11-04",
+     "rating": 4,
+     "note": "Team review: changes highlighted."
+    },
+    {
+     "date": "2026-11-06",
+     "rating": null,
+     "note": "Review with Dr Vo, 2:30 to 3:00 pm."
+    }
+   ],
+   "col": 8,
+   "row": 0,
+   "note": null
+  },
+  {
+   "id": "g2",
+   "file": "docs/test_plan.md",
+   "phase": "G",
+   "owner": "R",
+   "priority": 2,
+   "status": "co",
+   "deadline": "2026-11-03",
+   "summary": "The test plan: four layers, cheapest first, every check id, the mutation table and what the layers caught on 3 November.",
+   "what": "Names the layers (unit, smoke, integration, mutation, and the application's 213 tests), the id scheme of every check, the log format, the five seeded faults and the checks that catch them, and the four faults the layers caught before the chain passed.",
+   "depends": [
+    "d1",
+    "d2",
+    "d3",
+    "d4",
+    "e4"
+   ],
+   "affects": [
+    "g1"
+   ],
+   "arch": [
+    {
+     "n": "four layers",
+     "d": "cheapest first"
+    },
+    {
+     "n": "check ids",
+     "d": "UT, SM, CH, IT, ST, NF"
+    },
+    {
+     "n": "log format",
+     "d": "one dated line per check"
+    },
+    {
+     "n": "mutation table",
+     "d": "M1 to M5"
+    },
+    {
+     "n": "what the layers caught",
+     "d": "3 Nov"
+    }
+   ],
+   "reads": [
+    "logs/*_20261103.log"
+   ],
+   "writes": [
+    "docs/test_plan.md"
+   ],
+   "meetings": [
+    {
+     "date": "2026-11-01",
+     "rating": 4,
+     "note": "Test plan read against the logs."
+    }
+   ],
+   "col": 8,
+   "row": 1,
+   "note": null
+  },
+  {
+   "id": "g3",
+   "file": "docs/presentation/ (the deck and the three scripts)",
+   "phase": "G",
+   "owner": "J",
+   "priority": 1,
+   "status": "ip",
+   "deadline": "2026-11-11",
+   "summary": "The 50-slide deck and the three scripts: group lead (team, process, data), technical lead (findings, papers, policy, pipeline), front end.",
+   "what": "Johnny's script covers the team, the process and the data; Ricky's the findings, the papers, the policy and the pipeline, with the deck; Hara's the application and the findings in plain language. First rehearsal on 4 November; the GRPO slide is to be updated from the 3 November run; the final rehearsal is on 10 November.",
+   "depends": [
+    "g1",
+    "c14",
+    "e6"
+   ],
+   "affects": [],
+   "arch": [
+    {
+     "n": "group lead script",
+     "d": "team, process, data"
+    },
+    {
+     "n": "technical lead script",
+     "d": "findings, papers, policy, pipeline"
+    },
+    {
+     "n": "front-end script",
+     "d": "the application"
+    },
+    {
+     "n": "the deck",
+     "d": "50 slides"
+    },
+    {
+     "n": "rehearsals",
+     "d": "4 and 10 Nov"
+    }
+   ],
+   "reads": [
+    "A3_Design_Document_3Nov.docx",
+    "results/**"
+   ],
+   "writes": [
+    "the deck",
+    "three scripts"
+   ],
+   "meetings": [
+    {
+     "date": "2026-11-04",
+     "rating": 4,
+     "note": "First rehearsal of the three scripts."
+    },
+    {
+     "date": "2026-11-10",
+     "rating": null,
+     "note": "Final rehearsal."
+    }
+   ],
+   "col": 8,
+   "row": 2,
+   "note": null
+  },
+  {
+   "id": "g4",
+   "file": "docs/security_writeup.md",
+   "phase": "G",
+   "owner": "R",
+   "priority": 2,
+   "status": "co",
+   "deadline": "2026-10-30",
+   "summary": "What crosses out of the SuperComputer and what never does: float16 weights, word lists and JSON summaries out; logins, hosts and paths never.",
+   "what": "Why the code is on a private repository, why the research ran on the SuperComputer, what leaves it, how the application's tests and the static scan enforce the rule, and how the public repository carries the login redacted.",
+   "depends": [
+    "d5"
+   ],
+   "affects": [
+    "g1",
+    "e6"
+   ],
+   "arch": [
+    {
+     "n": "what leaves",
+     "d": "weights, word lists, summaries"
+    },
+    {
+     "n": "what never leaves",
+     "d": "logins, hosts, paths"
+    },
+    {
+     "n": "enforcement",
+     "d": "NF-07, ST-F-07, the scan"
+    },
+    {
+     "n": "the public repository",
+     "d": "redacted"
+    }
+   ],
+   "reads": [],
+   "writes": [
+    "docs/security_writeup.md"
+   ],
+   "meetings": [
+    {
+     "date": "2026-10-30",
+     "rating": 4,
+     "note": "Reviewed at the Sprint 3 review."
+    }
+   ],
+   "col": 8,
+   "row": 3,
+   "note": null
+  },
+  {
+   "id": "g5",
+   "file": "docs/minutes/ (minutes, the defect log, the backlog)",
+   "phase": "G",
+   "owner": "J",
+   "priority": 2,
+   "status": "ip",
+   "deadline": "2026-11-06",
+   "summary": "Johnny's record of every session: minutes, the defect list raised at the live-testing checks, the sprint backlogs and the retrospectives.",
+   "what": "Each session starts with a live-testing check and ends in the minutes and the defect list; each sprint has its planning record, its review and its Keep, Stop, Try. Sprint 4's review and retrospective are on Friday 6 November.",
+   "depends": [],
+   "affects": [
+    "g1",
+    "g6"
+   ],
+   "arch": [
+    {
+     "n": "live-testing minutes",
+     "d": "every session"
+    },
+    {
+     "n": "defect list",
+     "d": "raised on the spot"
+    },
+    {
+     "n": "sprint backlog",
+     "d": "planning"
+    },
+    {
+     "n": "review and retrospective",
+     "d": "last Friday"
+    },
+    {
+     "n": "Keep, Stop, Try",
+     "d": "at most three actions"
+    }
+   ],
+   "reads": [],
+   "writes": [
+    "docs/minutes/sprint<n>.md"
+   ],
+   "meetings": [
+    {
+     "date": "2026-10-16",
+     "rating": 4,
+     "note": "Sprint 1 review and retrospective."
+    },
+    {
+     "date": "2026-10-23",
+     "rating": 4,
+     "note": "Sprint 2 review and retrospective."
+    },
+    {
+     "date": "2026-10-30",
+     "rating": 4,
+     "note": "Sprint 3 review and retrospective."
+    },
+    {
+     "date": "2026-11-06",
+     "rating": null,
+     "note": "Sprint 4 review and retrospective."
+    }
+   ],
+   "col": 8,
+   "row": 4,
+   "note": null
+  },
+  {
+   "id": "g6",
+   "file": ".github/ (templates, the checks workflow, branch protection, the board)",
+   "phase": "G",
+   "owner": "R",
+   "priority": 2,
+   "status": "ip",
+   "deadline": "2026-11-11",
+   "summary": "The repository protocol: agile commit guidelines, the pull-request gate, the GitHub Projects board sentiment_heads, branch protection on main.",
+   "what": "Johnny's commit guidelines and the pull-request gate from Sprint 1; the public repository's final update pushed to main on 4 November; the GitHub Projects board with the four columns; the full cycle (issues, branches, pull requests with the checks workflow, review, squash merge) and branch protection still to run, with the release v1.0.0 carrying features.zip.",
+   "depends": [
+    "g5"
+   ],
+   "affects": [
+    "g1"
+   ],
+   "arch": [
+    {
+     "n": "commit guidelines",
+     "d": "Conventional Commits"
+    },
+    {
+     "n": "pull-request gate",
+     "d": "review before merge"
+    },
+    {
+     "n": "board",
+     "d": "Todo, In Progress, In review, Done"
+    },
+    {
+     "n": "checks workflow",
+     "d": "syntax and the unit suite"
+    },
+    {
+     "n": "branch protection",
+     "d": "main"
+    },
+    {
+     "n": "release v1.0.0",
+     "d": "features.zip"
+    }
+   ],
+   "reads": [],
+   "writes": [
+    ".github/",
+    "the board",
+    "the release"
+   ],
+   "meetings": [
+    {
+     "date": "2026-11-04",
+     "rating": 3,
+     "note": "Board created; the final update went to main directly instead of through the cycle."
+    }
+   ],
+   "col": 8,
+   "row": 5,
+   "note": null
+  }
+ ],
+ "todos": [
+  {
+   "id": "fd01-1",
+   "program": "fd01",
+   "title": "Clean FinGPT: mojibake repair, NFC, whitespace; the nine shades to three classes",
+   "owner": "R",
+   "priority": 2,
+   "status": "done",
+   "hours": 1.5,
+   "date": "2026-10-05",
+   "week": "W0"
+  },
+  {
+   "id": "fd01-2",
+   "program": "fd01",
+   "title": "Fold exact duplicates and build the near-duplicate group key",
+   "owner": "R",
+   "priority": 2,
+   "status": "done",
+   "hours": 1.0,
+   "date": "2026-10-06",
+   "week": "W0"
+  },
+  {
+   "id": "fdgpu-1",
+   "program": "fdgpu",
+   "title": "First encoding job on one P100 in fp16: 30,209 texts in 1.8 min",
+   "owner": "R",
+   "priority": 2,
+   "status": "done",
+   "hours": 1.5,
+   "date": "2026-10-05",
+   "week": "W0"
+  },
+  {
+   "id": "fdgpu-2",
+   "program": "fdgpu",
+   "title": "Cache under the content hash of weights, tokenizer, text, pooling and length",
+   "owner": "R",
+   "priority": 2,
+   "status": "done",
+   "hours": 1.5,
+   "date": "2026-10-06",
+   "week": "W0"
+  },
+  {
+   "id": "fdlin-1",
+   "program": "fdlin",
+   "title": "Fit the multinomial logit on the cached features",
+   "owner": "R",
+   "priority": 3,
+   "status": "done",
+   "hours": 1.5,
+   "date": "2026-10-06",
+   "week": "W0"
+  },
+  {
+   "id": "fdlin-2",
+   "program": "fdlin",
+   "title": "Score on the training set and on SEntFiN",
+   "owner": "R",
+   "priority": 3,
+   "status": "done",
+   "hours": 1.0,
+   "date": "2026-10-06",
+   "week": "W0"
+  },
+  {
+   "id": "fdinv-1",
+   "program": "fdinv",
+   "title": "Polarity flips: how the pooled vector moves when a sentence changes polarity",
+   "owner": "R",
+   "priority": 3,
+   "status": "done",
+   "hours": 2.5,
+   "date": "2026-10-07",
+   "week": "W0"
+  },
+  {
+   "id": "fdinv-2",
+   "program": "fdinv",
+   "title": "The same on the SEntFiN headlines",
+   "owner": "R",
+   "priority": 3,
+   "status": "done",
+   "hours": 1.5,
+   "date": "2026-10-08",
+   "week": "W0"
+  },
+  {
+   "id": "fdinv-3",
+   "program": "fdinv",
+   "title": "Training labels against the encoder's neighbours",
+   "owner": "R",
+   "priority": 3,
+   "status": "done",
+   "hours": 2.0,
+   "date": "2026-10-09",
+   "week": "W0"
+  },
+  {
+   "id": "fdinv-4",
+   "program": "fdinv",
+   "title": "Write-up for the Sprint 1 planning",
+   "owner": "R",
+   "priority": 3,
+   "status": "done",
+   "hours": 1.0,
+   "date": "2026-10-10",
+   "week": "S1"
+  },
+  {
+   "id": "jexp-1",
+   "program": "jexp",
+   "title": "Load and clean emotion-emotion_69k.csv; rename the files to the general dataset",
+   "owner": "J",
+   "priority": 3,
+   "status": "done",
+   "hours": 2.5,
+   "date": "2026-10-05",
+   "week": "W0"
+  },
+  {
+   "id": "jexp-2",
+   "program": "jexp",
+   "title": "Class skew and anomaly charts for the quality check",
+   "owner": "J",
+   "priority": 3,
+   "status": "done",
+   "hours": 1.5,
+   "date": "2026-10-05",
+   "week": "W0"
+  },
+  {
+   "id": "jexp-3",
+   "program": "jexp",
+   "title": "Remove the test files and the irrelevant files from the repository",
+   "owner": "J",
+   "priority": 4,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-10-07",
+   "week": "W0"
+  },
+  {
+   "id": "jtfidf-1",
+   "program": "jtfidf",
+   "title": "TF-IDF features and a logistic regression on the general dataset",
+   "owner": "J",
+   "priority": 4,
+   "status": "done",
+   "hours": 2.0,
+   "date": "2026-10-05",
+   "week": "W0"
+  },
+  {
+   "id": "jtfidf-2",
+   "program": "jtfidf",
+   "title": "Compare against the frozen-encoder route",
+   "owner": "J",
+   "priority": 4,
+   "status": "canc",
+   "hours": 0.5,
+   "date": "2026-10-08",
+   "week": "W0"
+  },
+  {
+   "id": "jsim-1",
+   "program": "jsim",
+   "title": "Encode the 32 emotion labels and compute the pairwise similarity",
+   "owner": "J",
+   "priority": 4,
+   "status": "done",
+   "hours": 1.5,
+   "date": "2026-10-08",
+   "week": "W0"
+  },
+  {
+   "id": "jsim-2",
+   "program": "jsim",
+   "title": "Heatmap with seaborn; a batch size limit during encoding",
+   "owner": "J",
+   "priority": 4,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-10-08",
+   "week": "W0"
+  },
+  {
+   "id": "jsoft-1",
+   "program": "jsoft",
+   "title": "Softmax over the label similarities to derive a sentiment",
+   "owner": "J",
+   "priority": 4,
+   "status": "done",
+   "hours": 1.5,
+   "date": "2026-10-08",
+   "week": "W0"
+  },
+  {
+   "id": "jsoft-2",
+   "program": "jsoft",
+   "title": "Try it on the general dataset",
+   "owner": "J",
+   "priority": 4,
+   "status": "done",
+   "hours": 1.0,
+   "date": "2026-10-08",
+   "week": "W0"
+  },
+  {
+   "id": "jsoft-3",
+   "program": "jsoft",
+   "title": "Carry the valence decoding into the dialogue head",
+   "owner": "J",
+   "priority": 4,
+   "status": "canc",
+   "hours": 0.5,
+   "date": "2026-10-18",
+   "week": "S2"
+  },
+  {
+   "id": "bened-1",
+   "program": "bened",
+   "title": "Flag the Benedetti file: undocumented labels, overlap with FinGPT",
+   "owner": "J",
+   "priority": 3,
+   "status": "done",
+   "hours": 1.5,
+   "date": "2026-10-07",
+   "week": "W0"
+  },
+  {
+   "id": "bened-2",
+   "program": "bened",
+   "title": "Prepare Benedetti as the external test set",
+   "owner": "J",
+   "priority": 3,
+   "status": "canc",
+   "hours": 0.5,
+   "date": "2026-10-09",
+   "week": "W0"
+  },
+  {
+   "id": "bened-3",
+   "program": "bened",
+   "title": "Label analysis with the head: 93 percent on the overlap, 46 percent on the rest",
+   "owner": "R",
+   "priority": 3,
+   "status": "done",
+   "hours": 1.0,
+   "date": "2026-10-21",
+   "week": "S2"
+  },
+  {
+   "id": "bened-4",
+   "program": "bened",
+   "title": "The Benedetti decision written into section II.F",
+   "owner": "J",
+   "priority": 4,
+   "status": "done",
+   "hours": 1.0,
+   "date": "2026-10-27",
+   "week": "S3"
+  },
+  {
+   "id": "fine-1",
+   "program": "fine",
+   "title": "Record the scope cut in the shared notes and the A2 revision",
+   "owner": "R",
+   "priority": 4,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-10-05",
+   "week": "W0"
+  },
+  {
+   "id": "fine-2",
+   "program": "fine",
+   "title": "Micro-batches of 16 with gradient checkpointing and fp16 loss scaling",
+   "owner": "R",
+   "priority": 5,
+   "status": "canc",
+   "hours": 0.0,
+   "date": "2026-10-05",
+   "week": "W0"
+  },
+  {
+   "id": "fine-3",
+   "program": "fine",
+   "title": "DoRA adapter for M4",
+   "owner": "R",
+   "priority": 5,
+   "status": "canc",
+   "hours": 0.0,
+   "date": "2026-10-05",
+   "week": "W0"
+  },
+  {
+   "id": "repr-1",
+   "program": "repr",
+   "title": "UMAP and GMM of the pooled space",
+   "owner": "J",
+   "priority": 5,
+   "status": "canc",
+   "hours": 0.5,
+   "date": "2026-10-09",
+   "week": "W0"
+  },
+  {
+   "id": "repr-2",
+   "program": "repr",
+   "title": "CKA between the fine-tuned and the frozen space",
+   "owner": "R",
+   "priority": 5,
+   "status": "canc",
+   "hours": 0.0,
+   "date": "2026-10-10",
+   "week": "S1"
+  },
+  {
+   "id": "fd07-1",
+   "program": "fd07",
+   "title": "First feed-forward head on the cached features",
+   "owner": "R",
+   "priority": 2,
+   "status": "done",
+   "hours": 4.0,
+   "date": "2026-10-11",
+   "week": "S1"
+  },
+  {
+   "id": "fd07-2",
+   "program": "fd07",
+   "title": "Memorisation found: training accuracy climbs while held-out falls",
+   "owner": "R",
+   "priority": 1,
+   "status": "done",
+   "hours": 2.0,
+   "date": "2026-10-13",
+   "week": "S1"
+  },
+  {
+   "id": "fd07-3",
+   "program": "fd07",
+   "title": "Grouped folds by the near-duplicate key",
+   "owner": "R",
+   "priority": 2,
+   "status": "done",
+   "hours": 2.0,
+   "date": "2026-10-14",
+   "week": "S1"
+  },
+  {
+   "id": "fd07-4",
+   "program": "fd07",
+   "title": "Paper study on noisy labels and memorisation; the protocol written down",
+   "owner": "R",
+   "priority": 1,
+   "status": "done",
+   "hours": 5.0,
+   "date": "2026-10-15",
+   "week": "S1"
+  },
+  {
+   "id": "fd07-5",
+   "program": "fd07",
+   "title": "Training loop with the confirmation split held out first",
+   "owner": "R",
+   "priority": 2,
+   "status": "done",
+   "hours": 2.0,
+   "date": "2026-10-16",
+   "week": "S1"
+  },
+  {
+   "id": "fd07-6",
+   "program": "fd07",
+   "title": "StratifiedGroupKFold 5 x 3, label smoothing, EMA, early stopping",
+   "owner": "R",
+   "priority": 1,
+   "status": "done",
+   "hours": 3.0,
+   "date": "2026-10-17",
+   "week": "S2"
+  },
+  {
+   "id": "fd07-7",
+   "program": "fd07",
+   "title": "Successive halving over 34 configurations; the job of Mon 19 Oct",
+   "owner": "R",
+   "priority": 1,
+   "status": "done",
+   "hours": 2.5,
+   "date": "2026-10-19",
+   "week": "S2"
+  },
+  {
+   "id": "fd07-8",
+   "program": "fd07",
+   "title": "Temperature on the out-of-fold logits; c12 chosen at 0.8044",
+   "owner": "R",
+   "priority": 2,
+   "status": "done",
+   "hours": 1.5,
+   "date": "2026-10-20",
+   "week": "S2"
+  },
+  {
+   "id": "fd07-9",
+   "program": "fd07",
+   "title": "Reviewer at the live-testing checks of Sprint 1: the first network run in front of the team",
+   "owner": "J",
+   "priority": 3,
+   "status": "done",
+   "hours": 3.0,
+   "date": "2026-10-14",
+   "week": "S1"
+  },
+  {
+   "id": "fd08-1",
+   "program": "fd08",
+   "title": "Every validation row's predicted class recorded for the audit",
+   "owner": "R",
+   "priority": 3,
+   "status": "done",
+   "hours": 1.0,
+   "date": "2026-10-20",
+   "week": "S2"
+  },
+  {
+   "id": "fd08-2",
+   "program": "fd08",
+   "title": "Random-label control: the head on shuffled labels",
+   "owner": "R",
+   "priority": 3,
+   "status": "done",
+   "hours": 1.5,
+   "date": "2026-10-21",
+   "week": "S2"
+  },
+  {
+   "id": "fd08-3",
+   "program": "fd08",
+   "title": "Data-quality follow-up on the audited rows",
+   "owner": "J",
+   "priority": 3,
+   "status": "done",
+   "hours": 2.5,
+   "date": "2026-10-21",
+   "week": "S2"
+  },
+  {
+   "id": "fd10-1",
+   "program": "fd10",
+   "title": "Hessian trace and seed connectivity of c12",
+   "owner": "R",
+   "priority": 3,
+   "status": "done",
+   "hours": 1.5,
+   "date": "2026-10-22",
+   "week": "S2"
+  },
+  {
+   "id": "fd10-2",
+   "program": "fd10",
+   "title": "Linear probes on the hidden layers",
+   "owner": "R",
+   "priority": 3,
+   "status": "done",
+   "hours": 1.0,
+   "date": "2026-10-22",
+   "week": "S2"
+  },
+  {
+   "id": "fdtr-1",
+   "program": "fdtr",
+   "title": "Zero-shot on SEntFiN: 73.5 percent",
+   "owner": "R",
+   "priority": 3,
+   "status": "done",
+   "hours": 1.0,
+   "date": "2026-10-20",
+   "week": "S2"
+  },
+  {
+   "id": "fdtr-2",
+   "program": "fdtr",
+   "title": "EM, BBSE and balanced corrections against the uncorrected reading",
+   "owner": "R",
+   "priority": 3,
+   "status": "done",
+   "hours": 1.5,
+   "date": "2026-10-22",
+   "week": "S2"
+  },
+  {
+   "id": "fdtr-3",
+   "program": "fdtr",
+   "title": "Ship a prior correction in the application",
+   "owner": "R",
+   "priority": 4,
+   "status": "canc",
+   "hours": 0.0,
+   "date": "2026-10-23",
+   "week": "S2"
+  },
+  {
+   "id": "ed01-1",
+   "program": "ed01",
+   "title": "Two-turn windows in conversation order, encoded on the P100",
+   "owner": "R",
+   "priority": 3,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-10-24",
+   "week": "S3"
+  },
+  {
+   "id": "ed01-2",
+   "program": "ed01",
+   "title": "The FinGPT Network reads every window: the distilled sentiment column",
+   "owner": "R",
+   "priority": 2,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-10-24",
+   "week": "S3"
+  },
+  {
+   "id": "ed07-1",
+   "program": "ed07",
+   "title": "Two-output head from one trunk; conversation-grouped splits",
+   "owner": "R",
+   "priority": 2,
+   "status": "done",
+   "hours": 1.0,
+   "date": "2026-10-23",
+   "week": "S2"
+  },
+  {
+   "id": "ed07-2",
+   "program": "ed07",
+   "title": "The search job of Sun 25 Oct; c31 chosen",
+   "owner": "R",
+   "priority": 1,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-10-25",
+   "week": "S3"
+  },
+  {
+   "id": "ed07-3",
+   "program": "ed07",
+   "title": "Prediction on SEntFiN: 74.5 percent without a finance label",
+   "owner": "R",
+   "priority": 2,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-10-25",
+   "week": "S3"
+  },
+  {
+   "id": "ed07-4",
+   "program": "ed07",
+   "title": "Review at the live-testing session of Sprint 3",
+   "owner": "J",
+   "priority": 3,
+   "status": "done",
+   "hours": 2.0,
+   "date": "2026-10-26",
+   "week": "S3"
+  },
+  {
+   "id": "ed12-1",
+   "program": "ed12",
+   "title": "Problem formulation: contextual bandit, KL leash, retention term",
+   "owner": "R",
+   "priority": 1,
+   "status": "done",
+   "hours": 1.0,
+   "date": "2026-10-22",
+   "week": "S2"
+  },
+  {
+   "id": "ed12-2",
+   "program": "ed12",
+   "title": "The closed form of the leashed objective",
+   "owner": "R",
+   "priority": 1,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-10-25",
+   "week": "S3"
+  },
+  {
+   "id": "ed12-3",
+   "program": "ed12",
+   "title": "REINFORCE, GRPO and PPO with the clipped ratio",
+   "owner": "R",
+   "priority": 2,
+   "status": "done",
+   "hours": 1.0,
+   "date": "2026-10-25",
+   "week": "S3"
+  },
+  {
+   "id": "ed12-4",
+   "program": "ed12",
+   "title": "The Q layer and the bandit variants with the off-policy estimators",
+   "owner": "R",
+   "priority": 3,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-10-26",
+   "week": "S3"
+  },
+  {
+   "id": "ed12-5",
+   "program": "ed12",
+   "title": "Both stages on every corpus, before and after; the RL reports",
+   "owner": "R",
+   "priority": 2,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-10-26",
+   "week": "S3"
+  },
+  {
+   "id": "ed12-6",
+   "program": "ed12",
+   "title": "Review of gains and retention at the sprint review",
+   "owner": "J",
+   "priority": 3,
+   "status": "done",
+   "hours": 1.0,
+   "date": "2026-10-26",
+   "week": "S3"
+  },
+  {
+   "id": "ed12-7",
+   "program": "ed12",
+   "title": "Ship REINFORCE, PPO and the Q layer in the final repository",
+   "owner": "R",
+   "priority": 4,
+   "status": "canc",
+   "hours": 0.0,
+   "date": "2026-10-28",
+   "week": "S3"
+  },
+  {
+   "id": "ed12-8",
+   "program": "ed12",
+   "title": "Advantage scaled by the whole batch's standard deviation",
+   "owner": "R",
+   "priority": 4,
+   "status": "canc",
+   "hours": 0.0,
+   "date": "2026-10-29",
+   "week": "S3"
+  },
+  {
+   "id": "edmis-1",
+   "program": "edmis",
+   "title": "The closed form on the 1,399 misread headlines",
+   "owner": "R",
+   "priority": 3,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-10-26",
+   "week": "S3"
+  },
+  {
+   "id": "edmis-2",
+   "program": "edmis",
+   "title": "Sampled methods on the misread rows",
+   "owner": "R",
+   "priority": 4,
+   "status": "canc",
+   "hours": 0.5,
+   "date": "2026-10-27",
+   "week": "S3"
+  },
+  {
+   "id": "c0-1",
+   "program": "c0",
+   "title": "One configuration file per corpus: files, labels, head, protocol, the adaptation settings",
+   "owner": "R",
+   "priority": 2,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-10-27",
+   "week": "S3"
+  },
+  {
+   "id": "c1-1",
+   "program": "c1",
+   "title": "Data in place and the Hugging Face cache on the login node",
+   "owner": "R",
+   "priority": 2,
+   "status": "done",
+   "hours": 1.5,
+   "date": "2026-10-05",
+   "week": "W0"
+  },
+  {
+   "id": "c1-2",
+   "program": "c1",
+   "title": "Accounts and project membership for the team",
+   "owner": "H",
+   "priority": 3,
+   "status": "done",
+   "hours": 1.5,
+   "date": "2026-10-05",
+   "week": "W0"
+  },
+  {
+   "id": "c1-3",
+   "program": "c1",
+   "title": "paths.sh: the project root, the offline flags, the venv",
+   "owner": "R",
+   "priority": 3,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-10-27",
+   "week": "S3"
+  },
+  {
+   "id": "c1-4",
+   "program": "c1",
+   "title": "Rebuild on python/3.11.5 with the CUDA 12.6 wheels; the module pair in venv/PYMOD",
+   "owner": "R",
+   "priority": 1,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-11-02",
+   "week": "S4"
+  },
+  {
+   "id": "c2-1",
+   "program": "c2",
+   "title": "root(), load_config(), cache_dir(), results_dir()",
+   "owner": "R",
+   "priority": 3,
+   "status": "done",
+   "hours": 0.25,
+   "date": "2026-10-27",
+   "week": "S3"
+  },
+  {
+   "id": "c2-2",
+   "program": "c2",
+   "title": "A config is also found under the project root, for the smoke chain",
+   "owner": "R",
+   "priority": 3,
+   "status": "done",
+   "hours": 0.25,
+   "date": "2026-11-01",
+   "week": "S4"
+  },
+  {
+   "id": "c3-1",
+   "program": "c3",
+   "title": "Cleaning, labels, duplicate keys and the grouped splits, lifted from the research pipeline and trimmed",
+   "owner": "R",
+   "priority": 2,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-10-27",
+   "week": "S3"
+  },
+  {
+   "id": "c4-1",
+   "program": "c4",
+   "title": "sha256 of weights, tokenizer and text column; save_features and load_features",
+   "owner": "R",
+   "priority": 3,
+   "status": "done",
+   "hours": 0.25,
+   "date": "2026-10-27",
+   "week": "S3"
+  },
+  {
+   "id": "c5-1",
+   "program": "c5",
+   "title": "Offline loading, pooling and the windowed forward pass: 510 tokens, 32 overlap",
+   "owner": "R",
+   "priority": 2,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-10-27",
+   "week": "S3"
+  },
+  {
+   "id": "c6-1",
+   "program": "c6",
+   "title": "MultiHead and fit(): AdamW, warm-up, cosine floor, EMA, smoothed cross-entropy, early stopping",
+   "owner": "R",
+   "priority": 1,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-10-28",
+   "week": "S3"
+  },
+  {
+   "id": "c6-2",
+   "program": "c6",
+   "title": "to_json / from_json: the export the application and the numpy pass read",
+   "owner": "R",
+   "priority": 1,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-10-29",
+   "week": "S3"
+  },
+  {
+   "id": "c7-1",
+   "program": "c7",
+   "title": "evaluate, macro_f1, ece, bootstrap_macro_f1, fit_temperature",
+   "owner": "R",
+   "priority": 2,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-10-28",
+   "week": "S3"
+  },
+  {
+   "id": "c7-2",
+   "program": "c7",
+   "title": "corrected_resampled_t, Nadeau and Bengio's overlap correction",
+   "owner": "R",
+   "priority": 2,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-10-31",
+   "week": "S4"
+  },
+  {
+   "id": "c8-1",
+   "program": "c8",
+   "title": "load_set: the prepared table with its cached features and labels",
+   "owner": "R",
+   "priority": 3,
+   "status": "done",
+   "hours": 0.25,
+   "date": "2026-10-28",
+   "week": "S3"
+  },
+  {
+   "id": "c9-1",
+   "program": "c9",
+   "title": "RunLog: one dated PASS or FAIL line per check, a .json mirror, no host or path",
+   "owner": "R",
+   "priority": 2,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-11-01",
+   "week": "S4"
+  },
+  {
+   "id": "c10-1",
+   "program": "c10",
+   "title": "Step 1 for both configs; the content hash on every table; the length audit",
+   "owner": "R",
+   "priority": 1,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-10-28",
+   "week": "S3"
+  },
+  {
+   "id": "c11-1",
+   "program": "c11",
+   "title": "The encoder over every prepared set; skip when the cache has the key",
+   "owner": "R",
+   "priority": 1,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-10-28",
+   "week": "S3"
+  },
+  {
+   "id": "c12-1",
+   "program": "c12",
+   "title": "Steps 3 to 7 on the chosen configuration",
+   "owner": "R",
+   "priority": 1,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-10-29",
+   "week": "S3"
+  },
+  {
+   "id": "c12-2",
+   "program": "c12",
+   "title": "folds.csv per seed and the confirmation recall in summary.json",
+   "owner": "R",
+   "priority": 2,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-11-01",
+   "week": "S4"
+  },
+  {
+   "id": "c13-1",
+   "program": "c13",
+   "title": "A trained head on every prediction set; pieces averaged per original row",
+   "owner": "R",
+   "priority": 2,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-10-29",
+   "week": "S3"
+  },
+  {
+   "id": "c14-1",
+   "program": "c14",
+   "title": "The closed form (exact) with the retention term",
+   "owner": "R",
+   "priority": 1,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-10-29",
+   "week": "S3"
+  },
+  {
+   "id": "c14-2",
+   "program": "c14",
+   "title": "GRPO with the group-normalised advantage",
+   "owner": "R",
+   "priority": 1,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-10-30",
+   "week": "S3"
+  },
+  {
+   "id": "c14-3",
+   "program": "c14",
+   "title": "--rows wrong, the eight runs, three seeds for the two shipped stages",
+   "owner": "R",
+   "priority": 2,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-11-02",
+   "week": "S4"
+  },
+  {
+   "id": "c15-1",
+   "program": "c15",
+   "title": "Ridge logistic regression on the network's folds and confirmation rows",
+   "owner": "R",
+   "priority": 2,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-10-30",
+   "week": "S3"
+  },
+  {
+   "id": "c15-2",
+   "program": "c15",
+   "title": "C on two folds; the paired bootstrap and the corrected t-test; the job of Sat 31 Oct 21:13",
+   "owner": "R",
+   "priority": 2,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-10-31",
+   "week": "S4"
+  },
+  {
+   "id": "c16-1",
+   "program": "c16",
+   "title": "Word indicators and the multinomial logit identified by its penalty",
+   "owner": "R",
+   "priority": 2,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-10-30",
+   "week": "S3"
+  },
+  {
+   "id": "c16-2",
+   "program": "c16",
+   "title": "Trigger words, the N/A reading, one model per corpus",
+   "owner": "R",
+   "priority": 2,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-10-31",
+   "week": "S4"
+  },
+  {
+   "id": "c16-3",
+   "program": "c16",
+   "title": "Six decimals in trigger_words.csv after the 0.50004 catch",
+   "owner": "R",
+   "priority": 3,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-11-03",
+   "week": "S4"
+  },
+  {
+   "id": "c17-1",
+   "program": "c17",
+   "title": "One job script per stage with its allocation",
+   "owner": "R",
+   "priority": 1,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-10-28",
+   "week": "S3"
+  },
+  {
+   "id": "c17-2",
+   "program": "c17",
+   "title": "_header.sh: a dated PASS or FAIL line with the wall time in the chain log",
+   "owner": "R",
+   "priority": 1,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-11-01",
+   "week": "S4"
+  },
+  {
+   "id": "c17-3",
+   "program": "c17",
+   "title": "The config as a positional argument after both jobs trained the finance head",
+   "owner": "R",
+   "priority": 1,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-11-02",
+   "week": "S4"
+  },
+  {
+   "id": "c18-1",
+   "program": "c18",
+   "title": "afterok dependencies: encode, train x2, adapt, linear, words, the integration test last",
+   "owner": "R",
+   "priority": 1,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-11-01",
+   "week": "S4"
+  },
+  {
+   "id": "c18-2",
+   "program": "c18",
+   "title": "Submission 1: the environment fault (Python 3.9, CUDA 12.8 wheels)",
+   "owner": "R",
+   "priority": 1,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-11-02",
+   "week": "S4"
+  },
+  {
+   "id": "c18-3",
+   "program": "c18",
+   "title": "Submission 2: both training jobs on the finance head",
+   "owner": "R",
+   "priority": 1,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-11-02",
+   "week": "S4"
+  },
+  {
+   "id": "c18-4",
+   "program": "c18",
+   "title": "Submission 3: 149 of 154; the manifests, six decimals, the KL band",
+   "owner": "R",
+   "priority": 1,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-11-03",
+   "week": "S4"
+  },
+  {
+   "id": "c18-5",
+   "program": "c18",
+   "title": "Submission 4: CH-08 PASS; the archive packed and its checksum verified",
+   "owner": "R",
+   "priority": 1,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-11-03",
+   "week": "S4"
+  },
+  {
+   "id": "c18-6",
+   "program": "c18",
+   "title": "Regression suite green before the review; the defect log closed",
+   "owner": "J",
+   "priority": 2,
+   "status": "done",
+   "hours": 1.5,
+   "date": "2026-11-03",
+   "week": "S4"
+  },
+  {
+   "id": "d1-1",
+   "program": "d1",
+   "title": "numpy_head.py: the independent pass from the export, the parity oracle",
+   "owner": "R",
+   "priority": 1,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-10-29",
+   "week": "S3"
+  },
+  {
+   "id": "d1-2",
+   "program": "d1",
+   "title": "UT-D, UT-B, UT-N: cleaning, the word reader, splits and the corrected t-test",
+   "owner": "R",
+   "priority": 1,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-10-31",
+   "week": "S4"
+  },
+  {
+   "id": "d1-3",
+   "program": "d1",
+   "title": "UT-R: the tilt and the GRPO advantage; UT-E at 1, 509, 510, 511, 988, 989 tokens; conftest writes the dated log",
+   "owner": "R",
+   "priority": 1,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-11-01",
+   "week": "S4"
+  },
+  {
+   "id": "d2-1",
+   "program": "d2",
+   "title": "Synthetic corpora, the tiny random encoder, the 25 steps with the checker on the clean tree and the broken copy",
+   "owner": "R",
+   "priority": 1,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-11-01",
+   "week": "S4"
+  },
+  {
+   "id": "d2-2",
+   "program": "d2",
+   "title": "SM-25 confirms the mutation count fix before the fourth submission",
+   "owner": "R",
+   "priority": 2,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-11-03",
+   "week": "S4"
+  },
+  {
+   "id": "d3-1",
+   "program": "d3",
+   "title": "Ten checks per model directory: files, reload, parity to 1e-6, split hygiene",
+   "owner": "R",
+   "priority": 1,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-10-31",
+   "week": "S4"
+  },
+  {
+   "id": "d3-2",
+   "program": "d3",
+   "title": "Fourteen checks across models: the two ladders, shared splits, manifests, tables",
+   "owner": "R",
+   "priority": 1,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-11-01",
+   "week": "S4"
+  },
+  {
+   "id": "d3-3",
+   "program": "d3",
+   "title": "integration_test.sh as the last job; the exit status is the test's",
+   "owner": "R",
+   "priority": 2,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-11-01",
+   "week": "S4"
+  },
+  {
+   "id": "d3-4",
+   "program": "d3",
+   "title": "bounds.json from the document's numbers; the KL band from the derivation [0.3, 1.8]",
+   "owner": "R",
+   "priority": 1,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-11-03",
+   "week": "S4"
+  },
+  {
+   "id": "d4-1",
+   "program": "d4",
+   "title": "Five faults into a copy: M1 to M5",
+   "owner": "R",
+   "priority": 2,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-11-01",
+   "week": "S4"
+  },
+  {
+   "id": "d4-2",
+   "program": "d4",
+   "title": "Exactly 8 FAIL lines and exit 1; count only the last run in the day's log",
+   "owner": "R",
+   "priority": 1,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-11-03",
+   "week": "S4"
+  },
+  {
+   "id": "d5-1",
+   "program": "d5",
+   "title": "Forbidden-pattern tests: no login, host or project path in any export or log",
+   "owner": "R",
+   "priority": 2,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-10-28",
+   "week": "S3"
+  },
+  {
+   "id": "d5-2",
+   "program": "d5",
+   "title": "The static scan over every deliverable before it leaves",
+   "owner": "R",
+   "priority": 2,
+   "status": "done",
+   "hours": 0.25,
+   "date": "2026-11-01",
+   "week": "S4"
+  },
+  {
+   "id": "d5-3",
+   "program": "d5",
+   "title": "Deployment hardening on the application side",
+   "owner": "H",
+   "priority": 2,
+   "status": "done",
+   "hours": 1.0,
+   "date": "2026-10-29",
+   "week": "S3"
+  },
+  {
+   "id": "e1-1",
+   "program": "e1",
+   "title": "Streamlit experiments: layout, reading an export, the sentence tool",
+   "owner": "H",
+   "priority": 2,
+   "status": "done",
+   "hours": 6.0,
+   "date": "2026-10-13",
+   "week": "S1"
+  },
+  {
+   "id": "e1-2",
+   "program": "e1",
+   "title": "Mock-up of the pages for the live-testing check",
+   "owner": "J",
+   "priority": 3,
+   "status": "done",
+   "hours": 2.0,
+   "date": "2026-10-13",
+   "week": "S1"
+  },
+  {
+   "id": "e1-3",
+   "program": "e1",
+   "title": "Streamlit experiments alongside Hara",
+   "owner": "J",
+   "priority": 3,
+   "status": "done",
+   "hours": 3.0,
+   "date": "2026-10-14",
+   "week": "S1"
+  },
+  {
+   "id": "e1-4",
+   "program": "e1",
+   "title": "The sentence tool: a text box, the encoder call, the probabilities",
+   "owner": "H",
+   "priority": 2,
+   "status": "done",
+   "hours": 3.0,
+   "date": "2026-10-15",
+   "week": "S1"
+  },
+  {
+   "id": "e1-5",
+   "program": "e1",
+   "title": "Reading an export: the JSON form of a head",
+   "owner": "H",
+   "priority": 2,
+   "status": "done",
+   "hours": 2.0,
+   "date": "2026-10-16",
+   "week": "S1"
+  },
+  {
+   "id": "e1-6",
+   "program": "e1",
+   "title": "Read the FinGPT Network export into the page",
+   "owner": "H",
+   "priority": 1,
+   "status": "done",
+   "hours": 5.0,
+   "date": "2026-10-21",
+   "week": "S2"
+  },
+  {
+   "id": "e1-7",
+   "program": "e1",
+   "title": "The network drawn with its live activations",
+   "owner": "H",
+   "priority": 2,
+   "status": "done",
+   "hours": 3.0,
+   "date": "2026-10-22",
+   "week": "S2"
+  },
+  {
+   "id": "e1-8",
+   "program": "e1",
+   "title": "Front-end supervision: pages presentable and consistent",
+   "owner": "J",
+   "priority": 3,
+   "status": "done",
+   "hours": 1.5,
+   "date": "2026-10-22",
+   "week": "S2"
+  },
+  {
+   "id": "e1-9",
+   "program": "e1",
+   "title": "The Dialogue Network page: two readings from one trunk",
+   "owner": "H",
+   "priority": 1,
+   "status": "done",
+   "hours": 2.5,
+   "date": "2026-10-26",
+   "week": "S3"
+  },
+  {
+   "id": "e1-10",
+   "program": "e1",
+   "title": "The adapted heads: before and after on a sentence",
+   "owner": "H",
+   "priority": 2,
+   "status": "done",
+   "hours": 2.0,
+   "date": "2026-10-28",
+   "week": "S3"
+  },
+  {
+   "id": "e1-11",
+   "program": "e1",
+   "title": "Front-end supervision, Sprint 3",
+   "owner": "J",
+   "priority": 3,
+   "status": "done",
+   "hours": 1.5,
+   "date": "2026-10-28",
+   "week": "S3"
+  },
+  {
+   "id": "e1-12",
+   "program": "e1",
+   "title": "The word-logit query page: a sentence word by word, N/A for unknown words",
+   "owner": "H",
+   "priority": 2,
+   "status": "done",
+   "hours": 2.0,
+   "date": "2026-10-30",
+   "week": "S3"
+  },
+  {
+   "id": "e1-13",
+   "program": "e1",
+   "title": "All fourteen models on the page; the catalog",
+   "owner": "H",
+   "priority": 1,
+   "status": "done",
+   "hours": 2.5,
+   "date": "2026-10-31",
+   "week": "S4"
+  },
+  {
+   "id": "e1-14",
+   "program": "e1",
+   "title": "Front-end supervision, Sprint 4",
+   "owner": "J",
+   "priority": 3,
+   "status": "done",
+   "hours": 1.0,
+   "date": "2026-11-01",
+   "week": "S4"
+  },
+  {
+   "id": "e2-1",
+   "program": "e2",
+   "title": "Read the exported float16 weights and JSON summaries into the model store",
+   "owner": "H",
+   "priority": 1,
+   "status": "done",
+   "hours": 2.5,
+   "date": "2026-10-27",
+   "week": "S3"
+  },
+  {
+   "id": "e2-2",
+   "program": "e2",
+   "title": "Scan every export and summary for home paths, logins and addresses; refuse the file",
+   "owner": "H",
+   "priority": 1,
+   "status": "done",
+   "hours": 1.0,
+   "date": "2026-10-29",
+   "week": "S3"
+  },
+  {
+   "id": "e2-3",
+   "program": "e2",
+   "title": "Rebuild the store from the exports of the 3 November chain",
+   "owner": "H",
+   "priority": 1,
+   "status": "prog",
+   "hours": 2.0,
+   "date": "2026-11-05",
+   "week": "S4",
+   "issue_title": "Rebuild the store from the exports of the 3 November chain"
+  },
+  {
+   "id": "e2-4",
+   "program": "e2",
+   "title": "The dialogue model as two heads: emotion from dialogue/train, sentiment from dialogue/adapt/finance_train_grpo",
+   "owner": "H",
+   "priority": 1,
+   "status": "todo",
+   "hours": 2.0,
+   "date": "2026-11-08",
+   "week": "S5",
+   "issue_title": "The dialogue model as two heads: emotion from dialogue/train, sentiment from dialogue/adapt/finance_train_grpo"
+  },
+  {
+   "id": "e2-5",
+   "program": "e2",
+   "title": "Which files carry which head, checked against results/README.md",
+   "owner": "R",
+   "priority": 2,
+   "status": "todo",
+   "hours": 1.0,
+   "date": "2026-11-08",
+   "week": "S5",
+   "issue_title": "Which files carry which head, checked against results/README.md"
+  },
+  {
+   "id": "e2-6",
+   "program": "e2",
+   "title": "Parity against the 3 November summaries (ST-P-01) and redeploy",
+   "owner": "H",
+   "priority": 1,
+   "status": "todo",
+   "hours": 1.5,
+   "date": "2026-11-09",
+   "week": "S5",
+   "issue_title": "Parity against the 3 November summaries (ST-P-01) and redeploy"
+  },
+  {
+   "id": "e3-1",
+   "program": "e3",
+   "title": "HTTP service: /health and /encode, the 2,048 values as the heads were trained",
+   "owner": "R",
+   "priority": 2,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-10-27",
+   "week": "S3"
+  },
+  {
+   "id": "e3-2",
+   "program": "e3",
+   "title": "Encoder optimised in the app: one load per process",
+   "owner": "H",
+   "priority": 2,
+   "status": "done",
+   "hours": 1.0,
+   "date": "2026-10-28",
+   "week": "S3"
+  },
+  {
+   "id": "e4-1",
+   "program": "e4",
+   "title": "First component tests",
+   "owner": "H",
+   "priority": 2,
+   "status": "done",
+   "hours": 2.0,
+   "date": "2026-10-23",
+   "week": "S2"
+  },
+  {
+   "id": "e4-2",
+   "program": "e4",
+   "title": "137 component tests",
+   "owner": "H",
+   "priority": 1,
+   "status": "done",
+   "hours": 1.5,
+   "date": "2026-10-25",
+   "week": "S3"
+  },
+  {
+   "id": "e4-3",
+   "program": "e4",
+   "title": "46 AppTest scenarios",
+   "owner": "H",
+   "priority": 1,
+   "status": "done",
+   "hours": 2.5,
+   "date": "2026-10-31",
+   "week": "S4"
+  },
+  {
+   "id": "e4-4",
+   "program": "e4",
+   "title": "15 non-functional checks (NF-07: no path, login or address in an export)",
+   "owner": "H",
+   "priority": 1,
+   "status": "done",
+   "hours": 1.5,
+   "date": "2026-10-31",
+   "week": "S4"
+  },
+  {
+   "id": "e4-5",
+   "program": "e4",
+   "title": "Parity tests against the pipeline's stored probabilities to 1e-5",
+   "owner": "H",
+   "priority": 1,
+   "status": "done",
+   "hours": 1.5,
+   "date": "2026-11-01",
+   "week": "S4"
+  },
+  {
+   "id": "e4-6",
+   "program": "e4",
+   "title": "Load test under a Playwright browser",
+   "owner": "H",
+   "priority": 2,
+   "status": "done",
+   "hours": 1.0,
+   "date": "2026-11-01",
+   "week": "S4"
+  },
+  {
+   "id": "e4-7",
+   "program": "e4",
+   "title": "Defect log for the application tests",
+   "owner": "J",
+   "priority": 3,
+   "status": "done",
+   "hours": 1.5,
+   "date": "2026-10-29",
+   "week": "S3"
+  },
+  {
+   "id": "e5-1",
+   "program": "e5",
+   "title": "Quick job on every push on Python 3.10 and 3.12",
+   "owner": "H",
+   "priority": 2,
+   "status": "done",
+   "hours": 1.0,
+   "date": "2026-10-31",
+   "week": "S4"
+  },
+  {
+   "id": "e5-2",
+   "program": "e5",
+   "title": "Full job on main",
+   "owner": "H",
+   "priority": 2,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-11-01",
+   "week": "S4"
+  },
+  {
+   "id": "e6-1",
+   "program": "e6",
+   "title": "Hosting account and a first Streamlit page",
+   "owner": "H",
+   "priority": 3,
+   "status": "done",
+   "hours": 2.0,
+   "date": "2026-10-09",
+   "week": "W0"
+  },
+  {
+   "id": "e6-2",
+   "program": "e6",
+   "title": "Deployment pipeline: secrets, requirements, the hosting build",
+   "owner": "H",
+   "priority": 2,
+   "status": "done",
+   "hours": 2.0,
+   "date": "2026-10-23",
+   "week": "S2"
+  },
+  {
+   "id": "e6-3",
+   "program": "e6",
+   "title": "First deployment: the first few models live",
+   "owner": "H",
+   "priority": 1,
+   "status": "done",
+   "hours": 2.0,
+   "date": "2026-10-25",
+   "week": "S3"
+  },
+  {
+   "id": "e6-4",
+   "program": "e6",
+   "title": "Redeploy all fourteen models",
+   "owner": "H",
+   "priority": 1,
+   "status": "done",
+   "hours": 2.0,
+   "date": "2026-11-01",
+   "week": "S4"
+  },
+  {
+   "id": "e6-5",
+   "program": "e6",
+   "title": "Deployment notes and the findings in plain language",
+   "owner": "H",
+   "priority": 2,
+   "status": "done",
+   "hours": 1.0,
+   "date": "2026-11-02",
+   "week": "S4"
+  },
+  {
+   "id": "e7-1",
+   "program": "e7",
+   "title": "Unpack the heads from the model pages into model.pkl",
+   "owner": "H",
+   "priority": 3,
+   "status": "done",
+   "hours": 1.0,
+   "date": "2026-10-26",
+   "week": "S3"
+  },
+  {
+   "id": "e7-2",
+   "program": "e7",
+   "title": "Keep model.pkl as the store",
+   "owner": "H",
+   "priority": 4,
+   "status": "canc",
+   "hours": 0.5,
+   "date": "2026-10-27",
+   "week": "S3"
+  },
+  {
+   "id": "e8-1",
+   "program": "e8",
+   "title": "BI dashboard layout",
+   "owner": "J",
+   "priority": 4,
+   "status": "done",
+   "hours": 2.5,
+   "date": "2026-10-18",
+   "week": "S2"
+  },
+  {
+   "id": "e8-2",
+   "program": "e8",
+   "title": "Adjust the UI, flexbox in CSS",
+   "owner": "J",
+   "priority": 4,
+   "status": "done",
+   "hours": 1.5,
+   "date": "2026-10-18",
+   "week": "S2"
+  },
+  {
+   "id": "e8-3",
+   "program": "e8",
+   "title": "Wire the dashboard to the exports",
+   "owner": "J",
+   "priority": 4,
+   "status": "canc",
+   "hours": 0.5,
+   "date": "2026-10-23",
+   "week": "S2"
+  },
+  {
+   "id": "f1-1",
+   "program": "f1",
+   "title": "Two containers: the application and the encoder service, CPU only",
+   "owner": "H",
+   "priority": 2,
+   "status": "todo",
+   "hours": 3.0,
+   "date": "2026-11-09",
+   "week": "S5",
+   "issue_title": "Two containers: the application and the encoder service, CPU only"
+  },
+  {
+   "id": "f1-2",
+   "program": "f1",
+   "title": "The model store from the release asset features.zip and the results folder",
+   "owner": "R",
+   "priority": 2,
+   "status": "todo",
+   "hours": 2.0,
+   "date": "2026-11-10",
+   "week": "S5",
+   "issue_title": "The model store from the release asset features.zip and the results folder"
+  },
+  {
+   "id": "f1-3",
+   "program": "f1",
+   "title": "HTTPS behind a reverse proxy; health checks",
+   "owner": "H",
+   "priority": 3,
+   "status": "todo",
+   "hours": 2.0,
+   "date": "2026-11-11",
+   "week": "S5",
+   "issue_title": "HTTPS behind a reverse proxy; health checks"
+  },
+  {
+   "id": "f2-1",
+   "program": "f2",
+   "title": "Hosting options and cost: a small VM against the Streamlit hosting",
+   "owner": "H",
+   "priority": 3,
+   "status": "todo",
+   "hours": 1.0,
+   "date": "2026-11-10",
+   "week": "S5",
+   "issue_title": "Hosting options and cost: a small VM against the Streamlit hosting"
+  },
+  {
+   "id": "f2-2",
+   "program": "f2",
+   "title": "Secrets and the model store out of the image",
+   "owner": "J",
+   "priority": 3,
+   "status": "todo",
+   "hours": 1.0,
+   "date": "2026-11-10",
+   "week": "S5",
+   "issue_title": "Secrets and the model store out of the image"
+  },
+  {
+   "id": "g1-1",
+   "program": "g1",
+   "title": "Technical sections, the test plan references, the numbers from the 3 November run",
+   "owner": "R",
+   "priority": 1,
+   "status": "done",
+   "hours": 1.0,
+   "date": "2026-11-01",
+   "week": "S4"
+  },
+  {
+   "id": "g1-2",
+   "program": "g1",
+   "title": "Management sections, timeline and milestones",
+   "owner": "J",
+   "priority": 1,
+   "status": "done",
+   "hours": 3.0,
+   "date": "2026-11-01",
+   "week": "S4"
+  },
+  {
+   "id": "g1-3",
+   "program": "g1",
+   "title": "Application section and the findings in plain language",
+   "owner": "H",
+   "priority": 2,
+   "status": "done",
+   "hours": 1.0,
+   "date": "2026-11-01",
+   "week": "S4"
+  },
+  {
+   "id": "g1-4",
+   "program": "g1",
+   "title": "The 3 November revision: the chain's four fixes and the three seeds",
+   "owner": "R",
+   "priority": 1,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-11-03",
+   "week": "S4"
+  },
+  {
+   "id": "g1-5",
+   "program": "g1",
+   "title": "Team review of the document, the test plan and the deck",
+   "owner": "J",
+   "priority": 1,
+   "status": "rev",
+   "hours": 2.0,
+   "date": "2026-11-04",
+   "week": "S4",
+   "issue_title": "Team review of the document, the test plan and the deck"
+  },
+  {
+   "id": "g1-6",
+   "program": "g1",
+   "title": "Review with Dr Vo, Fri 6 Nov 2:30 pm",
+   "owner": "J",
+   "priority": 1,
+   "status": "todo",
+   "hours": 0.5,
+   "date": "2026-11-06",
+   "week": "S4",
+   "issue_title": "Review with Dr Vo, Fri 6 Nov 2:30 pm"
+  },
+  {
+   "id": "g1-7",
+   "program": "g1",
+   "title": "Review of the A2 revision before the SuperComputer work",
+   "owner": "H",
+   "priority": 3,
+   "status": "done",
+   "hours": 2.0,
+   "date": "2026-10-07",
+   "week": "W0"
+  },
+  {
+   "id": "g2-1",
+   "program": "g2",
+   "title": "Four layers, cheapest first; every check id",
+   "owner": "R",
+   "priority": 2,
+   "status": "done",
+   "hours": 0.25,
+   "date": "2026-10-31",
+   "week": "S4"
+  },
+  {
+   "id": "g2-2",
+   "program": "g2",
+   "title": "The mutation table and what the layers caught",
+   "owner": "R",
+   "priority": 2,
+   "status": "done",
+   "hours": 0.25,
+   "date": "2026-11-03",
+   "week": "S4"
+  },
+  {
+   "id": "g3-1",
+   "program": "g3",
+   "title": "Group lead script: team, process, data",
+   "owner": "J",
+   "priority": 1,
+   "status": "done",
+   "hours": 2.0,
+   "date": "2026-11-01",
+   "week": "S4"
+  },
+  {
+   "id": "g3-2",
+   "program": "g3",
+   "title": "Technical lead script and the 50-slide deck",
+   "owner": "R",
+   "priority": 1,
+   "status": "done",
+   "hours": 1.0,
+   "date": "2026-11-01",
+   "week": "S4"
+  },
+  {
+   "id": "g3-3",
+   "program": "g3",
+   "title": "Front-end script: the application and the findings in plain language",
+   "owner": "H",
+   "priority": 2,
+   "status": "done",
+   "hours": 1.0,
+   "date": "2026-11-02",
+   "week": "S4"
+  },
+  {
+   "id": "g3-4",
+   "program": "g3",
+   "title": "First rehearsal of the three scripts",
+   "owner": "J",
+   "priority": 1,
+   "status": "prog",
+   "hours": 2.0,
+   "date": "2026-11-05",
+   "week": "S4",
+   "issue_title": "First rehearsal of the three scripts"
+  },
+  {
+   "id": "g3-5",
+   "program": "g3",
+   "title": "GRPO slide updated from the 3 November run",
+   "owner": "R",
+   "priority": 2,
+   "status": "todo",
+   "hours": 1.0,
+   "date": "2026-11-07",
+   "week": "S5",
+   "issue_title": "GRPO slide updated from the 3 November run"
+  },
+  {
+   "id": "g3-6",
+   "program": "g3",
+   "title": "Final rehearsal",
+   "owner": "J",
+   "priority": 1,
+   "status": "todo",
+   "hours": 2.0,
+   "date": "2026-11-10",
+   "week": "S5",
+   "issue_title": "Final rehearsal (Johnny)"
+  },
+  {
+   "id": "g3-7",
+   "program": "g3",
+   "title": "Final rehearsal",
+   "owner": "R",
+   "priority": 1,
+   "status": "todo",
+   "hours": 2.0,
+   "date": "2026-11-10",
+   "week": "S5",
+   "issue_title": "Final rehearsal (Ricky)"
+  },
+  {
+   "id": "g3-8",
+   "program": "g3",
+   "title": "Final rehearsal",
+   "owner": "H",
+   "priority": 1,
+   "status": "todo",
+   "hours": 2.0,
+   "date": "2026-11-10",
+   "week": "S5",
+   "issue_title": "Final rehearsal (Hara)"
+  },
+  {
+   "id": "g4-1",
+   "program": "g4",
+   "title": "What leaves the SuperComputer: float16 weights, word lists, JSON summaries",
+   "owner": "R",
+   "priority": 2,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-10-26",
+   "week": "S3"
+  },
+  {
+   "id": "g4-2",
+   "program": "g4",
+   "title": "The redacted public repository",
+   "owner": "R",
+   "priority": 2,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-10-30",
+   "week": "S3"
+  },
+  {
+   "id": "g4-3",
+   "program": "g4",
+   "title": "Review of the security write-up",
+   "owner": "J",
+   "priority": 2,
+   "status": "done",
+   "hours": 1.0,
+   "date": "2026-10-30",
+   "week": "S3"
+  },
+  {
+   "id": "g5-1",
+   "program": "g5",
+   "title": "Sprint 1 minutes and the defect list",
+   "owner": "J",
+   "priority": 2,
+   "status": "done",
+   "hours": 1.5,
+   "date": "2026-10-16",
+   "week": "S1"
+  },
+  {
+   "id": "g5-2",
+   "program": "g5",
+   "title": "Sprint 2 minutes and the defect list",
+   "owner": "J",
+   "priority": 2,
+   "status": "done",
+   "hours": 1.5,
+   "date": "2026-10-23",
+   "week": "S2"
+  },
+  {
+   "id": "g5-3",
+   "program": "g5",
+   "title": "Dashboard and splits review for Sprint 3",
+   "owner": "J",
+   "priority": 3,
+   "status": "done",
+   "hours": 1.0,
+   "date": "2026-10-24",
+   "week": "S3"
+  },
+  {
+   "id": "g5-4",
+   "program": "g5",
+   "title": "Sprint 3 minutes and the defect list",
+   "owner": "J",
+   "priority": 2,
+   "status": "done",
+   "hours": 1.5,
+   "date": "2026-10-30",
+   "week": "S3"
+  },
+  {
+   "id": "g5-5",
+   "program": "g5",
+   "title": "Sprint 4 minutes and the retrospective",
+   "owner": "J",
+   "priority": 2,
+   "status": "todo",
+   "hours": 1.5,
+   "date": "2026-11-06",
+   "week": "S4",
+   "issue_title": "Sprint 4 minutes and the retrospective"
+  },
+  {
+   "id": "g5-6",
+   "program": "g5",
+   "title": "Retrospective actions onto the board",
+   "owner": "J",
+   "priority": 3,
+   "status": "todo",
+   "hours": 1.0,
+   "date": "2026-11-07",
+   "week": "S5",
+   "issue_title": "Retrospective actions onto the board"
+  },
+  {
+   "id": "g5-7",
+   "program": "g5",
+   "title": "Canvas submission checklist",
+   "owner": "J",
+   "priority": 2,
+   "status": "todo",
+   "hours": 1.0,
+   "date": "2026-11-11",
+   "week": "S5",
+   "issue_title": "Canvas submission checklist"
+  },
+  {
+   "id": "g6-1",
+   "program": "g6",
+   "title": "Agile commit guidelines and the pull-request gate",
+   "owner": "J",
+   "priority": 2,
+   "status": "done",
+   "hours": 1.5,
+   "date": "2026-10-12",
+   "week": "S1"
+  },
+  {
+   "id": "g6-2",
+   "program": "g6",
+   "title": "Set up a Miro board for the kanban",
+   "owner": "J",
+   "priority": 4,
+   "status": "canc",
+   "hours": 0.5,
+   "date": "2026-11-04",
+   "week": "S4"
+  },
+  {
+   "id": "g6-3",
+   "program": "g6",
+   "title": "GitHub Projects board sentiment_heads with the four columns",
+   "owner": "R",
+   "priority": 2,
+   "status": "done",
+   "hours": 0.5,
+   "date": "2026-11-04",
+   "week": "S4"
+  },
+  {
+   "id": "g6-4",
+   "program": "g6",
+   "title": "Final update pushed to main; the protocol cycle still to run",
+   "owner": "R",
+   "priority": 2,
+   "status": "prog",
+   "hours": 1.0,
+   "date": "2026-11-05",
+   "week": "S4",
+   "issue_title": "Final update pushed to main; the protocol cycle still to run"
+  },
+  {
+   "id": "g6-5",
+   "program": "g6",
+   "title": "Branch protection on main; the release v1.0.0 with features.zip",
+   "owner": "R",
+   "priority": 2,
+   "status": "todo",
+   "hours": 1.0,
+   "date": "2026-11-07",
+   "week": "S5",
+   "issue_title": "Branch protection on main; the release v1.0.0 with features.zip"
+  }
+ ],
+ "edges": [
+  [
+   "fd01",
+   "fdgpu"
+  ],
+  [
+   "fdgpu",
+   "fdlin"
+  ],
+  [
+   "fdlin",
+   "fdinv"
+  ],
+  [
+   "fdinv",
+   "fd07"
+  ],
+  [
+   "fdgpu",
+   "fd07"
+  ],
+  [
+   "jexp",
+   "jtfidf"
+  ],
+  [
+   "jexp",
+   "jsim"
+  ],
+  [
+   "jsim",
+   "jsoft"
+  ],
+  [
+   "jsoft",
+   "ed01"
+  ],
+  [
+   "bened",
+   "fdtr"
+  ],
+  [
+   "fine",
+   "fdgpu"
+  ],
+  [
+   "repr",
+   "fd10"
+  ],
+  [
+   "fd07",
+   "fd08"
+  ],
+  [
+   "fd07",
+   "fd10"
+  ],
+  [
+   "fd07",
+   "fdtr"
+  ],
+  [
+   "fd07",
+   "ed01"
+  ],
+  [
+   "ed01",
+   "ed07"
+  ],
+  [
+   "ed07",
+   "ed12"
+  ],
+  [
+   "ed12",
+   "edmis"
+  ],
+  [
+   "fd07",
+   "c6"
+  ],
+  [
+   "ed12",
+   "c14"
+  ],
+  [
+   "fdlin",
+   "c15"
+  ],
+  [
+   "jtfidf",
+   "c16"
+  ],
+  [
+   "c2",
+   "c10"
+  ],
+  [
+   "c3",
+   "c10"
+  ],
+  [
+   "c4",
+   "c11"
+  ],
+  [
+   "c5",
+   "c11"
+  ],
+  [
+   "c6",
+   "c12"
+  ],
+  [
+   "c7",
+   "c12"
+  ],
+  [
+   "c8",
+   "c12"
+  ],
+  [
+   "c9",
+   "c17"
+  ],
+  [
+   "c0",
+   "c10"
+  ],
+  [
+   "c10",
+   "c11"
+  ],
+  [
+   "c11",
+   "c12"
+  ],
+  [
+   "c12",
+   "c13"
+  ],
+  [
+   "c12",
+   "c14"
+  ],
+  [
+   "c12",
+   "c15"
+  ],
+  [
+   "c12",
+   "c16"
+  ],
+  [
+   "c1",
+   "c17"
+  ],
+  [
+   "c17",
+   "c18"
+  ],
+  [
+   "c18",
+   "d3"
+  ],
+  [
+   "c6",
+   "d1"
+  ],
+  [
+   "d1",
+   "d2"
+  ],
+  [
+   "d2",
+   "c18"
+  ],
+  [
+   "d3",
+   "d4"
+  ],
+  [
+   "c14",
+   "d3"
+  ],
+  [
+   "c15",
+   "d3"
+  ],
+  [
+   "c16",
+   "d3"
+  ],
+  [
+   "d5",
+   "e2"
+  ],
+  [
+   "c12",
+   "e2"
+  ],
+  [
+   "c14",
+   "e2"
+  ],
+  [
+   "e2",
+   "e1"
+  ],
+  [
+   "e3",
+   "e1"
+  ],
+  [
+   "e1",
+   "e4"
+  ],
+  [
+   "e4",
+   "e5"
+  ],
+  [
+   "e5",
+   "e6"
+  ],
+  [
+   "e7",
+   "e2"
+  ],
+  [
+   "e8",
+   "e1"
+  ],
+  [
+   "e6",
+   "f1"
+  ],
+  [
+   "e3",
+   "f1"
+  ],
+  [
+   "f1",
+   "f2"
+  ],
+  [
+   "d3",
+   "g2"
+  ],
+  [
+   "g2",
+   "g1"
+  ],
+  [
+   "e4",
+   "g1"
+  ],
+  [
+   "g1",
+   "g3"
+  ],
+  [
+   "d5",
+   "g4"
+  ],
+  [
+   "g5",
+   "g6"
+  ]
+ ]
+}

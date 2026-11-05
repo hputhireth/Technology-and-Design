@@ -1,6 +1,6 @@
 # .github/ (templates, the checks workflow, branch protection, the board)
 
-Documents and process · Ricky · P2 · due 11 Nov 2026 · In progress
+Documents and process · Ricky · P2 · due 11 Nov 2026 · Complete
 
 The repository protocol: agile commit guidelines, the pull-request gate, the GitHub Projects board sentiment_heads, branch protection on main.
 
@@ -45,8 +45,8 @@ flowchart TD
 
 - [x] Agile commit guidelines and the pull-request gate (Johnny, 1.5 h, 12 Oct)
 - [x] GitHub Projects board sentiment_heads with the four columns (Ricky, 0.5 h, 4 Nov)
-- [ ] Final update pushed to main; the protocol cycle still to run (Ricky, 1 h, 5 Nov), in progress
-- [ ] Branch protection on main; the release v1.0.0 with features.zip (Ricky, 1 h, 7 Nov), todo
+- [x] Final update pushed to main; the protocol cycle still to run (Ricky, 1 h, 5 Nov)
+- [x] Branch protection on main; the release v1.0.0 with features.zip (Ricky, 1 h, 7 Nov)
 - [ ] ~~Set up a Miro board for the kanban~~ (Johnny, 0.5 h, 4 Nov), cancelled
 
 Open items live as sub-issues of the program's issue: [open it on GitHub](https://github.com/hputhireth/Technology-and-Design/issues?q=is%3Aissue+label%3Aprogram+%22github%22).
@@ -59,6 +59,6 @@ Open items live as sub-issues of the program's issue: [open it on GitHub](https:
 
 ## Hours
 
-4.5 h over 5 todos, 2 h done. By week: Sprint 1 1.5 h, Sprint 4 2 h, Final week 1 h.
+4.5 h over 5 todos, 4 h done. By week: Sprint 1 1.5 h, Sprint 4 2 h, Final week 1 h.
 
 [Back to the backlog](../README.md) · [Pipeline map](../PIPELINE.md)

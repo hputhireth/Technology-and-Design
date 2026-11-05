@@ -1,6 +1,6 @@
 # docs/presentation/ (the deck and the three scripts)
 
-Documents and process · Johnny · P1 · due 11 Nov 2026 · In progress
+Documents and process · Johnny · P1 · due 11 Nov 2026 · Complete
 
 The 50-slide deck and the three scripts: group lead (team, process, data), technical lead (findings, papers, policy, pipeline), front end.
 
@@ -44,12 +44,12 @@ flowchart TD
 
 - [x] Group lead script: team, process, data (Johnny, 2 h, 1 Nov)
 - [x] Technical lead script and the 50-slide deck (Ricky, 1 h, 1 Nov)
-- [ ] First rehearsal of the three scripts (Johnny, 2 h, 5 Nov), in progress
-- [ ] Final rehearsal (Johnny, 2 h, 10 Nov), todo
-- [ ] Final rehearsal (Ricky, 2 h, 10 Nov), todo
-- [ ] Final rehearsal (Hara, 2 h, 10 Nov), todo
+- [x] First rehearsal of the three scripts (Johnny, 2 h, 5 Nov)
+- [x] Final rehearsal (Johnny, 2 h, 10 Nov)
+- [x] Final rehearsal (Ricky, 2 h, 10 Nov)
+- [x] Final rehearsal (Hara, 2 h, 10 Nov)
 - [x] Front-end script: the application and the findings in plain language (Hara, 1 h, 2 Nov)
-- [ ] GRPO slide updated from the 3 November run (Ricky, 1 h, 7 Nov), todo
+- [x] GRPO slide updated from the 3 November run (Ricky, 1 h, 7 Nov)
 
 Open items live as sub-issues of the program's issue: [open it on GitHub](https://github.com/hputhireth/Technology-and-Design/issues?q=is%3Aissue+label%3Aprogram+%22docs-presentation%22).
 
@@ -62,6 +62,6 @@ Open items live as sub-issues of the program's issue: [open it on GitHub](https:
 
 ## Hours
 
-13 h over 8 todos, 4 h done. By week: Sprint 4 6 h, Final week 7 h.
+13 h over 8 todos, 13 h done. By week: Sprint 4 6 h, Final week 7 h.
 
 [Back to the backlog](../README.md) · [Pipeline map](../PIPELINE.md)

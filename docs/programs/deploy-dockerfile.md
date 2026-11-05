@@ -1,8 +1,10 @@
 # deploy/Dockerfile, deploy/compose.yml
 
-Cloud system · Hara · P3 · due 11 Nov 2026 · Not started
+Cloud system · Hara · P3 · due 11 Nov 2026 · Cancelled
 
 Two containers, the application and the encoder service, CPU only, with the model store from the release asset and HTTPS behind a reverse proxy.
+
+> Cancelled on 5 November: only the Streamlit deployment ships, no containers and no cloud hosting.
 
 ## What it does
 
@@ -42,9 +44,9 @@ flowchart TD
 
 ## Todos
 
-- [ ] Two containers: the application and the encoder service, CPU only (Hara, 3 h, 9 Nov), todo
-- [ ] The model store from the release asset features.zip and the results folder (Ricky, 2 h, 10 Nov), todo
-- [ ] HTTPS behind a reverse proxy; health checks (Hara, 2 h, 11 Nov), todo
+- [ ] ~~Two containers: the application and the encoder service, CPU only~~ (Hara, 3 h, 9 Nov), cancelled
+- [ ] ~~The model store from the release asset features.zip and the results folder~~ (Ricky, 2 h, 10 Nov), cancelled
+- [ ] ~~HTTPS behind a reverse proxy; health checks~~ (Hara, 2 h, 11 Nov), cancelled
 
 Open items live as sub-issues of the program's issue: [open it on GitHub](https://github.com/hputhireth/Technology-and-Design/issues?q=is%3Aissue+label%3Aprogram+%22deploy-dockerfile%22).
 
@@ -52,7 +54,7 @@ Open items live as sub-issues of the program's issue: [open it on GitHub](https:
 
 | Date | Rating | Note |
 |---|---|---|
-| 6 Nov 2026 | pending | To be scoped after the review with Dr Vo. |
+| 5 Nov 2026 | 3/5 | Decision: only the Streamlit deployment ships; the cloud system is cancelled. |
 
 ## Hours
 

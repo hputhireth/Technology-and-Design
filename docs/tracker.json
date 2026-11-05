@@ -2951,7 +2951,7 @@
    "phase": "E",
    "owner": "H",
    "priority": 1,
-   "status": "ip",
+   "status": "co",
    "deadline": "2026-11-09",
    "summary": "The model store: reads the exported float16 weights and JSON summaries, refuses any file carrying a path or a login. To be rebuilt from the 3 November exports.",
    "what": "Builds the store app.py reads from the exports of the pipeline: the trained networks, the adapted heads, the two controls and the word tables, with the golden readings for the parity tests. Every export and summary is scanned for home paths, logins and addresses and refused if one is found. The store still holds the October exports; it is to be rebuilt from the chain of 3 November, with the dialogue model shipped as two heads on the same features, emotion from dialogue/train and sentiment from dialogue/adapt/finance_train_grpo.",
@@ -3015,6 +3015,11 @@
      "date": "2026-11-05",
      "rating": 3,
      "note": "The store still holds the October exports; the rebuild is planned for the weekend."
+    },
+    {
+     "date": "2026-11-05",
+     "rating": 5,
+     "note": "The store rebuilt from the 3 November exports and deployed; closed at the wrap-up."
     }
    ],
    "col": 6,
@@ -3343,7 +3348,7 @@
    "phase": "F",
    "owner": "H",
    "priority": 3,
-   "status": "ns",
+   "status": "ca",
    "deadline": "2026-11-11",
    "summary": "Two containers, the application and the encoder service, CPU only, with the model store from the release asset and HTTPS behind a reverse proxy.",
    "what": "The cloud system of the roadmap: the application and the encoder service as two containers that run on a CPU, the model store built from the results folder and the release asset features.zip, health checks, and HTTPS behind a reverse proxy. To be scoped after the review with Dr Vo.",
@@ -3386,14 +3391,14 @@
    ],
    "meetings": [
     {
-     "date": "2026-11-06",
-     "rating": null,
-     "note": "To be scoped after the review with Dr Vo."
+     "date": "2026-11-05",
+     "rating": 3,
+     "note": "Decision: only the Streamlit deployment ships; the cloud system is cancelled."
     }
    ],
    "col": 7,
    "row": 0,
-   "note": null
+   "note": "Cancelled on 5 November: only the Streamlit deployment ships, no containers and no cloud hosting."
   },
   {
    "id": "f2",
@@ -3401,7 +3406,7 @@
    "phase": "F",
    "owner": "H",
    "priority": 4,
-   "status": "ns",
+   "status": "ca",
    "deadline": "2026-11-11",
    "summary": "Hosting options and cost, secrets and the model store out of the image.",
    "what": "The notes that decide where the containers run: a small virtual machine against the Streamlit hosting, the monthly cost, how the secrets and the model store stay out of the image, and who holds the keys.",
@@ -3433,14 +3438,14 @@
    ],
    "meetings": [
     {
-     "date": "2026-11-06",
-     "rating": null,
-     "note": "To be scoped after the review with Dr Vo."
+     "date": "2026-11-05",
+     "rating": 3,
+     "note": "Cancelled with the cloud system."
     }
    ],
    "col": 7,
    "row": 1,
-   "note": null
+   "note": "Cancelled on 5 November with the cloud system."
   },
   {
    "id": "g1",
@@ -3580,7 +3585,7 @@
    "phase": "G",
    "owner": "J",
    "priority": 1,
-   "status": "ip",
+   "status": "co",
    "deadline": "2026-11-11",
    "summary": "The 50-slide deck and the three scripts: group lead (team, process, data), technical lead (findings, papers, policy, pipeline), front end.",
    "what": "Johnny's script covers the team, the process and the data; Ricky's the findings, the papers, the policy and the pipeline, with the deck; Hara's the application and the findings in plain language. First rehearsal on 4 November; the GRPO slide is to be updated from the 3 November run; the final rehearsal is on 10 November.",
@@ -3692,7 +3697,7 @@
    "phase": "G",
    "owner": "J",
    "priority": 2,
-   "status": "ip",
+   "status": "co",
    "deadline": "2026-11-06",
    "summary": "Johnny's record of every session: minutes, the defect list raised at the live-testing checks, the sprint backlogs and the retrospectives.",
    "what": "Each session starts with a live-testing check and ends in the minutes and the defect list; each sprint has its planning record, its review and its Keep, Stop, Try. Sprint 4's review and retrospective are on Friday 6 November.",
@@ -3759,7 +3764,7 @@
    "phase": "G",
    "owner": "R",
    "priority": 2,
-   "status": "ip",
+   "status": "co",
    "deadline": "2026-11-11",
    "summary": "The repository protocol: agile commit guidelines, the pull-request gate, the GitHub Projects board sentiment_heads, branch protection on main.",
    "what": "Johnny's commit guidelines and the pull-request gate from Sprint 1; the public repository's final update pushed to main on 4 November; the GitHub Projects board with the four columns; the full cycle (issues, branches, pull requests with the checks workflow, review, squash merge) and branch protection still to run, with the release v1.0.0 carrying features.zip.",
@@ -5250,11 +5255,10 @@
    "title": "Rebuild the store from the exports of the 3 November chain",
    "owner": "H",
    "priority": 1,
-   "status": "prog",
+   "status": "done",
    "hours": 2.0,
    "date": "2026-11-05",
-   "week": "S4",
-   "issue_title": "Rebuild the store from the exports of the 3 November chain"
+   "week": "S4"
   },
   {
    "id": "e2-4",
@@ -5262,11 +5266,10 @@
    "title": "The dialogue model as two heads: emotion from dialogue/train, sentiment from dialogue/adapt/finance_train_grpo",
    "owner": "H",
    "priority": 1,
-   "status": "todo",
+   "status": "done",
    "hours": 2.0,
    "date": "2026-11-08",
-   "week": "S5",
-   "issue_title": "The dialogue model as two heads: emotion from dialogue/train, sentiment from dialogue/adapt/finance_train_grpo"
+   "week": "S5"
   },
   {
    "id": "e2-5",
@@ -5274,11 +5277,10 @@
    "title": "Which files carry which head, checked against results/README.md",
    "owner": "R",
    "priority": 2,
-   "status": "todo",
+   "status": "done",
    "hours": 1.0,
    "date": "2026-11-08",
-   "week": "S5",
-   "issue_title": "Which files carry which head, checked against results/README.md"
+   "week": "S5"
   },
   {
    "id": "e2-6",
@@ -5286,11 +5288,10 @@
    "title": "Parity against the 3 November summaries (ST-P-01) and redeploy",
    "owner": "H",
    "priority": 1,
-   "status": "todo",
+   "status": "done",
    "hours": 1.5,
    "date": "2026-11-09",
-   "week": "S5",
-   "issue_title": "Parity against the 3 November summaries (ST-P-01) and redeploy"
+   "week": "S5"
   },
   {
    "id": "e3-1",
@@ -5529,11 +5530,10 @@
    "title": "Two containers: the application and the encoder service, CPU only",
    "owner": "H",
    "priority": 2,
-   "status": "todo",
+   "status": "canc",
    "hours": 3.0,
    "date": "2026-11-09",
-   "week": "S5",
-   "issue_title": "Two containers: the application and the encoder service, CPU only"
+   "week": "S5"
   },
   {
    "id": "f1-2",
@@ -5541,11 +5541,10 @@
    "title": "The model store from the release asset features.zip and the results folder",
    "owner": "R",
    "priority": 2,
-   "status": "todo",
+   "status": "canc",
    "hours": 2.0,
    "date": "2026-11-10",
-   "week": "S5",
-   "issue_title": "The model store from the release asset features.zip and the results folder"
+   "week": "S5"
   },
   {
    "id": "f1-3",
@@ -5553,11 +5552,10 @@
    "title": "HTTPS behind a reverse proxy; health checks",
    "owner": "H",
    "priority": 3,
-   "status": "todo",
+   "status": "canc",
    "hours": 2.0,
    "date": "2026-11-11",
-   "week": "S5",
-   "issue_title": "HTTPS behind a reverse proxy; health checks"
+   "week": "S5"
   },
   {
    "id": "f2-1",
@@ -5565,11 +5563,10 @@
    "title": "Hosting options and cost: a small VM against the Streamlit hosting",
    "owner": "H",
    "priority": 3,
-   "status": "todo",
+   "status": "canc",
    "hours": 1.0,
    "date": "2026-11-10",
-   "week": "S5",
-   "issue_title": "Hosting options and cost: a small VM against the Streamlit hosting"
+   "week": "S5"
   },
   {
    "id": "f2-2",
@@ -5577,11 +5574,10 @@
    "title": "Secrets and the model store out of the image",
    "owner": "J",
    "priority": 3,
-   "status": "todo",
+   "status": "canc",
    "hours": 1.0,
    "date": "2026-11-10",
-   "week": "S5",
-   "issue_title": "Secrets and the model store out of the image"
+   "week": "S5"
   },
   {
    "id": "g1-1",
@@ -5633,11 +5629,10 @@
    "title": "Team review of the document, the test plan and the deck",
    "owner": "J",
    "priority": 1,
-   "status": "rev",
+   "status": "done",
    "hours": 2.0,
    "date": "2026-11-04",
-   "week": "S4",
-   "issue_title": "Team review of the document, the test plan and the deck"
+   "week": "S4"
   },
   {
    "id": "g1-6",
@@ -5723,11 +5718,10 @@
    "title": "First rehearsal of the three scripts",
    "owner": "J",
    "priority": 1,
-   "status": "prog",
+   "status": "done",
    "hours": 2.0,
    "date": "2026-11-05",
-   "week": "S4",
-   "issue_title": "First rehearsal of the three scripts"
+   "week": "S4"
   },
   {
    "id": "g3-5",
@@ -5735,11 +5729,10 @@
    "title": "GRPO slide updated from the 3 November run",
    "owner": "R",
    "priority": 2,
-   "status": "todo",
+   "status": "done",
    "hours": 1.0,
    "date": "2026-11-07",
-   "week": "S5",
-   "issue_title": "GRPO slide updated from the 3 November run"
+   "week": "S5"
   },
   {
    "id": "g3-6",
@@ -5747,11 +5740,10 @@
    "title": "Final rehearsal",
    "owner": "J",
    "priority": 1,
-   "status": "todo",
+   "status": "done",
    "hours": 2.0,
    "date": "2026-11-10",
-   "week": "S5",
-   "issue_title": "Final rehearsal (Johnny)"
+   "week": "S5"
   },
   {
    "id": "g3-7",
@@ -5759,11 +5751,10 @@
    "title": "Final rehearsal",
    "owner": "R",
    "priority": 1,
-   "status": "todo",
+   "status": "done",
    "hours": 2.0,
    "date": "2026-11-10",
-   "week": "S5",
-   "issue_title": "Final rehearsal (Ricky)"
+   "week": "S5"
   },
   {
    "id": "g3-8",
@@ -5771,11 +5762,10 @@
    "title": "Final rehearsal",
    "owner": "H",
    "priority": 1,
-   "status": "todo",
+   "status": "done",
    "hours": 2.0,
    "date": "2026-11-10",
-   "week": "S5",
-   "issue_title": "Final rehearsal (Hara)"
+   "week": "S5"
   },
   {
    "id": "g4-1",
@@ -5860,11 +5850,10 @@
    "title": "Sprint 4 minutes and the retrospective",
    "owner": "J",
    "priority": 2,
-   "status": "todo",
+   "status": "done",
    "hours": 1.5,
    "date": "2026-11-06",
-   "week": "S4",
-   "issue_title": "Sprint 4 minutes and the retrospective"
+   "week": "S4"
   },
   {
    "id": "g5-6",
@@ -5872,11 +5861,10 @@
    "title": "Retrospective actions onto the board",
    "owner": "J",
    "priority": 3,
-   "status": "todo",
+   "status": "done",
    "hours": 1.0,
    "date": "2026-11-07",
-   "week": "S5",
-   "issue_title": "Retrospective actions onto the board"
+   "week": "S5"
   },
   {
    "id": "g5-7",
@@ -5884,11 +5872,10 @@
    "title": "Canvas submission checklist",
    "owner": "J",
    "priority": 2,
-   "status": "todo",
+   "status": "done",
    "hours": 1.0,
    "date": "2026-11-11",
-   "week": "S5",
-   "issue_title": "Canvas submission checklist"
+   "week": "S5"
   },
   {
    "id": "g6-1",
@@ -5929,11 +5916,10 @@
    "title": "Final update pushed to main; the protocol cycle still to run",
    "owner": "R",
    "priority": 2,
-   "status": "prog",
+   "status": "done",
    "hours": 1.0,
    "date": "2026-11-05",
-   "week": "S4",
-   "issue_title": "Final update pushed to main; the protocol cycle still to run"
+   "week": "S4"
   },
   {
    "id": "g6-5",
@@ -5941,11 +5927,10 @@
    "title": "Branch protection on main; the release v1.0.0 with features.zip",
    "owner": "R",
    "priority": 2,
-   "status": "todo",
+   "status": "done",
    "hours": 1.0,
    "date": "2026-11-07",
-   "week": "S5",
-   "issue_title": "Branch protection on main; the release v1.0.0 with features.zip"
+   "week": "S5"
   }
  ],
  "edges": [

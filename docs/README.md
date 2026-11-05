@@ -18,9 +18,9 @@ Every program of the pipeline, highest priority first, with its deadline, owner,
 | P1 | [slurm/_header.sh](programs/slurm-header-sh.md) | Final pipeline | Ricky | Complete | 2 Nov | 1.5 | 3 of 3 |
 | P1 | [slurm/chain.sh](programs/slurm-chain-sh.md) | Final pipeline | Ricky | Complete | 3 Nov | 4 | 6 of 6 |
 | P1 | [tests/integration/check_results.py](programs/tests-integration-check-results-py.md) | Test layers | Ricky | Complete | 3 Nov | 2 | 4 of 4 |
-| P1 | [docs/A3_Design_Document.docx](programs/docs-a3-design-document-docx.md) | Documents and process | Ricky | Under review | 6 Nov | 10 | 5 of 7 |
-| P1 | [sentiment-app/build_models.py](programs/sentiment-app-build-models-py.md) | Front end | Hara | In progress | 9 Nov | 10 | 2 of 6 |
-| P1 | [docs/presentation/](programs/docs-presentation.md) | Documents and process | Johnny | In progress | 11 Nov | 13 | 3 of 8 |
+| P1 | [docs/A3_Design_Document.docx](programs/docs-a3-design-document-docx.md) | Documents and process | Ricky | Under review | 6 Nov | 10 | 6 of 7 |
+| P1 | [sentiment-app/build_models.py](programs/sentiment-app-build-models-py.md) | Front end | Hara | Complete | 9 Nov | 10 | 6 of 6 |
+| P1 | [docs/presentation/](programs/docs-presentation.md) | Documents and process | Johnny | Complete | 11 Nov | 13 | 8 of 8 |
 | P2 | [fs_detailed/fd_07_nn.py](programs/fs-detailed-fd-07-nn-py.md) | Model research | Ricky | Complete | 19 Oct | 25 | 9 of 9 |
 | P2 | [fs_detailed/ed_07_nn.py](programs/fs-detailed-ed-07-nn-py.md) | Model research | Ricky | Complete | 25 Oct | 4 | 4 of 4 |
 | P2 | [fs_detailed/ed_12_rl.py](programs/fs-detailed-ed-12-rl-py.md) | Model research | Ricky | Complete | 26 Oct | 4.5 | 6 of 6 |
@@ -40,8 +40,8 @@ Every program of the pipeline, highest priority first, with its deadline, owner,
 | P2 | [sentiment-app/README.md and the deployment](programs/sentiment-app-readme-md-and-the-deployment.md) | Front end | Hara | Complete | 2 Nov | 9 | 5 of 5 |
 | P2 | [docs/test_plan.md](programs/docs-test-plan-md.md) | Documents and process | Ricky | Complete | 3 Nov | 0.5 | 2 of 2 |
 | P2 | [tests/integration/mutate.py](programs/tests-integration-mutate-py.md) | Test layers | Ricky | Complete | 3 Nov | 1 | 2 of 2 |
-| P2 | [docs/minutes/](programs/docs-minutes.md) | Documents and process | Johnny | In progress | 6 Nov | 9 | 4 of 7 |
-| P2 | [.github/](programs/github.md) | Documents and process | Ricky | In progress | 11 Nov | 4.5 | 2 of 4 |
+| P2 | [docs/minutes/](programs/docs-minutes.md) | Documents and process | Johnny | Complete | 6 Nov | 9 | 7 of 7 |
+| P2 | [.github/](programs/github.md) | Documents and process | Ricky | Complete | 11 Nov | 4.5 | 4 of 4 |
 | P3 | [fs_detailed/fd_01_prepare.py](programs/fs-detailed-fd-01-prepare-py.md) | Encoding research | Ricky | Complete | 6 Oct | 2.5 | 2 of 2 |
 | P3 | [fs_detailed/fd_gpu_encode.py](programs/fs-detailed-fd-gpu-encode-py.md) | Encoding research | Ricky | Complete | 6 Oct | 3 | 2 of 2 |
 | P3 | [fs_detailed/fd_08_label_audit.py](programs/fs-detailed-fd-08-label-audit-py.md) | Model research | Ricky | Complete | 22 Oct | 5 | 3 of 3 |
@@ -51,13 +51,13 @@ Every program of the pipeline, highest priority first, with its deadline, owner,
 | P3 | [common/cache.py](programs/common-cache-py.md) | Final pipeline | Ricky | Complete | 28 Oct | 0.25 | 1 of 1 |
 | P3 | [common/sets.py](programs/common-sets-py.md) | Final pipeline | Ricky | Complete | 28 Oct | 0.25 | 1 of 1 |
 | P3 | [common/paths.py](programs/common-paths-py.md) | Final pipeline | Ricky | Complete | 1 Nov | 0.5 | 2 of 2 |
-| P3 | [deploy/Dockerfile](programs/deploy-dockerfile.md) | Cloud system | Hara | Not started | 11 Nov | 7 | 0 of 3 |
+| P3 | [deploy/Dockerfile](programs/deploy-dockerfile.md) | Cloud system | Hara | Cancelled | 11 Nov | 7 | 0 of 0 |
 | P4 | [data/explore_general.py](programs/data-explore-general-py.md) | Encoding research | Johnny | Complete | 5 Oct | 4.5 | 3 of 3 |
 | P4 | [fs_detailed/fd_linear.py](programs/fs-detailed-fd-linear-py.md) | Encoding research | Ricky | Complete | 6 Oct | 2.5 | 2 of 2 |
 | P4 | [data/benedetti_check.py](programs/data-benedetti-check-py.md) | Encoding research | Johnny | Complete | 9 Oct | 4 | 3 of 3 |
 | P4 | [fs_detailed/fd_investigate.py](programs/fs-detailed-fd-investigate-py.md) | Encoding research | Ricky | Complete | 10 Oct | 7 | 4 of 4 |
 | P4 | [fs_detailed/ed_rl_mistakes.py](programs/fs-detailed-ed-rl-mistakes-py.md) | Model research | Ricky | Complete | 27 Oct | 1 | 1 of 1 |
-| P4 | [deploy/cloud_notes.md](programs/deploy-cloud-notes-md.md) | Cloud system | Hara | Not started | 11 Nov | 2 | 0 of 2 |
+| P4 | [deploy/cloud_notes.md](programs/deploy-cloud-notes-md.md) | Cloud system | Hara | Cancelled | 11 Nov | 2 | 0 of 0 |
 | P5 | [models/general_tfidf_logreg.py](programs/models-general-tfidf-logreg-py.md) | Encoding research | Johnny | Cancelled | 5 Oct | 2.5 | 1 of 1 |
 | P5 | [research/finetune_encoder.py](programs/research-finetune-encoder-py.md) | Encoding research | Ricky | Cancelled | 5 Oct | 0.5 | 1 of 1 |
 | P5 | [models/emotion_label_similarity.py](programs/models-emotion-label-similarity-py.md) | Encoding research | Johnny | Cancelled | 8 Oct | 2 | 2 of 2 |

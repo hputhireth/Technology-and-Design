@@ -81,10 +81,11 @@ Every meeting at which a program was discussed, with the rating given at the tim
 | 4 Nov 2026 | [docs/presentation/](programs/docs-presentation.md) | 4/5 | First rehearsal of the three scripts. |
 | 4 Nov 2026 | [.github/](programs/github.md) | 3/5 | Board created; the final update went to main directly instead of through the cycle. |
 | 5 Nov 2026 | [sentiment-app/build_models.py](programs/sentiment-app-build-models-py.md) | 3/5 | The store still holds the October exports; the rebuild is planned for the weekend. |
+| 5 Nov 2026 | [sentiment-app/build_models.py](programs/sentiment-app-build-models-py.md) | 5/5 | The store rebuilt from the 3 November exports and deployed; closed at the wrap-up. |
+| 5 Nov 2026 | [deploy/Dockerfile](programs/deploy-dockerfile.md) | 3/5 | Decision: only the Streamlit deployment ships; the cloud system is cancelled. |
+| 5 Nov 2026 | [deploy/cloud_notes.md](programs/deploy-cloud-notes-md.md) | 3/5 | Cancelled with the cloud system. |
 | 6 Nov 2026 | [docs/A3_Design_Document.docx](programs/docs-a3-design-document-docx.md) | pending | Review with Dr Vo, 2:30 to 3:00 pm. |
 | 6 Nov 2026 | [docs/minutes/](programs/docs-minutes.md) | pending | Sprint 4 review and retrospective. |
-| 6 Nov 2026 | [deploy/Dockerfile](programs/deploy-dockerfile.md) | pending | To be scoped after the review with Dr Vo. |
-| 6 Nov 2026 | [deploy/cloud_notes.md](programs/deploy-cloud-notes-md.md) | pending | To be scoped after the review with Dr Vo. |
 | 10 Nov 2026 | [docs/presentation/](programs/docs-presentation.md) | pending | Final rehearsal. |
 
 [Back to the backlog](README.md)

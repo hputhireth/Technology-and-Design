@@ -1,0 +1,54 @@
+# The gate on main: the syntax of every script and config, the links of the backlog pages, and the unit suite once it exists.
+# Branch protection requires the job named checks to pass before a merge.
+name: pr-checks
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      COS_ROOT: ${{ github.workspace }}/../cos_root
+      PYTHONUTF8: "1"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: syntax of the scripts and the configs
+        run: |
+          python -m compileall -q common scripts
+          for f in slurm/*.sh env/*.sh; do bash -n "$f"; done
+          python -c "import json, glob; [json.load(open(f)) for f in glob.glob('configs/*.json')]"
+
+      - name: links of the backlog pages
+        run: |
+          if [ ! -d docs/programs ]; then echo "no backlog pages yet"; exit 0; fi
+          python - <<'EOF'
+          import pathlib, re, sys
+          bad = []
+          for md in pathlib.Path("docs").rglob("*.md"):
+              for target in re.findall(r"\]\(([^)#?]+)", md.read_text(encoding="utf-8")):
+                  if target.startswith(("http://", "https://")):
+                      continue
+                  if not (md.parent / target).exists():
+                      bad.append(f"{md}: {target}")
+          print("\n".join(bad) or "every relative link resolves")
+          sys.exit(1 if bad else 0)
+          EOF
+
+      - name: unit suite
+        run: |
+          if [ ! -d tests/unit ]; then echo "no unit tests yet"; exit 0; fi
+          mkdir -p "$COS_ROOT"
+          python -m pip install --upgrade pip
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install -r requirements.txt
+          python -m pytest tests/unit -q -p no:cacheprovider
